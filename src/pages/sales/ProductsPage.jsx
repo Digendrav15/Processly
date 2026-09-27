@@ -66,90 +66,111 @@ export function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs tracking-wider uppercase border border-emerald-500/30">
-              Order To Delivery
-            </span>
+    <div className="space-y-2.5">
+      {/* Compact Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/30">
+            <Package className="w-4 h-4" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Product Master</h1>
-          <p className="text-xs text-slate-400 mt-1">Manage catalog items, pricing, tax units, and categories.</p>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-black text-[9px] uppercase tracking-wider border border-emerald-500/30">
+                Order To Delivery
+              </span>
+              <h1 className="text-base font-extrabold tracking-tight">Product Master</h1>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Manage catalog items, pricing, tax units, and categories</p>
+          </div>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Product</span>
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleOpenModal()}
+            className="flex items-center space-x-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Product</span>
+          </button>
+        </div>
       </div>
 
       {/* Product List / Empty State */}
       {products.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center shadow-xs">
-          <Package className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No Products Added</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            You have not created any products yet. Add products to populate order item dropdowns.
-          </p>
-          <button
-            onClick={() => handleOpenModal()}
-            className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Add Product</span>
-          </button>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400">
+          No products added yet. Click &quot;Add Product&quot; to populate your catalog.
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
-                <th className="pb-3 px-3">Product Code</th>
-                <th className="pb-3 px-3">Product Name</th>
-                <th className="pb-3 px-3">Category</th>
-                <th className="pb-3 px-3">Unit</th>
-                <th className="pb-3 px-3">Tax/GST %</th>
-                <th className="pb-3 px-3">Default Rate</th>
-                <th className="pb-3 px-3">Status</th>
-                <th className="pb-3 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-              {products.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="py-3 px-3 font-extrabold text-emerald-600 dark:text-emerald-400">{p.code}</td>
-                  <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">{p.name}</td>
-                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{p.category} {p.subCategory ? `(${p.subCategory})` : ''}</td>
-                  <td className="py-3 px-3 font-medium text-slate-600 dark:text-slate-300">{p.unit}</td>
-                  <td className="py-3 px-3 font-semibold text-slate-700 dark:text-slate-300">{p.taxRate}%</td>
-                  <td className="py-3 px-3 font-extrabold text-slate-900 dark:text-white">₹ {parseFloat(p.defaultRate || 0).toLocaleString('en-IN')}</td>
-                  <td className="py-3 px-3">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        p.status === 'Active'
-                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                      }`}
-                    >
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right space-x-2">
-                    <button onClick={() => handleOpenModal(p)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-emerald-600 dark:text-emerald-400">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDeleteProduct(p.id)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-rose-600 dark:text-rose-400">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-210px)] overflow-y-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-xs border-b border-slate-200 dark:border-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  <th className="px-3 py-2 w-20">Actions</th>
+                  <th className="px-3 py-2">Product Code</th>
+                  <th className="px-3 py-2">Product Name</th>
+                  <th className="px-3 py-2">Category</th>
+                  <th className="px-3 py-2">Unit</th>
+                  <th className="px-3 py-2">Tax/GST %</th>
+                  <th className="px-3 py-2">Default Rate</th>
+                  <th className="px-3 py-2">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                {products.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="px-3 py-1.5 font-semibold">
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={() => handleOpenModal(p)}
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-emerald-600 transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id)}
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-rose-600 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-3 py-1.5 font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                      {p.code}
+                    </td>
+                    <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-white text-[11.5px]">
+                      {p.name}
+                    </td>
+                    <td className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
+                      {p.category} {p.subCategory ? `(${p.subCategory})` : ''}
+                    </td>
+                    <td className="px-3 py-1.5 font-medium text-slate-600 dark:text-slate-300 text-[11px]">
+                      {p.unit}
+                    </td>
+                    <td className="px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                      {p.taxRate}%
+                    </td>
+                    <td className="px-3 py-1.5 font-extrabold text-slate-900 dark:text-white text-[11px]">
+                      ₹ {parseFloat(p.defaultRate || 0).toLocaleString('en-IN')}
+                    </td>
+                    <td className="px-3 py-1.5">
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          p.status === 'Active'
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

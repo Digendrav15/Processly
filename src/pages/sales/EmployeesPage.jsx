@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Plus, Edit2, Trash2, Shield, Phone, Mail, CheckCircle2, UserCheck, Lock } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
-import { STORAGE_KEYS, setData, generateId, getCurrentUser, setCurrentUser, logAuditAction } from '../../services/otdStorageService';
+import { STORAGE_KEYS, setData, generateId, getCurrentUser, setCurrentUser, logAuditAction, initEmployees } from '../../services/otdStorageService';
 import { SYSTEMS_CONFIG } from '../../config/systemsConfig';
+import { useAuth } from '../../context/AuthContext';
 
 export function EmployeesPage() {
   const employees = useOTDStorage(STORAGE_KEYS.EMPLOYEES, []);
   const currentUser = getCurrentUser();
+  const { switchUser } = useAuth();
+
+  useEffect(() => {
+    initEmployees();
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [editingEmp, setEditingEmp] = useState(null);
@@ -94,143 +100,183 @@ export function EmployeesPage() {
 
   const handleSetCurrentUser = (emp) => {
     setCurrentUser(emp);
+    switchUser({
+      id: emp.id,
+      employee_id: emp.code,
+      name: emp.name,
+      full_name: emp.name,
+      email: emp.email || `${emp.code.toLowerCase()}@corporate.com`,
+      role: emp.userGroup === 'Admin' ? 'ADMIN' : emp.userGroup === 'Manager' ? 'MANAGER' : 'EMPLOYEE',
+      userGroup: emp.userGroup,
+      department_name: emp.department,
+      designation: emp.designation,
+      allowedModules: emp.allowedModules || ALL_MODULE_IDS,
+      is_active: emp.status === 'Active'
+    });
     logAuditAction('Local User Switched', 'User Session', emp.id, { userName: emp.name });
   };
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 font-extrabold text-xs uppercase tracking-wider border border-rose-500/30">
-            Master System
-          </span>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">User / Employee Master</h1>
-          <p className="text-xs text-slate-400 mt-1">Manage user permissions, roles, and module access controls.</p>
-        </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add User / Employee</span>
-        </button>
-      </div>
-
-      {/* Active Local Session Card */}
-      <div className="bg-gradient-to-r from-indigo-900/90 to-purple-900/90 p-5 rounded-2xl text-white shadow-md border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/30 border border-indigo-400/40 flex items-center justify-center font-extrabold text-indigo-300">
-            <UserCheck className="w-5 h-5" />
+    <div className="space-y-2.5">
+      {/* Compact Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/30">
+            <Users className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-300">Active User Testing Session</span>
-            <h3 className="font-extrabold text-base">{currentUser?.name || 'Default Admin'}</h3>
-            <p className="text-xs text-indigo-200">{currentUser?.designation} • {currentUser?.userGroup || 'Admin'}</p>
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 font-black text-[9px] uppercase tracking-wider border border-rose-500/30">
+                Master System
+              </span>
+              <h1 className="text-base font-extrabold tracking-tight">User / Employee Master</h1>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Manage user permissions, roles, and module access controls</p>
           </div>
         </div>
-        <div className="text-xs text-indigo-200 bg-indigo-950/60 p-3 rounded-xl border border-indigo-800/40 max-w-sm">
-          Allowed Modules: <strong>{currentUser?.allowedModules ? currentUser.allowedModules.length : 'All (Admin)'}</strong> module(s). Switch user below to test permission enforcement.
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleOpenModal()}
+            className="flex items-center space-x-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add User</span>
+          </button>
         </div>
       </div>
 
-      {/* Employee List / Empty State */}
+      {/* Active Session Compact Bar */}
+      <div className="bg-indigo-950/60 border border-indigo-800/40 px-3 py-2 rounded-xl text-white flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center space-x-2">
+          <UserCheck className="w-4 h-4 text-indigo-400" />
+          <span>Active Session: <strong className="text-white">{currentUser?.name || 'Default Admin'}</strong> ({currentUser?.designation} • {currentUser?.userGroup || 'Admin'})</span>
+        </div>
+        <div className="text-[11px] text-indigo-300">
+          Permitted Modules: <strong>{currentUser?.allowedModules ? currentUser.allowedModules.length : 'All (Admin)'}</strong> module(s).
+        </div>
+      </div>
+
+      {/* High Density Table */}
       {employees.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center shadow-xs">
-          <Users className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No Users Added</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Create user accounts and assign module permissions to restrict system module access.
-          </p>
-          <button
-            onClick={() => handleOpenModal()}
-            className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Add User</span>
-          </button>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400">
+          No users added yet. Click &quot;Add User&quot; to configure employees and permissions.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {employees.map((emp) => {
-            const isActiveUser = currentUser?.id === emp.id || currentUser?.code === emp.code;
-            const empModules = emp.allowedModules || ALL_MODULE_IDS;
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-220px)] overflow-y-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-xs border-b border-slate-200 dark:border-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  <th className="px-3 py-2 w-28">Actions</th>
+                  <th className="px-3 py-2">Code</th>
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Department & Role</th>
+                  <th className="px-3 py-2">User Group</th>
+                  <th className="px-3 py-2">Allowed Modules</th>
+                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2 text-right">Session Switch</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                {employees.map((emp) => {
+                  const isActiveUser = currentUser?.id === emp.id || currentUser?.code === emp.code;
+                  const empModules = emp.allowedModules || ALL_MODULE_IDS;
 
-            return (
-              <div
-                key={emp.id}
-                className={`bg-white dark:bg-slate-900 p-5 rounded-2xl border transition-all shadow-xs space-y-3 relative ${
-                  isActiveUser
-                    ? 'border-indigo-500 dark:border-indigo-500 ring-2 ring-indigo-500/20'
-                    : 'border-slate-200 dark:border-slate-800'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{emp.code}</span>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm leading-tight flex items-center gap-1.5">
-                      {emp.name}
-                      {isActiveUser && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{emp.designation} • {emp.department}</p>
-                  </div>
-                  <div className="flex space-x-1">
-                    <button onClick={() => handleOpenModal(emp)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-600">
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => handleDeleteEmployee(emp.id)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-rose-600">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="text-xs space-y-1.5 text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <p className="flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-purple-500" /> <strong className="text-slate-700 dark:text-slate-300">Group: {emp.userGroup}</strong>
-                  </p>
-                  <div className="pt-1">
-                    <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                      <Lock className="w-3 h-3 text-amber-500" /> Permitted Modules ({empModules.length}):
-                    </span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {SYSTEMS_CONFIG.map((sys) => {
-                        const hasPerm = empModules.includes(sys.id);
-                        return (
-                          <span
-                            key={sys.id}
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              hasPerm
-                                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                                : 'bg-slate-100 text-slate-400 line-through opacity-50'
-                            }`}
+                  return (
+                    <tr
+                      key={emp.id}
+                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
+                        isActiveUser ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''
+                      }`}
+                    >
+                      <td className="px-3 py-1.5 font-semibold">
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => handleOpenModal(emp)}
+                            className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-indigo-600 transition-colors"
+                            title="Edit User"
                           >
-                            {sys.shortName}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${emp.status === 'Active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-slate-100 text-slate-500'}`}>
-                    {emp.status}
-                  </span>
-                  <button
-                    onClick={() => handleSetCurrentUser(emp)}
-                    disabled={isActiveUser}
-                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
-                      isActiveUser
-                        ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 cursor-default'
-                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20'
-                    }`}
-                  >
-                    {isActiveUser ? 'Active Session' : 'Switch Session'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEmployee(emp.id)}
+                            className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-rose-600 transition-colors"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-3 py-1.5 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">
+                        {emp.code}
+                      </td>
+                      <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-white text-[11.5px]">
+                        <div className="flex items-center gap-1.5">
+                          <span>{emp.name}</span>
+                          {isActiveUser && (
+                            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
+                        {emp.designation} • {emp.department}
+                      </td>
+                      <td className="px-3 py-1.5">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold">
+                          <Shield className="w-2.5 h-2.5" />
+                          {emp.userGroup}
+                        </span>
+                      </td>
+                      <td className="px-3 py-1.5">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {SYSTEMS_CONFIG.map((sys) => {
+                            const hasPerm = empModules.includes(sys.id);
+                            return (
+                              <span
+                                key={sys.id}
+                                className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                                  hasPerm
+                                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                                    : 'bg-slate-100 text-slate-400 line-through opacity-40'
+                                }`}
+                              >
+                                {sys.shortName}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-3 py-1.5">
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          emp.status === 'Active'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {emp.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-1.5 text-right">
+                        <button
+                          onClick={() => handleSetCurrentUser(emp)}
+                          disabled={isActiveUser}
+                          className={`px-2 py-1 rounded-lg font-bold text-[11px] transition-all ${
+                            isActiveUser
+                              ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 cursor-default'
+                              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs cursor-pointer'
+                          }`}
+                        >
+                          {isActiveUser ? 'Active Session' : 'Switch'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

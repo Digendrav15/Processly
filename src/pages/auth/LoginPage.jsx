@@ -51,7 +51,7 @@ export function LoginPage() {
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-indigo-500/30">
             <Building2 className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">TaskFlow OS</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Multi Systems App</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Checklist & Delegation Management System
           </p>

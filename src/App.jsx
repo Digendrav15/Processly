@@ -5,6 +5,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ProfilePage } from './pages/auth/ProfilePage';
 import { DashboardRouter } from './pages/dashboards/DashboardRouter';
+import { UnifiedDashboard } from './pages/dashboards/UnifiedDashboard';
 import { MyTasksPage } from './pages/tasks/MyTasksPage';
 import { TaskAssignmentPage } from './pages/tasks/TaskAssignmentPage';
 import { LeaveRequestsPage } from './pages/leave/LeaveRequestsPage';
@@ -59,15 +60,55 @@ import { GRNPage } from './pages/purchase/GRNPage';
 import { PurchasePaymentPage } from './pages/purchase/PurchasePaymentPage';
 
 // Lead To Orders System Pages
-import { LeadPipelinePage } from './pages/leadToOrders/LeadPipelinePage';
-import { ActiveDealsPage } from './pages/leadToOrders/ActiveDealsPage';
-import { OrderConversionsPage } from './pages/leadToOrders/OrderConversionsPage';
+import { LeadDashboardPage } from './pages/leadToOrders/LeadDashboardPage';
+import { LeadsManagementPage } from './pages/leadToOrders/LeadsManagementPage';
+import { FollowUpPage } from './pages/leadToOrders/FollowUpPage';
+import { QuotationPage } from './pages/leadToOrders/QuotationPage';
+import { NegotiationPage } from './pages/leadToOrders/NegotiationPage';
+import { ApprovalPage } from './pages/leadToOrders/ApprovalPage';
+import { LeadReportsPage } from './pages/leadToOrders/LeadReportsPage';
 
-// HR System Pages
+// HR Flow Management System (HR FMS) Pages
 import { HRDashboardPage } from './pages/hr/HRDashboardPage';
-import { EmployeeDirectoryPage } from './pages/hr/EmployeeDirectoryPage';
-import { AttendancePage } from './pages/hr/AttendancePage';
-import { PayrollPage } from './pages/hr/PayrollPage';
+import { HRIndentPage } from './pages/hr/HRIndentPage';
+import { HRIndentApprovalPage } from './pages/hr/HRIndentApprovalPage';
+import { HRJobEnquiryPage } from './pages/hr/HRJobEnquiryPage';
+import { HRCandidateScreeningPage } from './pages/hr/HRCandidateScreeningPage';
+import { HRInterviewPage } from './pages/hr/HRInterviewPage';
+import { HROfferApprovalPage } from './pages/hr/HROfferApprovalPage';
+import { HRJoiningPage } from './pages/hr/HRJoiningPage';
+import { HRActiveEmployeesPage } from './pages/hr/HRActiveEmployeesPage';
+import { HRInactiveEmployeesPage } from './pages/hr/HRInactiveEmployeesPage';
+import { HRAttendancePage } from './pages/hr/HRAttendancePage';
+import { HRLeavePage } from './pages/hr/HRLeavePage';
+import { HRPayrollPage } from './pages/hr/HRPayrollPage';
+import { HRPayslipsPage } from './pages/hr/HRPayslipsPage';
+import { HRExitManagementPage } from './pages/hr/HRExitManagementPage';
+import { HRDocumentsLettersPage } from './pages/hr/HRDocumentsLettersPage';
+import { HRReportsPage } from './pages/hr/HRReportsPage';
+
+// Petty Expenses Module Pages
+import { PettyDashboardPage } from './pages/petty/PettyDashboardPage';
+import { PettyReceivedPage } from './pages/petty/PettyReceivedPage';
+import { PettyOutgoingsPage } from './pages/petty/PettyOutgoingsPage';
+import { ChequeTrackerPage } from './pages/petty/ChequeTrackerPage';
+import { PettyReportsPage } from './pages/petty/PettyReportsPage';
+
+// Document & Subscription System Pages
+import DocSubDashboardPage from './pages/docSub/DocSubDashboardPage';
+import DocumentsManagementPage from './pages/docSub/DocumentsManagementPage';
+import SubscriptionsManagementPage from './pages/docSub/SubscriptionsManagementPage';
+import RenewalExpiryPage from './pages/docSub/RenewalExpiryPage';
+import PaymentTrackingPage from './pages/docSub/PaymentTrackingPage';
+import DocSubHistoryPage from './pages/docSub/DocSubHistoryPage';
+
+// WhatsApp Inbox Module Pages
+import WhatsAppInboxPage from './pages/whatsapp/WhatsAppInboxPage';
+import WhatsAppTemplatesPage from './pages/whatsapp/WhatsAppTemplatesPage';
+import WhatsAppSettingsPage from './pages/whatsapp/WhatsAppSettingsPage';
+
+import { useSystem } from './context/SystemContext';
+import { Outlet } from 'react-router-dom';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -89,6 +130,15 @@ function TaskAssignmentRoute({ children }) {
   return <Navigate to="/my-tasks" replace />;
 }
 
+function ModuleRoute({ systemId, children }) {
+  const { hasModuleAccess, systemsList } = useSystem();
+  if (!hasModuleAccess(systemId)) {
+    const fallbackPath = systemsList[0]?.defaultPath || '/dashboard';
+    return <Navigate to={fallbackPath} replace />;
+  }
+  return children || <Outlet />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -106,6 +156,8 @@ export default function App() {
         
         {/* Checklist & Core System Routes */}
         <Route path="dashboard" element={<DashboardRouter />} />
+        <Route path="checklist/dashboard" element={<UnifiedDashboard />} />
+        <Route path="checklist" element={<Navigate to="/my-tasks" replace />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route
           path="task-assignment"
@@ -130,58 +182,126 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
 
         {/* Order To Delivery System Routes */}
-        <Route path="sales/new-order" element={<NewOrderPage />} />
-        <Route path="sales/verification" element={<OrderVerificationPage />} />
-        <Route path="sales/approval" element={<OrderApprovalPage />} />
-        <Route path="sales/advance-payment" element={<AdvancePaymentPage />} />
-        <Route path="sales/stock-check" element={<StockCheckPage />} />
-        <Route path="sales/processing" element={<OrderProcessingPage />} />
-        <Route path="sales/qc" element={<QualityCheckPage />} />
-        <Route path="sales/ready-dispatch" element={<ReadyForDispatchPage />} />
-        <Route path="sales/dispatch" element={<DispatchPage />} />
-        <Route path="sales/delivered" element={<DeliveredPage />} />
-        <Route path="sales/payment-collection" element={<PaymentCollectionPage />} />
-        <Route path="sales/closed" element={<OrderClosedPage />} />
+        <Route path="sales" element={<ModuleRoute systemId="sales" />}>
+          <Route path="new-order" element={<NewOrderPage />} />
+          <Route path="verification" element={<OrderVerificationPage />} />
+          <Route path="approval" element={<OrderApprovalPage />} />
+          <Route path="advance-payment" element={<AdvancePaymentPage />} />
+          <Route path="stock-check" element={<StockCheckPage />} />
+          <Route path="processing" element={<OrderProcessingPage />} />
+          <Route path="qc" element={<QualityCheckPage />} />
+          <Route path="ready-dispatch" element={<ReadyForDispatchPage />} />
+          <Route path="dispatch" element={<DispatchPage />} />
+          <Route path="delivered" element={<DeliveredPage />} />
+          <Route path="payment-collection" element={<PaymentCollectionPage />} />
+          <Route path="closed" element={<OrderClosedPage />} />
 
-        <Route path="sales/dashboard" element={<SalesDashboardPage />} />
-        <Route path="sales/tasks" element={<OTDTasksPage />} />
-        <Route path="sales/orders" element={<SalesOrdersPage />} />
-        <Route path="sales/tracking" element={<OrderTrackingPage />} />
-        <Route path="sales/reports" element={<OTDReportsPage />} />
-        <Route path="sales/audit-log" element={<OTDAuditLogPage />} />
-        <Route path="sales/data-management" element={<OTDDataManagementPage />} />
+          <Route path="dashboard" element={<SalesDashboardPage />} />
+          <Route path="tasks" element={<OTDTasksPage />} />
+          <Route path="orders" element={<SalesOrdersPage />} />
+          <Route path="tracking" element={<OrderTrackingPage />} />
+          <Route path="reports" element={<OTDReportsPage />} />
+          <Route path="audit-log" element={<OTDAuditLogPage />} />
+          <Route path="data-management" element={<OTDDataManagementPage />} />
+        </Route>
 
         {/* Master System Module Routes */}
-        <Route path="master-system/overview" element={<MasterOverviewPage />} />
-        <Route path="master-system/company-details" element={<MasterCompanyDetailsPage />} />
-        <Route path="master-system/vendors" element={<MasterVendorsPage />} />
-        <Route path="master-system/products" element={<ProductsPage />} />
-        <Route path="master-system/departments" element={<MasterDepartmentsPage />} />
-        <Route path="master-system/users" element={<EmployeesPage />} />
-        <Route path="master-system/tat" element={<OTDTatPage />} />
-        <Route path="master-system/holidays" element={<MasterHolidaysPage />} />
+        <Route path="master-system" element={<ModuleRoute systemId="master-system" />}>
+          <Route path="overview" element={<MasterOverviewPage />} />
+          <Route path="company-details" element={<MasterCompanyDetailsPage />} />
+          <Route path="vendors" element={<MasterVendorsPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="departments" element={<MasterDepartmentsPage />} />
+          <Route path="users" element={<EmployeesPage />} />
+          <Route path="tat" element={<OTDTatPage />} />
+          <Route path="holidays" element={<MasterHolidaysPage />} />
+        </Route>
 
         {/* Purchase System Routes */}
-        <Route path="purchase/indent" element={<PurchaseIndentPage />} />
-        <Route path="purchase/indent-approval" element={<IndentApprovalPage />} />
-        <Route path="purchase/po" element={<PurchaseOrderPage />} />
-        <Route path="purchase/lifting-dispatch" element={<MaterialLiftingPage />} />
-        <Route path="purchase/delivery" element={<MaterialDeliveryPage />} />
-        <Route path="purchase/receiving" element={<MaterialReceivingPage />} />
-        <Route path="purchase/qc" element={<PurchaseQCPage />} />
-        <Route path="purchase/grn" element={<GRNPage />} />
-        <Route path="purchase/payment" element={<PurchasePaymentPage />} />
+        <Route path="purchase" element={<ModuleRoute systemId="purchase" />}>
+          <Route path="indent" element={<PurchaseIndentPage />} />
+          <Route path="indent-approval" element={<IndentApprovalPage />} />
+          <Route path="po" element={<PurchaseOrderPage />} />
+          <Route path="lifting-dispatch" element={<MaterialLiftingPage />} />
+          <Route path="delivery" element={<MaterialDeliveryPage />} />
+          <Route path="receiving" element={<MaterialReceivingPage />} />
+          <Route path="qc" element={<PurchaseQCPage />} />
+          <Route path="grn" element={<GRNPage />} />
+          <Route path="payment" element={<PurchasePaymentPage />} />
+        </Route>
 
-        {/* Lead To Orders Routes */}
-        <Route path="lead-to-orders/pipeline" element={<LeadPipelinePage />} />
-        <Route path="lead-to-orders/deals" element={<ActiveDealsPage />} />
-        <Route path="lead-to-orders/conversions" element={<OrderConversionsPage />} />
+        {/* Lead To Orders System Routes */}
+        <Route path="lead-to-orders" element={<ModuleRoute systemId="lead-to-orders" />}>
+          <Route path="dashboard" element={<LeadDashboardPage />} />
+          <Route path="leads" element={<LeadsManagementPage />} />
+          <Route path="follow-up" element={<FollowUpPage />} />
+          <Route path="quotation" element={<QuotationPage />} />
+          <Route path="negotiation" element={<NegotiationPage />} />
+          <Route path="approval" element={<ApprovalPage />} />
+          <Route path="reports" element={<LeadReportsPage />} />
 
-        {/* HR System Routes */}
-        <Route path="hr/dashboard" element={<HRDashboardPage />} />
-        <Route path="hr/employees" element={<EmployeeDirectoryPage />} />
-        <Route path="hr/attendance" element={<AttendancePage />} />
-        <Route path="hr/payroll" element={<PayrollPage />} />
+          {/* Legacy route fallbacks */}
+          <Route path="pipeline" element={<Navigate to="/lead-to-orders/dashboard" replace />} />
+          <Route path="deals" element={<Navigate to="/lead-to-orders/negotiation" replace />} />
+          <Route path="conversions" element={<Navigate to="/lead-to-orders/reports" replace />} />
+        </Route>
+
+        {/* HR Flow Management System (HR FMS) Routes */}
+        <Route path="hr" element={<ModuleRoute systemId="hr" />}>
+          <Route index element={<Navigate to="/hr/dashboard" replace />} />
+          <Route path="dashboard" element={<HRDashboardPage />} />
+          <Route path="indent" element={<HRIndentPage />} />
+          <Route path="indent-approval" element={<HRIndentApprovalPage />} />
+          <Route path="job-enquiry" element={<HRJobEnquiryPage />} />
+          <Route path="candidate-screening" element={<HRCandidateScreeningPage />} />
+          <Route path="interviews" element={<HRInterviewPage />} />
+          <Route path="offer-approval" element={<HROfferApprovalPage />} />
+          <Route path="joining" element={<HRJoiningPage />} />
+          <Route path="active-employees" element={<HRActiveEmployeesPage />} />
+          <Route path="employees" element={<Navigate to="/hr/active-employees" replace />} />
+          <Route path="inactive-employees" element={<HRInactiveEmployeesPage />} />
+          <Route path="attendance" element={<HRAttendancePage />} />
+          <Route path="leave" element={<HRLeavePage />} />
+          <Route path="payroll" element={<HRPayrollPage />} />
+          <Route path="payslips" element={<HRPayslipsPage />} />
+          <Route path="resignation" element={<HRExitManagementPage />} />
+          <Route path="clearance" element={<HRExitManagementPage />} />
+          <Route path="fnf" element={<HRExitManagementPage />} />
+          <Route path="exit" element={<Navigate to="/hr/resignation" replace />} />
+          <Route path="exit-management" element={<Navigate to="/hr/resignation" replace />} />
+          <Route path="documents" element={<HRDocumentsLettersPage />} />
+          <Route path="letters" element={<HRDocumentsLettersPage />} />
+          <Route path="reports" element={<HRReportsPage />} />
+        </Route>
+
+        {/* Petty Expenses System Routes */}
+        <Route path="petty-expenses" element={<ModuleRoute systemId="petty-expenses" />}>
+          <Route index element={<Navigate to="/petty-expenses/dashboard" replace />} />
+          <Route path="dashboard" element={<PettyDashboardPage />} />
+          <Route path="received" element={<PettyReceivedPage />} />
+          <Route path="outgoings" element={<PettyOutgoingsPage />} />
+          <Route path="cheques" element={<ChequeTrackerPage />} />
+          <Route path="reports" element={<PettyReportsPage />} />
+        </Route>
+
+        {/* Document & Subscription System Routes */}
+        <Route path="doc-subscription" element={<ModuleRoute systemId="doc-subscription" />}>
+          <Route index element={<Navigate to="/doc-subscription/dashboard" replace />} />
+          <Route path="dashboard" element={<DocSubDashboardPage />} />
+          <Route path="documents" element={<DocumentsManagementPage />} />
+          <Route path="subscriptions" element={<SubscriptionsManagementPage />} />
+          <Route path="renewals" element={<RenewalExpiryPage />} />
+          <Route path="payments" element={<PaymentTrackingPage />} />
+          <Route path="history" element={<DocSubHistoryPage />} />
+        </Route>
+
+        {/* WhatsApp Inbox System Routes */}
+        <Route path="whatsapp" element={<ModuleRoute systemId="whatsapp" />}>
+          <Route index element={<Navigate to="/whatsapp/inbox" replace />} />
+          <Route path="inbox" element={<WhatsAppInboxPage />} />
+          <Route path="templates" element={<WhatsAppTemplatesPage />} />
+          <Route path="settings" element={<WhatsAppSettingsPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

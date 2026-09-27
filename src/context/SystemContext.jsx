@@ -1,44 +1,55 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SYSTEMS_CONFIG } from '../config/systemsConfig';
-import { getCurrentUser } from '../services/otdStorageService';
+import { useAuth } from './AuthContext';
 
 const SystemContext = createContext();
 
 export function SystemProvider({ children }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [activeSystemId, setActiveSystemId] = useState(() => {
     return localStorage.getItem('taskflow_active_system') || 'checklist';
   });
 
-  const [currentUser, setCurrentUserState] = useState(() => getCurrentUser());
+  // Strict Module Permission Filtering
+  const systemsList = useMemo(() => {
+    // 1. Admin role always has access to all configured systems
+    const isAdmin =
+      user?.userGroup === 'Admin' ||
+      user?.role === 'ADMIN' ||
+      (typeof user?.userGroup === 'string' && user.userGroup.toLowerCase() === 'admin');
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const handleUpdate = () => {
-      setCurrentUserState(getCurrentUser());
-    };
-    window.addEventListener('otd_storage_update', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
-    return () => {
-      window.removeEventListener('otd_storage_update', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
-    };
-  }, []);
-
-  // Module Permission Filtering
-  const allowedModules = currentUser?.allowedModules;
-
-  const systemsList = SYSTEMS_CONFIG.filter((sys) => {
-    // If no permission restrictions set or user is Admin, allow all modules
-    if (currentUser?.userGroup === 'Admin' || currentUser?.role === 'ADMIN' || !allowedModules || allowedModules.length === 0) {
-      return true;
+    if (isAdmin) {
+      return SYSTEMS_CONFIG;
     }
-    return allowedModules.includes(sys.id);
-  });
+
+    // 2. Explicit allowedModules list for non-admin users
+    const allowed = user?.allowedModules;
+    if (Array.isArray(allowed) && allowed.length > 0) {
+      const filtered = SYSTEMS_CONFIG.filter((sys) => allowed.includes(sys.id));
+      if (filtered.length > 0) return filtered;
+    }
+
+    // 3. Default fallback
+    return [SYSTEMS_CONFIG[0]];
+  }, [user]);
+
+  const hasModuleAccess = (systemId) => {
+    return systemsList.some((sys) => sys.id === systemId);
+  };
 
   const currentSystem = systemsList.find((sys) => sys.id === activeSystemId) || systemsList[0] || SYSTEMS_CONFIG[0];
+
+  // If current activeSystem is not in systemsList, fallback immediately
+  useEffect(() => {
+    if (systemsList.length > 0 && !systemsList.some((s) => s.id === activeSystemId)) {
+      setActiveSystemId(systemsList[0].id);
+      localStorage.setItem('taskflow_active_system', systemsList[0].id);
+    }
+  }, [systemsList, activeSystemId]);
 
   const switchSystem = (systemId, shouldNavigate = true) => {
     const targetSystem = systemsList.find((sys) => sys.id === systemId);
@@ -57,9 +68,17 @@ export function SystemProvider({ children }) {
     const currentPath = location.pathname;
 
     // Find matching system for current path
-    const matchingSystem = systemsList.find((sys) =>
-      sys.navItems.some((item) => item.path === currentPath)
-    );
+    const matchingSystem = systemsList.find((sys) => {
+      if (sys.id === 'hr' && currentPath.startsWith('/hr')) return true;
+      if (sys.id === 'petty-expenses' && currentPath.startsWith('/petty-expenses')) return true;
+      if (sys.id === 'doc-subscription' && currentPath.startsWith('/doc-subscription')) return true;
+      if (sys.id === 'whatsapp' && currentPath.startsWith('/whatsapp')) return true;
+      if (sys.id === 'sales' && currentPath.startsWith('/sales')) return true;
+      if (sys.id === 'purchase' && currentPath.startsWith('/purchase')) return true;
+      if (sys.id === 'lead-to-orders' && currentPath.startsWith('/lead-to-orders')) return true;
+      if (sys.id === 'master-system' && currentPath.startsWith('/master-system')) return true;
+      return sys.navItems.some((item) => item.path === currentPath);
+    });
 
     if (matchingSystem && matchingSystem.id !== activeSystemId) {
       setActiveSystemId(matchingSystem.id);
@@ -74,6 +93,9 @@ export function SystemProvider({ children }) {
         currentSystem,
         switchSystem,
         systemsList,
+        hasModuleAccess,
+        currentUser: user,
+        user
       }}
     >
       {children}

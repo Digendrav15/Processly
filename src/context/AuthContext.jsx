@@ -10,6 +10,24 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     loadUser();
+
+    const handleSessionUpdate = (e) => {
+      if (e?.detail && typeof e.detail === 'object' && e.detail.id) {
+        setUser(e.detail);
+      } else {
+        loadUser();
+      }
+    };
+
+    window.addEventListener('user_session_update', handleSessionUpdate);
+    window.addEventListener('otd_storage_update', handleSessionUpdate);
+    window.addEventListener('storage', handleSessionUpdate);
+
+    return () => {
+      window.removeEventListener('user_session_update', handleSessionUpdate);
+      window.removeEventListener('otd_storage_update', handleSessionUpdate);
+      window.removeEventListener('storage', handleSessionUpdate);
+    };
   }, []);
 
   const loadUser = async () => {
@@ -55,6 +73,7 @@ export function AuthProvider({ children }) {
         notificationService.notifyLogout(user);
       }
       await authService.logout();
+      localStorage.removeItem('otd_current_user');
       setUser(null);
     } finally {
       setLoading(false);
@@ -65,32 +84,53 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const switchedUser = await authService.switchDemoRole(targetRole);
+      localStorage.setItem('otd_current_user', JSON.stringify(switchedUser));
       setUser(switchedUser);
       notificationService.notifyLogin(switchedUser);
+      window.dispatchEvent(new CustomEvent('user_session_update', { detail: switchedUser }));
+      window.dispatchEvent(new CustomEvent('otd_storage_update', { detail: { key: 'otd_current_user' } }));
       return switchedUser;
     } finally {
       setLoading(false);
     }
   };
 
+  const switchUser = (userObj) => {
+    if (!userObj) return;
+    localStorage.setItem('corporate_system_mock_user', JSON.stringify(userObj));
+    localStorage.setItem('otd_current_user', JSON.stringify(userObj));
+    setUser(userObj);
+    notificationService.notifyLogin(userObj);
+    window.dispatchEvent(new CustomEvent('user_session_update', { detail: userObj }));
+    window.dispatchEvent(new CustomEvent('otd_storage_update', { detail: { key: 'otd_current_user' } }));
+  };
+
   const updateProfile = async (updateData) => {
     if (!user) return;
     const updated = await authService.updateProfile(user.id, updateData);
+    localStorage.setItem('otd_current_user', JSON.stringify(updated));
     setUser(updated);
+    window.dispatchEvent(new CustomEvent('user_session_update', { detail: updated }));
     return updated;
   };
 
+  const userRole = (user?.role || (user?.userGroup === 'Admin' ? 'ADMIN' : 'EMPLOYEE')).toUpperCase();
+  const isAdmin = userRole === 'ADMIN' || user?.userGroup === 'Admin';
+  const isManager = userRole === 'MANAGER' || (user?.userGroup && user.userGroup.toLowerCase().includes('manager'));
+
   const value = {
     user,
-    role: user?.role || 'EMPLOYEE',
-    isAdmin: user?.role === 'ADMIN',
-    isManager: user?.role === 'MANAGER',
-    isEmployee: user?.role === 'EMPLOYEE',
+    role: userRole,
+    isAdmin,
+    isManager,
+    isEmployee: !isAdmin && !isManager,
+    allowedModules: user?.allowedModules || (isAdmin ? ['checklist', 'sales', 'master-system', 'purchase', 'lead-to-orders', 'hr', 'petty-expenses', 'doc-subscription', 'whatsapp'] : ['checklist']),
     loading,
     login,
     signup,
     logout,
     switchRole,
+    switchUser,
     updateProfile,
   };
 

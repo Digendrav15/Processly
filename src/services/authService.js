@@ -26,7 +26,29 @@ export const authService = {
     const stored = localStorage.getItem(MOCK_AUTH_KEY);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (parsed) {
+          const isAdmin = parsed.role === 'ADMIN' || parsed.userGroup === 'Admin';
+          let modified = false;
+          if (isAdmin && Array.isArray(parsed.allowedModules)) {
+            if (!parsed.allowedModules.includes('petty-expenses')) {
+              parsed.allowedModules.push('petty-expenses');
+              modified = true;
+            }
+            if (!parsed.allowedModules.includes('doc-subscription')) {
+              parsed.allowedModules.push('doc-subscription');
+              modified = true;
+            }
+            if (!parsed.allowedModules.includes('whatsapp')) {
+              parsed.allowedModules.push('whatsapp');
+              modified = true;
+            }
+          }
+          if (modified) {
+            localStorage.setItem(MOCK_AUTH_KEY, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (e) {
         // invalid JSON
       }

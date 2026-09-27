@@ -63,21 +63,52 @@ export function MyTasksPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">My Tasks</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            View your assigned operational checklists and delegated work items
-          </p>
+    <div className="space-y-2.5">
+      {/* Compact Page Header with Integrated Tabs & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2.5 rounded-xl shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg">
+            <ListTodo className="w-4 h-4" />
+          </div>
+          <div>
+            <h1 className="text-base font-black text-slate-900 dark:text-white leading-tight">My Tasks</h1>
+            <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">
+              Assigned checklists & delegated operational work items
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Integrated 2 Tabs */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+            <button
+              onClick={() => setActiveTab('Checklist')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'Checklist'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <ListTodo className="w-3.5 h-3.5" />
+              <span>Checklist</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('Delegation')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'Delegation'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span>Delegation</span>
+            </button>
+          </div>
+
           {(isAdmin || isManager) && (
             <Link
               to="/task-assignment"
-              className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all"
+              className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all"
             >
               <span>Task Assignment Hub</span>
             </Link>
@@ -85,106 +116,86 @@ export function MyTasksPage() {
         </div>
       </div>
 
-      {/* REQUIREMENT #1: Strictly ONLY 2 Tabs: Checklist & Delegation */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-        <button
-          onClick={() => setActiveTab('Checklist')}
-          className={`flex items-center space-x-2 px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all ${
-            activeTab === 'Checklist'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-          }`}
-        >
-          <ListTodo className="w-4 h-4" />
-          <span>Checklist</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('Delegation')}
-          className={`flex items-center space-x-2 px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all ${
-            activeTab === 'Delegation'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-          }`}
-        >
-          <CheckSquare className="w-4 h-4" />
-          <span>Delegation</span>
-        </button>
-      </div>
-
       {/* Filter Bar */}
       <FilterBar filters={filters} onFilterChange={handleFilterChange} onReset={handleResetFilters} />
 
-      {/* Data Table with REQUIREMENT #5: 1st Column = Action */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+      {/* High Density Data Table */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-xs text-slate-400">Loading your tasks...</div>
+          <div className="p-8 text-center text-xs text-slate-400">Loading your tasks...</div>
         ) : tasks.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-400">
+          <div className="p-8 text-center text-xs text-slate-400">
             No assigned tasks found under {activeTab}.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[calc(100vh-210px)] overflow-y-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  {/* REQUIREMENT #5: 1st Column is ACTION */}
-                  <th className="px-4 py-3.5 w-32">Action</th>
-                  <th className="px-4 py-3.5">Task Code</th>
-                  <th className="px-4 py-3.5">Task Title</th>
-                  <th className="px-4 py-3.5">Frequency</th>
-                  <th className="px-4 py-3.5">Assigned By</th>
-                  <th className="px-4 py-3.5">Due Date</th>
-                  <th className="px-4 py-3.5">Priority</th>
-                  <th className="px-4 py-3.5">Attachment</th>
-                  <th className="px-4 py-3.5">Status</th>
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs border-b border-slate-200 dark:border-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  <th className="px-3 py-2 w-28">Action</th>
+                  <th className="px-3 py-2">Task Code</th>
+                  <th className="px-3 py-2">Task Title</th>
+                  <th className="px-3 py-2">Frequency</th>
+                  <th className="px-3 py-2">Assigned By</th>
+                  <th className="px-3 py-2">Due Date</th>
+                  <th className="px-3 py-2">Priority</th>
+                  <th className="px-3 py-2">Attachment</th>
+                  <th className="px-3 py-2">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
                 {tasks.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                    {/* 1ST COLUMN: ACTION */}
-                    <td className="px-4 py-3 font-semibold">
-                      <div className="flex items-center space-x-1.5">
+                  <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    {/* Action */}
+                    <td className="px-3 py-1.5 font-semibold">
+                      <div className="flex items-center space-x-1">
                         <button
                           onClick={() => setSelectedTaskForUpdate(t)}
-                          className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all"
+                          className="flex items-center space-x-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all cursor-pointer"
                         >
-                          <Edit3 className="w-3.5 h-3.5" />
+                          <Edit3 className="w-3 h-3" />
                           <span>Update</span>
                         </button>
                         <button
                           onClick={() => setSelectedTaskIdForDetail(t.id)}
-                          className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                          className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                           title="View History"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">{t.task_code}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white max-w-xs truncate">{t.title}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <td className="px-3 py-1.5 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">
+                      {t.task_code}
+                    </td>
+                    <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-white max-w-sm truncate text-[11.5px]">
+                      {t.title}
+                    </td>
+                    <td className="px-3 py-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                         {t.frequency || (activeTab === 'Delegation' ? 'One Time' : 'Daily')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{t.assigned_by_name || 'Manager'}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{formatDate(t.due_date)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
+                      {t.assigned_by_name || 'Manager'}
+                    </td>
+                    <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
+                      {formatDate(t.due_date)}
+                    </td>
+                    <td className="px-3 py-1.5">
                       <PriorityBadge priority={t.priority} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-1.5">
                       {t.required_attachment ? (
-                        <span className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded">
+                        <span className="text-[9px] font-extrabold text-rose-600 bg-rose-50 dark:bg-rose-950 px-1.5 py-0.5 rounded">
                           Required
                         </span>
                       ) : (
                         <span className="text-[10px] text-slate-400">Optional</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-1.5">
                       <StatusBadge status={t.status} />
                     </td>
                   </tr>

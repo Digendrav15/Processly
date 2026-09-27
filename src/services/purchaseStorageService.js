@@ -370,3 +370,9 @@ export function initializePurchaseData() {
 
   setPurchaseData(PURCHASE_STORAGE_KEYS.INDENTS, initialIndents);
 }
+
+export const initPurchaseData = initializePurchaseData;
+
+// Ensure initial purchase data is seeded
+initializePurchaseData();
+

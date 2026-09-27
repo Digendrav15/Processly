@@ -3,16 +3,20 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSystem } from '../../context/SystemContext';
 import { ThemeToggle } from '../common/ThemeToggle';
-import { Bell, Menu, User, LogOut, CheckCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Users as UsersIcon } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { INITIAL_USERS } from '../../services/mockData';
 
 export function Header({ onOpenMobileMenu }) {
-  const { user, logout } = useAuth();
+  const { user, logout, switchUser } = useAuth();
   const { currentSystem } = useSystem();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isMainDashboard = location.pathname === '/dashboard';
 
   const handleLogout = async () => {
     await logout();
@@ -32,9 +36,9 @@ export function Header({ onOpenMobileMenu }) {
         <div className="hidden sm:block">
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Acme Corporate Enterprise</p>
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>{currentSystem.name}</span>
+            <span>{isMainDashboard ? 'Admin Dashboard' : currentSystem.name}</span>
             <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-2 py-0.5 rounded-full">
-              {currentSystem.badge}
+              {isMainDashboard ? 'All Systems Hub' : currentSystem.badge}
             </span>
           </h2>
         </div>
@@ -85,9 +89,8 @@ export function Header({ onOpenMobileMenu }) {
                         setShowNotifPopover(false);
                         if (n.link_url) navigate(n.link_url);
                       }}
-                      className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${
-                        !n.is_read ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''
-                      }`}
+                      className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${!n.is_read ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''
+                        }`}
                     >
                       <p className="text-xs font-bold text-slate-900 dark:text-white">{n.title}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{n.message}</p>
@@ -129,22 +132,74 @@ export function Header({ onOpenMobileMenu }) {
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-1 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                    {user?.role || 'User'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    {user?.allowedModules ? `${user.allowedModules.length} Modules` : 'All Modules'}
+                  </span>
+                </div>
+              </div>
+
               <Link
                 to="/profile"
                 onClick={() => setShowProfileMenu(false)}
-                className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <User className="w-4 h-4 text-slate-400" />
-                <span>My Profile</span>
+                <span>My Profile & Requests</span>
               </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
+
+              {/* Quick Switch User & Test Module Access */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="px-4 py-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <UsersIcon className="w-3 h-3 text-indigo-500" /> Switch User (Module Test)
+                  </span>
+                </div>
+                <div className="py-1 max-h-48 overflow-y-auto space-y-0.5">
+                  {INITIAL_USERS.map((u) => {
+                    const isCurrent = (user?.id === u.id || user?.email === u.email);
+                    return (
+                      <button
+                        key={u.id}
+                        onClick={() => {
+                          switchUser(u);
+                          setShowProfileMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2 text-left text-xs transition-colors cursor-pointer ${
+                          isCurrent
+                            ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold'
+                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <p className="truncate text-[11px] leading-tight font-bold">{u.full_name}</p>
+                          <span className="text-[10px] text-slate-400 font-normal block truncate">
+                            {u.designation} • {u.allowedModules ? `${u.allowedModules.length} Mod` : 'Full'}
+                          </span>
+                        </div>
+                        {isCurrent && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

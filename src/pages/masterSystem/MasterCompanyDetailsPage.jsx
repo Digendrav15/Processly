@@ -149,7 +149,7 @@ export function MasterCompanyDetailsPage() {
                     type="text"
                     value={form.brandName || ''}
                     onChange={(e) => handleChange('brandName', e.target.value)}
-                    placeholder="e.g. GimBooks / TaskFlow OS"
+                    placeholder="e.g. GimBooks / Multi Systems App"
                     className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

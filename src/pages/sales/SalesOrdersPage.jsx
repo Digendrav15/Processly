@@ -204,45 +204,45 @@ export function SalesOrdersPage() {
   });
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs tracking-wider uppercase border border-emerald-500/30">
-              Order To Delivery
-            </span>
+    <div className="space-y-2.5">
+      {/* Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2.5 rounded-xl shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg">
+            <ShoppingBag className="w-4 h-4" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Orders Management</h1>
-          <p className="text-xs text-slate-400 mt-1">Create sales orders and advance workflow stage executions.</p>
+          <div>
+            <h1 className="text-base font-black text-slate-900 dark:text-white leading-tight">Orders Management</h1>
+            <span className="text-[10px] text-slate-400 font-medium hidden sm:inline">Create sales orders and advance workflow stage executions</span>
+          </div>
         </div>
         <button
           onClick={() => handleOpenCreateModal()}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all"
+          className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          <span>+ Create New Order</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Create New Order</span>
         </button>
       </div>
 
       {/* Filter Toolbar */}
       {orders.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search by Order # or Customer..."
+              placeholder="Search Order # or Customer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-hidden"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none dark:text-white"
             />
           </div>
-          <div className="flex items-center space-x-3 text-xs">
+          <div className="w-48 sm:w-56 text-xs">
             <select
               value={stageFilter}
               onChange={(e) => setStageFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300"
+              className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none"
             >
               <option value="">All Workflow Stages</option>
               {stages.map((stg) => (
@@ -257,96 +257,98 @@ export function SalesOrdersPage() {
 
       {/* Orders Table / Empty State */}
       {orders.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center shadow-xs">
-          <ShoppingBag className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No Orders Found</h3>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-xs">
+          <ShoppingBag className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">No Orders Found</h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             No order records created yet. Click below to create your first order.
           </p>
           <button
             onClick={() => handleOpenCreateModal()}
-            className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md"
+            className="mt-3 inline-flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-xs"
           >
-            <Plus className="w-4 h-4" />
-            <span>+ Create New Order</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Create New Order</span>
           </button>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-400">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 text-center text-xs text-slate-400">
           No orders matching search filter "{searchTerm}".
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
-                <th className="pb-3 px-3">Order Number</th>
-                <th className="pb-3 px-3">Customer</th>
-                <th className="pb-3 px-3">Order Date</th>
-                <th className="pb-3 px-3">Grand Total</th>
-                <th className="pb-3 px-3">Current Stage</th>
-                <th className="pb-3 px-3">TAT / Remaining</th>
-                <th className="pb-3 px-3">Priority</th>
-                <th className="pb-3 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-              {filteredOrders.map((o) => {
-                const remaining = calculateRemainingTime(o.plannedCompletionDate, o.status === 'Closed');
-                return (
-                  <tr key={o.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="py-3 px-3 font-extrabold text-indigo-600 dark:text-indigo-400">{o.orderNumber}</td>
-                    <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">{o.customerName}</td>
-                    <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{o.orderDate}</td>
-                    <td className="py-3 px-3 font-extrabold text-emerald-600 dark:text-emerald-400">
-                      ₹ {parseFloat(o.grandTotal || 0).toLocaleString('en-IN')}
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-slate-700 dark:text-slate-200">
-                      <span className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800">
-                        {o.currentStage}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3">
-                      {o.plannedCompletionDate ? (
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-210px)] overflow-y-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                  <th className="py-2 px-3">Order Number</th>
+                  <th className="py-2 px-3">Customer</th>
+                  <th className="py-2 px-3">Order Date</th>
+                  <th className="py-2 px-3">Grand Total</th>
+                  <th className="py-2 px-3">Current Stage</th>
+                  <th className="py-2 px-3">TAT / Remaining</th>
+                  <th className="py-2 px-3">Priority</th>
+                  <th className="py-2 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+                {filteredOrders.map((o) => {
+                  const remaining = calculateRemainingTime(o.plannedCompletionDate, o.status === 'Closed');
+                  return (
+                    <tr key={o.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="py-1.5 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">{o.orderNumber}</td>
+                      <td className="py-1.5 px-3 font-bold text-slate-900 dark:text-white text-[11.5px]">{o.customerName}</td>
+                      <td className="py-1.5 px-3 text-slate-500 dark:text-slate-400 text-[11px]">{o.orderDate}</td>
+                      <td className="py-1.5 px-3 font-black text-emerald-600 dark:text-emerald-400 text-[11.5px]">
+                        ₹ {parseFloat(o.grandTotal || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-1.5 px-3 font-semibold text-slate-700 dark:text-slate-200">
+                        <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-[10.5px] border border-indigo-200 dark:border-indigo-800">
+                          {o.currentStage}
+                        </span>
+                      </td>
+                      <td className="py-1.5 px-3">
+                        {o.plannedCompletionDate ? (
+                          <span
+                            className={`inline-flex items-center gap-1 font-bold text-[10.5px] ${
+                              remaining.isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                            }`}
+                          >
+                            <Clock className="w-3 h-3" />
+                            <span>{remaining.text}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400">No TAT set</span>
+                        )}
+                      </td>
+                      <td className="py-1.5 px-3">
                         <span
-                          className={`inline-flex items-center gap-1 font-bold text-[11px] ${
-                            remaining.isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                            o.priority === 'Urgent'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                              : o.priority === 'High'
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                           }`}
                         >
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{remaining.text}</span>
+                          {o.priority}
                         </span>
-                      ) : (
-                        <span className="text-slate-400">No TAT set</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          o.priority === 'Urgent'
-                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                            : o.priority === 'High'
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                        }`}
-                      >
-                        {o.priority}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right">
-                      <button
-                        onClick={() => setSelectedOrderForStage(o)}
-                        className="inline-flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all"
-                      >
-                        <span>Update Stage</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="py-1.5 px-3 text-right">
+                        <button
+                          onClick={() => setSelectedOrderForStage(o)}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] rounded-lg shadow-xs transition-all cursor-pointer"
+                        >
+                          <span>Update Stage</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

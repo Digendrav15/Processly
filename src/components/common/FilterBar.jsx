@@ -11,26 +11,26 @@ export function FilterBar({ filters, onFilterChange, onReset }) {
     filters.department !== 'All';
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm mb-6 space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 sm:p-2.5 rounded-xl shadow-xs mb-3">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Search */}
-        <div className="lg:col-span-2 relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+        <div className="flex-1 min-w-[200px] relative">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by title, code, employee..."
+            placeholder="Search title, code, employee..."
             value={filters.search || ''}
             onChange={(e) => onFilterChange('search', e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           />
         </div>
 
         {/* Status */}
-        <div>
+        <div className="w-28 sm:w-32">
           <select
             value={filters.status || 'All'}
             onChange={(e) => onFilterChange('status', e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+            className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           >
             <option value="All">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -42,11 +42,11 @@ export function FilterBar({ filters, onFilterChange, onReset }) {
         </div>
 
         {/* Priority */}
-        <div>
+        <div className="w-28 sm:w-32">
           <select
             value={filters.priority || 'All'}
             onChange={(e) => onFilterChange('priority', e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+            className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           >
             <option value="All">All Priorities</option>
             <option value="Critical">Critical</option>
@@ -57,11 +57,11 @@ export function FilterBar({ filters, onFilterChange, onReset }) {
         </div>
 
         {/* Task Type */}
-        <div>
+        <div className="w-28 sm:w-32">
           <select
             value={filters.taskType || 'All'}
             onChange={(e) => onFilterChange('taskType', e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+            className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           >
             <option value="All">All Types</option>
             <option value="checklist">Checklist</option>
@@ -70,11 +70,11 @@ export function FilterBar({ filters, onFilterChange, onReset }) {
         </div>
 
         {/* Department */}
-        <div>
+        <div className="w-32 sm:w-36">
           <select
             value={filters.department || 'All'}
             onChange={(e) => onFilterChange('department', e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+            className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           >
             <option value="All">All Departments</option>
             {DEPARTMENTS.map((d) => (
@@ -84,19 +84,19 @@ export function FilterBar({ filters, onFilterChange, onReset }) {
             ))}
           </select>
         </div>
-      </div>
 
-      {hasActiveFilters && (
-        <div className="flex justify-end">
+        {/* Clear Filters (Inline) */}
+        {hasActiveFilters && (
           <button
             onClick={onReset}
-            className="flex items-center space-x-1 text-xs text-rose-600 dark:text-rose-400 hover:underline font-medium"
+            className="flex items-center space-x-1 px-2.5 py-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg font-bold border border-rose-200 dark:border-rose-900 transition-colors shrink-0"
+            title="Reset All Filters"
           >
-            <X className="w-3.5 h-3.5" />
-            <span>Clear Filters</span>
+            <X className="w-3 h-3" />
+            <span>Reset</span>
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

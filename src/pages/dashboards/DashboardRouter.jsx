@@ -1,6 +1,6 @@
 import React from 'react';
-import { UnifiedDashboard } from './UnifiedDashboard';
+import { MainAdminDashboard } from './MainAdminDashboard';
 
 export function DashboardRouter() {
-  return <UnifiedDashboard />;
+  return <MainAdminDashboard />;
 }

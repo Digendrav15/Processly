@@ -34,7 +34,22 @@ import {
   PackageCheck,
   Archive,
   Receipt,
-  Navigation
+  Navigation,
+  UserPlus,
+  UserX,
+  LogOut,
+  Award,
+  Wallet,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Landmark,
+  Files,
+  AlertTriangle,
+  RefreshCw,
+  MessageSquare,
+  Bookmark,
+  Radio,
+  Settings
 } from 'lucide-react';
 
 export const SYSTEMS_CONFIG = [
@@ -146,11 +161,15 @@ export const SYSTEMS_CONFIG = [
     gradient: 'from-violet-600 to-purple-600',
     bgLight: 'bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400',
     border: 'border-violet-200 dark:border-violet-800',
-    defaultPath: '/lead-to-orders/pipeline',
+    defaultPath: '/lead-to-orders/dashboard',
     navItems: [
-      { label: 'Lead Pipeline', path: '/lead-to-orders/pipeline', icon: Workflow },
-      { label: 'Active Deals', path: '/lead-to-orders/deals', icon: Target },
-      { label: 'Order Conversions', path: '/lead-to-orders/conversions', icon: CheckCircle2 },
+      { label: 'Dashboard', path: '/lead-to-orders/dashboard', icon: LayoutDashboard },
+      { label: 'Leads', path: '/lead-to-orders/leads', icon: Users },
+      { label: 'Follow-up', path: '/lead-to-orders/follow-up', icon: Clock },
+      { label: 'Quotation', path: '/lead-to-orders/quotation', icon: FileText },
+      { label: 'Negotiation', path: '/lead-to-orders/negotiation', icon: TrendingUp },
+      { label: 'Approval', path: '/lead-to-orders/approval', icon: FileCheck },
+      { label: 'Reports', path: '/lead-to-orders/reports', icon: FileSpreadsheet },
     ]
   },
   {
@@ -158,7 +177,7 @@ export const SYSTEMS_CONFIG = [
     name: 'HR System',
     shortName: 'HR & People',
     badge: 'Human Resources',
-    description: 'Employee Directory, Leave Management, Attendance & Payroll',
+    description: 'Complete HR Flow Management System from Requirement to Exit',
     icon: Users,
     color: 'cyan',
     gradient: 'from-cyan-500 to-blue-600',
@@ -166,11 +185,117 @@ export const SYSTEMS_CONFIG = [
     border: 'border-cyan-200 dark:border-cyan-800',
     defaultPath: '/hr/dashboard',
     navItems: [
-      { label: 'HR Dashboard', path: '/hr/dashboard', icon: LayoutDashboard },
-      { label: 'Employee Directory', path: '/hr/employees', icon: Users },
-      { label: 'Leave Requests', path: '/leave-requests', icon: Plane },
-      { label: 'Attendance Log', path: '/hr/attendance', icon: UserCheck },
-      { label: 'Payroll & Docs', path: '/hr/payroll', icon: DollarSign },
+      { label: 'Dashboard', path: '/hr/dashboard', icon: LayoutDashboard, section: 'Overview' },
+
+      // Recruitment
+      { label: 'Indent / Requirement', path: '/hr/indent', icon: FileText, section: 'Recruitment' },
+      { label: 'Indent Approval', path: '/hr/indent-approval', icon: FileCheck, section: 'Recruitment' },
+      { label: 'Job Enquiry', path: '/hr/job-enquiry', icon: Briefcase, section: 'Recruitment' },
+      { label: 'Candidate Screening', path: '/hr/candidate-screening', icon: UserCheck, section: 'Recruitment' },
+      { label: 'Follow-up / Interview', path: '/hr/interviews', icon: Clock, section: 'Recruitment' },
+      { label: 'Offer / Salary Approval', path: '/hr/offer-approval', icon: DollarSign, section: 'Recruitment' },
+      { label: 'Joining', path: '/hr/joining', icon: UserPlus, section: 'Recruitment' },
+
+      // Employee
+      { label: 'Active Employees', path: '/hr/active-employees', icon: Users, section: 'Employee' },
+      { label: 'Inactive Employees', path: '/hr/inactive-employees', icon: UserX, section: 'Employee' },
+
+      // Attendance & Leave
+      { label: 'Attendance', path: '/hr/attendance', icon: CheckSquare, section: 'Attendance & Leave' },
+      { label: 'Leave', path: '/hr/leave', icon: Plane, section: 'Attendance & Leave' },
+
+      // Payroll
+      { label: 'Payroll', path: '/hr/payroll', icon: DollarSign, section: 'Payroll' },
+      { label: 'Payslips', path: '/hr/payslips', icon: Receipt, section: 'Payroll' },
+
+      // Exit Management
+      { label: 'Resignation', path: '/hr/resignation', icon: LogOut, section: 'Exit Management' },
+      { label: 'Exit / Clearance', path: '/hr/clearance', icon: ShieldCheck, section: 'Exit Management' },
+      { label: 'Full & Final Settlement', path: '/hr/fnf', icon: CreditCard, section: 'Exit Management' },
+
+      // Documents & Letters
+      { label: 'Employee Documents', path: '/hr/documents', icon: Archive, section: 'Documents & Letters' },
+      { label: 'HR Letters', path: '/hr/letters', icon: Award, section: 'Documents & Letters' },
+
+      // Reports
+      { label: 'Reports', path: '/hr/reports', icon: FileSpreadsheet, section: 'Reports' },
+    ]
+  },
+  {
+    id: 'petty-expenses',
+    name: 'Petty Expenses',
+    shortName: 'Petty Expenses',
+    badge: 'Cash & Cheques',
+    description: 'Petty Cash Inflow, Outgoings, Expense Vouchers & Cheque Deposit/Clearance Tracker',
+    icon: Wallet,
+    color: 'teal',
+    gradient: 'from-teal-500 to-emerald-600',
+    bgLight: 'bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400',
+    border: 'border-teal-200 dark:border-teal-800',
+    defaultPath: '/petty-expenses/dashboard',
+    navItems: [
+      { label: 'Overview & Ledger', path: '/petty-expenses/dashboard', icon: LayoutDashboard },
+      { label: 'Amount Received (In)', path: '/petty-expenses/received', icon: ArrowDownLeft },
+      { label: 'Expenses (Out)', path: '/petty-expenses/outgoings', icon: ArrowUpRight },
+      { label: 'Cheque Tracker', path: '/petty-expenses/cheques', icon: Landmark },
+      { label: 'Reports & Analytics', path: '/petty-expenses/reports', icon: FileSpreadsheet },
+    ]
+  },
+  {
+    id: 'doc-subscription',
+    name: 'Document & Subscription',
+    shortName: 'Docs & Subscriptions',
+    badge: 'Compliance & SaaS',
+    description: 'Corporate Documents, Legal Agreements, SaaS Subscriptions, Renewal Pipeline & Payment Tracker',
+    icon: Files,
+    color: 'blue',
+    gradient: 'from-blue-600 to-indigo-600',
+    bgLight: 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-800',
+    defaultPath: '/doc-subscription/dashboard',
+    navItems: [
+      { label: 'Dashboard', path: '/doc-subscription/dashboard', icon: LayoutDashboard },
+
+      // Documents
+      { label: 'All Documents', path: '/doc-subscription/documents?tab=all', icon: FileText, section: 'Documents' },
+      { label: 'Add Document', path: '/doc-subscription/documents?tab=add', icon: PlusCircle, section: 'Documents' },
+      { label: 'Pending Verification', path: '/doc-subscription/documents?tab=pending', icon: ShieldCheck, section: 'Documents' },
+      { label: 'Expiring Soon', path: '/doc-subscription/documents?tab=expiring', icon: Clock, section: 'Documents' },
+      { label: 'Expired', path: '/doc-subscription/documents?tab=expired', icon: AlertTriangle, section: 'Documents' },
+
+      // Subscriptions
+      { label: 'All Subscriptions', path: '/doc-subscription/subscriptions?tab=all', icon: CreditCard, section: 'Subscriptions' },
+      { label: 'Add Subscription', path: '/doc-subscription/subscriptions?tab=add', icon: PlusCircle, section: 'Subscriptions' },
+      { label: 'Renewal Due', path: '/doc-subscription/subscriptions?tab=renewalDue', icon: Clock, section: 'Subscriptions' },
+      { label: 'Payment Due', path: '/doc-subscription/subscriptions?tab=paymentDue', icon: DollarSign, section: 'Subscriptions' },
+      { label: 'Expired', path: '/doc-subscription/subscriptions?tab=expired', icon: AlertTriangle, section: 'Subscriptions' },
+
+      // Renewal & Expiry
+      { label: 'Renewal & Expiry', path: '/doc-subscription/renewals', icon: RefreshCw, section: 'Management' },
+
+      // Payment Tracking
+      { label: 'Payment Tracking', path: '/doc-subscription/payments', icon: Receipt, section: 'Management' },
+
+      // History
+      { label: 'History', path: '/doc-subscription/history', icon: Archive, section: 'Management' },
+    ]
+  },
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp Inbox',
+    shortName: 'WhatsApp',
+    badge: 'Live Chat & CRM',
+    description: 'WhatsApp Live Chat, Message Composer, Customer ERP Context, Canned Templates & Webhook Engine',
+    icon: MessageSquare,
+    color: 'emerald',
+    gradient: 'from-emerald-500 to-green-600',
+    bgLight: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    defaultPath: '/whatsapp/inbox',
+    navItems: [
+      { label: 'WhatsApp Inbox', path: '/whatsapp/inbox', icon: MessageSquare, section: 'Live Chats' },
+      { label: 'Broadcast & Templates', path: '/whatsapp/templates', icon: Bookmark, section: 'Messaging' },
+      { label: 'API & Webhooks', path: '/whatsapp/settings', icon: Settings, section: 'Configuration' },
     ]
   }
 ];

@@ -3,6 +3,8 @@
  * Pure LocalStorage driven implementation. Zero external backend.
  */
 
+import { INITIAL_USERS } from './mockData';
+
 // LocalStorage Keys
 export const STORAGE_KEYS = {
   ORDERS: 'otd_orders',
@@ -174,18 +176,100 @@ export function logAuditAction(action, moduleName, recordId, details = {}, previ
   setData(STORAGE_KEYS.AUDIT_LOGS, logs);
 }
 
-// Current User Management (For local testing)
+// Current User Management (Synchronized with Auth session)
 export function getCurrentUser() {
-  const user = getData(STORAGE_KEYS.CURRENT_USER, null);
-  if (!user) {
-    // Default fallback local test user if no employee created yet
-    return { id: 'EMP-001', code: 'EMP-001', name: 'Default Admin', department: 'Management', designation: 'System Admin', userGroup: 'Admin' };
+  const otdUser = getData(STORAGE_KEYS.CURRENT_USER, null);
+  if (otdUser) {
+    const isAdmin = otdUser.role === 'ADMIN' || otdUser.userGroup === 'Admin';
+    let mod = false;
+    if (isAdmin && Array.isArray(otdUser.allowedModules)) {
+      if (!otdUser.allowedModules.includes('petty-expenses')) {
+        otdUser.allowedModules.push('petty-expenses');
+        mod = true;
+      }
+      if (!otdUser.allowedModules.includes('doc-subscription')) {
+        otdUser.allowedModules.push('doc-subscription');
+        mod = true;
+      }
+      if (!otdUser.allowedModules.includes('whatsapp')) {
+        otdUser.allowedModules.push('whatsapp');
+        mod = true;
+      }
+    }
+    if (mod) {
+      setData(STORAGE_KEYS.CURRENT_USER, otdUser);
+    }
+    return otdUser;
   }
-  return user;
+
+  // Fallback to corporate auth user if present
+  try {
+    const authStored = localStorage.getItem('corporate_system_mock_user');
+    if (authStored) {
+      const parsed = JSON.parse(authStored);
+      if (parsed) {
+        const isAdmin = parsed.role === 'ADMIN' || parsed.userGroup === 'Admin';
+        let mod = false;
+        if (isAdmin && Array.isArray(parsed.allowedModules)) {
+          if (!parsed.allowedModules.includes('petty-expenses')) {
+            parsed.allowedModules.push('petty-expenses');
+            mod = true;
+          }
+          if (!parsed.allowedModules.includes('doc-subscription')) {
+            parsed.allowedModules.push('doc-subscription');
+            mod = true;
+          }
+          if (!parsed.allowedModules.includes('whatsapp')) {
+            parsed.allowedModules.push('whatsapp');
+            mod = true;
+          }
+        }
+        if (mod) {
+          localStorage.setItem('corporate_system_mock_user', JSON.stringify(parsed));
+        }
+        return parsed;
+      }
+    }
+  } catch (e) {
+    // Ignore JSON error
+  }
+
+  // Default fallback user: Admin
+  const defaultUser = INITIAL_USERS[0];
+  setData(STORAGE_KEYS.CURRENT_USER, defaultUser);
+  return defaultUser;
 }
 
 export function setCurrentUser(user) {
   setData(STORAGE_KEYS.CURRENT_USER, user);
+  try {
+    localStorage.setItem('corporate_system_mock_user', JSON.stringify(user));
+  } catch (e) {
+    // Ignore
+  }
+  window.dispatchEvent(new CustomEvent('user_session_update', { detail: user }));
+  window.dispatchEvent(new CustomEvent('otd_storage_update', { detail: { key: STORAGE_KEYS.CURRENT_USER } }));
+}
+
+// Seed default employees for Master System -> Users if empty
+export function initEmployees() {
+  const existing = getData(STORAGE_KEYS.EMPLOYEES, []);
+  if (!existing || existing.length === 0) {
+    const seeded = INITIAL_USERS.map((u) => ({
+      id: u.id,
+      code: u.employee_id,
+      name: u.full_name,
+      email: u.email,
+      mobile: u.mobile,
+      department: u.department_name,
+      designation: u.designation,
+      userGroup: u.userGroup || (u.role === 'ADMIN' ? 'Admin' : u.role === 'MANAGER' ? 'Manager' : 'User'),
+      allowedModules: u.allowedModules || ['checklist'],
+      status: 'Active',
+      createdAt: new Date().toISOString()
+    }));
+    setData(STORAGE_KEYS.EMPLOYEES, seeded);
+  }
 }
 
 // TAT & Planned Completion Calculations
@@ -430,3 +514,299 @@ export function clearAllOTDData() {
   });
   window.dispatchEvent(new CustomEvent('otd_storage_update', { detail: { key: 'ALL' } }));
 }
+
+// Seed Initial Orders for Stage Reports & Kanban demo
+export function initOTDData() {
+  initEmployees();
+  const existing = localStorage.getItem(STORAGE_KEYS.ORDERS);
+  if (existing) {
+    try {
+      const parsed = JSON.parse(existing);
+      if (Array.isArray(parsed) && parsed.length > 0) return;
+    } catch (e) {
+      // Re-seed on parse error
+    }
+  }
+
+  const initialOrders = [
+    {
+      id: 'ORD-MOCK-1',
+      orderNumber: 'ORD-1001',
+      soNumber: 'SO-2026-081',
+      customerName: 'Foto dugros B.V.',
+      contactPerson: 'Arjen Van Dijk',
+      email: 'arjen@fotodugros.nl',
+      mobile: '+31 6 12345678',
+      deliveryLocation: 'Rotterdam Distribution Center, Netherlands',
+      orderDate: '2026-09-18',
+      expectedDeliveryDate: '2026-09-24',
+      stageStartDate: '2026-09-18T10:00:00Z',
+      plannedCompletionDate: '2026-09-22T18:00:00Z',
+      currentStage: 'New Order',
+      status: 'Verification Pending',
+      priority: 'Urgent',
+      salesPerson: 'Deepak Rao',
+      items: [
+        { productName: 'Charm London Brand Patch In Black Silver Text', quantity: 2000, unit: 'Pcs', rate: 72.5, amount: 145000 }
+      ],
+      grandTotal: 145000,
+      remarks: 'European export order; export customs clearance required.'
+    },
+    {
+      id: 'ORD-MOCK-2',
+      orderNumber: 'ORD-1002',
+      soNumber: 'SO-2026-082',
+      customerName: 'DUGROS B.V.',
+      contactPerson: 'Kees Dugros',
+      email: 'kees@dugros.nl',
+      mobile: '+31 6 98765432',
+      deliveryLocation: 'Amsterdam Logistics Hub',
+      orderDate: '2026-09-15',
+      expectedDeliveryDate: '2026-09-22',
+      stageStartDate: '2026-09-15T09:00:00Z',
+      plannedCompletionDate: '2026-09-20T17:00:00Z',
+      currentStage: 'Order Verification',
+      status: 'Verification In Progress',
+      priority: 'Urgent',
+      salesPerson: 'Priya Sharma',
+      items: [
+        { productName: 'Chamada B All Ornaments & Leather Accessories', quantity: 1500, unit: 'Sets', rate: 190, amount: 285000 }
+      ],
+      grandTotal: 285000,
+      remarks: 'Technical specifications verified with buyer.'
+    },
+    {
+      id: 'ORD-MOCK-3',
+      orderNumber: 'ORD-1003',
+      soNumber: 'SO-2026-083',
+      customerName: 'Prestige Infrastructure Corp',
+      contactPerson: 'Sneha Kulkarni',
+      email: 'sneha.k@prestigeconstructions.com',
+      mobile: '+91 98450 11223',
+      deliveryLocation: 'Prestige Tech Cloud Site, Bengaluru',
+      orderDate: '2026-09-14',
+      expectedDeliveryDate: '2026-09-23',
+      stageStartDate: '2026-09-14T11:00:00Z',
+      plannedCompletionDate: '2026-09-21T18:00:00Z',
+      currentStage: 'Order Approval',
+      status: 'Approval Pending',
+      priority: 'Normal',
+      salesPerson: 'Rahul Mehta',
+      items: [
+        { productName: 'Heavy High Tensile Fasteners & Hex Bolts M24', quantity: 20000, unit: 'Pcs', rate: 17, amount: 340000 }
+      ],
+      grandTotal: 340000,
+      remarks: 'Commercial signoff awaiting CFO approval.'
+    },
+    {
+      id: 'ORD-MOCK-4',
+      orderNumber: 'ORD-1004',
+      soNumber: 'SO-2026-084',
+      customerName: 'Shapoorji Pallonji EPC Ltd',
+      contactPerson: 'Vikramaditya Sengupta',
+      email: 'v.sengupta@shapoorji.com',
+      mobile: '+91 98200 45678',
+      deliveryLocation: 'Metro Line Girder Site, Thane Yard',
+      orderDate: '2026-09-12',
+      expectedDeliveryDate: '2026-09-21',
+      stageStartDate: '2026-09-12T14:00:00Z',
+      plannedCompletionDate: '2026-09-19T18:00:00Z',
+      currentStage: 'Advance Payment',
+      status: 'Advance Pending',
+      priority: 'High',
+      salesPerson: 'Amitabh Joshi',
+      items: [
+        { productName: 'Structural Steel Girder Beams ISMB 400 (120 MT)', quantity: 120, unit: 'MT', rate: 7666, amount: 920000 }
+      ],
+      grandTotal: 920000,
+      remarks: '20% advance milestone payment pending remittance.'
+    },
+    {
+      id: 'ORD-MOCK-5',
+      orderNumber: 'ORD-1005',
+      soNumber: 'SO-2026-085',
+      customerName: 'Godrej Process Equipment',
+      contactPerson: 'Rajesh Nambiar',
+      email: 'r.nambiar@godrej.com',
+      mobile: '+91 99670 98765',
+      deliveryLocation: 'Plant 13, Vikhroli East, Mumbai',
+      orderDate: '2026-09-11',
+      expectedDeliveryDate: '2026-09-20',
+      stageStartDate: '2026-09-11T16:00:00Z',
+      plannedCompletionDate: '2026-09-18T18:00:00Z',
+      currentStage: 'Stock Check',
+      status: 'Stock Check Ongoing',
+      priority: 'Normal',
+      salesPerson: 'Rahul Mehta',
+      items: [
+        { productName: 'Pressure Vessel Flanges SS316L (50 Nos)', quantity: 50, unit: 'Nos', rate: 8200, amount: 410000 }
+      ],
+      grandTotal: 410000,
+      remarks: 'Inventory allocation for raw forged rings in warehouse.'
+    },
+    {
+      id: 'ORD-MOCK-6',
+      orderNumber: 'ORD-1006',
+      soNumber: 'SO-2026-086',
+      customerName: 'Tata Projects Ltd',
+      contactPerson: 'Arunav Banerjee',
+      email: 'a.banerjee@tataprojects.com',
+      mobile: '+91 98190 77665',
+      deliveryLocation: 'Thermal Power Expansion Site, Mundra',
+      orderDate: '2026-09-09',
+      expectedDeliveryDate: '2026-09-18',
+      stageStartDate: '2026-09-09T10:00:00Z',
+      plannedCompletionDate: '2026-09-16T18:00:00Z',
+      currentStage: 'Order Processing',
+      status: 'Machining In Progress',
+      priority: 'High',
+      salesPerson: 'Priya Sharma',
+      items: [
+        { productName: 'Industrial Submersible Pumps 15HP Heavy Duty', quantity: 5, unit: 'Sets', rate: 55000, amount: 275000 }
+      ],
+      grandTotal: 275000,
+      remarks: 'Assembly line station 3 running final impeller balance.'
+    },
+    {
+      id: 'ORD-MOCK-7',
+      orderNumber: 'ORD-1007',
+      soNumber: 'SO-2026-087',
+      customerName: 'L&T Construction Engineering',
+      contactPerson: 'Muralidharan S',
+      email: 'murali.s@larsentoubro.com',
+      mobile: '+91 94440 22334',
+      deliveryLocation: 'Bridge Fabrication Yard, Hazira',
+      orderDate: '2026-09-08',
+      expectedDeliveryDate: '2026-09-17',
+      stageStartDate: '2026-09-08T09:00:00Z',
+      plannedCompletionDate: '2026-09-14T18:00:00Z',
+      currentStage: 'Quality Check (QC)',
+      status: 'QC Inspection Pending',
+      priority: 'Urgent',
+      salesPerson: 'Deepak Rao',
+      items: [
+        { productName: 'Heavy Earthmoving Hydraulic Fittings & Cylinders', quantity: 40, unit: 'Sets', rate: 14000, amount: 560000 }
+      ],
+      grandTotal: 560000,
+      remarks: 'Hydrostatic pressure test report pending inspector signoff.'
+    },
+    {
+      id: 'ORD-MOCK-8',
+      orderNumber: 'ORD-1008',
+      soNumber: 'SO-2026-088',
+      customerName: 'Reliance Retail Supply Chain',
+      contactPerson: 'Saurabh Mittal',
+      email: 'saurabh.mittal@ril.com',
+      mobile: '+91 98210 99887',
+      deliveryLocation: 'Mega Fulfillment Center, Bhiwandi',
+      orderDate: '2026-09-05',
+      expectedDeliveryDate: '2026-09-15',
+      stageStartDate: '2026-09-05T12:00:00Z',
+      plannedCompletionDate: '2026-09-12T18:00:00Z',
+      currentStage: 'Ready for Dispatch',
+      status: 'Packaging Complete',
+      priority: 'Normal',
+      salesPerson: 'Amitabh Joshi',
+      items: [
+        { productName: 'Warehouse Automation Pallet Conveyors & Rollers', quantity: 20, unit: 'Sections', rate: 41500, amount: 830000 }
+      ],
+      grandTotal: 830000,
+      remarks: 'Palletized, shrink-wrapped, and staged in Bay 4.'
+    },
+    {
+      id: 'ORD-MOCK-9',
+      orderNumber: 'ORD-1009',
+      soNumber: 'SO-2026-089',
+      customerName: 'Siemens India Energy',
+      contactPerson: 'Karan Mehra',
+      email: 'karan.mehra@siemens.com',
+      mobile: '+91 98201 33445',
+      deliveryLocation: 'Substation Project, Kalwa Works, Navi Mumbai',
+      orderDate: '2026-09-03',
+      expectedDeliveryDate: '2026-09-12',
+      stageStartDate: '2026-09-03T14:00:00Z',
+      plannedCompletionDate: '2026-09-10T18:00:00Z',
+      currentStage: 'Dispatch',
+      status: 'In Transit',
+      priority: 'High',
+      salesPerson: 'Rahul Mehta',
+      items: [
+        { productName: '4-Core Armoured Copper Power Cables 16sqmm', quantity: 500, unit: 'Meters', rate: 390, amount: 195000 }
+      ],
+      grandTotal: 195000,
+      remarks: 'Dispatched via VRL Logistics; LR# VRL-77884.'
+    },
+    {
+      id: 'ORD-MOCK-10',
+      orderNumber: 'ORD-1010',
+      soNumber: 'SO-2026-090',
+      customerName: 'Adani Solar Infrastructure',
+      contactPerson: 'Hemant Trivedi',
+      email: 'hemant.trivedi@adani.com',
+      mobile: '+91 97120 44556',
+      deliveryLocation: 'Khavda Renewable Energy Park, Kutch, Gujarat',
+      orderDate: '2026-08-28',
+      expectedDeliveryDate: '2026-09-09',
+      stageStartDate: '2026-08-28T10:00:00Z',
+      plannedCompletionDate: '2026-09-08T18:00:00Z',
+      currentStage: 'Delivered',
+      status: 'Delivered at Site',
+      priority: 'Normal',
+      salesPerson: 'Priya Sharma',
+      items: [
+        { productName: 'Solar Inverter Matrix Modules 10kVA', quantity: 8, unit: 'Units', rate: 83750, amount: 670000 }
+      ],
+      grandTotal: 670000,
+      remarks: 'Signed POD received from site material manager.'
+    },
+    {
+      id: 'ORD-MOCK-11',
+      orderNumber: 'ORD-1011',
+      soNumber: 'SO-2026-091',
+      customerName: 'Mahindra & Mahindra Automotive',
+      contactPerson: 'Aniket Jadhav',
+      email: 'jadhav.aniket@mahindra.com',
+      mobile: '+91 98220 66778',
+      deliveryLocation: 'Automotive Plant, Chakan MIDC, Pune',
+      orderDate: '2026-08-24',
+      expectedDeliveryDate: '2026-09-05',
+      stageStartDate: '2026-08-24T11:00:00Z',
+      plannedCompletionDate: '2026-09-04T18:00:00Z',
+      currentStage: 'Payment Collection',
+      status: 'Payment Pending',
+      priority: 'Normal',
+      salesPerson: 'Deepak Rao',
+      items: [
+        { productName: 'Pneumatic Control Cylinders 50mm Standard Bore', quantity: 25, unit: 'Pcs', rate: 5920, amount: 148000 }
+      ],
+      grandTotal: 148000,
+      remarks: 'Invoice INV-2026-041 submitted; 30-day payment cycle.'
+    },
+    {
+      id: 'ORD-MOCK-12',
+      orderNumber: 'ORD-1012',
+      soNumber: 'SO-2026-092',
+      customerName: 'Bharat Forge Ltd',
+      contactPerson: 'Sunil Rathi',
+      email: 's.rathi@bharatforge.com',
+      mobile: '+91 98900 11224',
+      deliveryLocation: 'Mundhwa Plant, Pune',
+      orderDate: '2026-08-15',
+      expectedDeliveryDate: '2026-08-30',
+      stageStartDate: '2026-08-15T09:00:00Z',
+      plannedCompletionDate: '2026-08-30T18:00:00Z',
+      currentStage: 'Order Closed',
+      status: 'Order Completed & Paid',
+      priority: 'Normal',
+      salesPerson: 'Amitabh Joshi',
+      items: [
+        { productName: 'Forged Alloy High Pressure Flanges (Special Grade)', quantity: 20, unit: 'Sets', rate: 24500, amount: 490000 }
+      ],
+      grandTotal: 490000,
+      remarks: 'Full settlement received. Order archived successfully.'
+    }
+  ];
+
+  setData(STORAGE_KEYS.ORDERS, initialOrders);
+}
+
