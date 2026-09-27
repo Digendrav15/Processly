@@ -64,7 +64,7 @@ export function MobileDrawer({ isOpen, onClose }) {
               }
             >
               <LayoutDashboard className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span>Admin Dashboard</span>
+              <span>{isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'My Dashboard'}</span>
             </NavLink>
           </div>
 

@@ -8,7 +8,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { INITIAL_USERS } from '../../services/mockData';
 
 export function Header({ onOpenMobileMenu }) {
-  const { user, logout, switchUser } = useAuth();
+  const { user, isAdmin, isManager, logout, switchUser } = useAuth();
   const { currentSystem } = useSystem();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifPopover, setShowNotifPopover] = useState(false);
@@ -17,6 +17,8 @@ export function Header({ onOpenMobileMenu }) {
   const location = useLocation();
 
   const isMainDashboard = location.pathname === '/dashboard';
+  const dashboardTitle = isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'My Dashboard';
+  const dashboardBadge = isAdmin ? 'All Systems Hub' : isManager ? 'Team Review' : 'My Workspace';
 
   const handleLogout = async () => {
     await logout();
@@ -36,9 +38,9 @@ export function Header({ onOpenMobileMenu }) {
         <div className="hidden sm:block">
           <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Acme Corporate Enterprise</p>
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>{isMainDashboard ? 'Admin Dashboard' : currentSystem.name}</span>
+            <span>{isMainDashboard ? dashboardTitle : currentSystem.name}</span>
             <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-2 py-0.5 rounded-full">
-              {isMainDashboard ? 'All Systems Hub' : currentSystem.badge}
+              {isMainDashboard ? dashboardBadge : currentSystem.badge}
             </span>
           </h2>
         </div>

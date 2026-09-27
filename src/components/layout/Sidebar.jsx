@@ -310,7 +310,7 @@ export function Sidebar() {
 
       {/* Main Navigation Area */}
       <div className="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto overflow-x-hidden sidebar-scrollbar">
-        {/* 1. Main Dashboard Link (Clean, standard card format) */}
+        {/* 1. Main Dashboard Link (Role-aware: Admin Dashboard only for Admin) */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
@@ -320,7 +320,7 @@ export function Sidebar() {
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white border border-transparent'
             }`
           }
-          title={isCollapsed ? 'Main Dashboard' : undefined}
+          title={isCollapsed ? (isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'My Dashboard') : undefined}
         >
           <div className="flex items-center space-x-3 min-w-0">
             <div
@@ -332,10 +332,10 @@ export function Sidebar() {
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-bold text-slate-900 dark:text-white block truncate tracking-tight">
-                  Admin Dashboard
+                  {isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'My Dashboard'}
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block truncate">
-                  All Systems Tracking
+                  {isAdmin ? 'All Systems Tracking' : isManager ? 'Team & Task Review' : 'My Daily Overview'}
                 </span>
               </div>
             )}

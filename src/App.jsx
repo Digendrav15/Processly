@@ -5,6 +5,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ProfilePage } from './pages/auth/ProfilePage';
 import { DashboardRouter } from './pages/dashboards/DashboardRouter';
+import { MainAdminDashboard } from './pages/dashboards/MainAdminDashboard';
 import { UnifiedDashboard } from './pages/dashboards/UnifiedDashboard';
 import { MyTasksPage } from './pages/tasks/MyTasksPage';
 import { TaskAssignmentPage } from './pages/tasks/TaskAssignmentPage';
@@ -156,6 +157,14 @@ export default function App() {
         
         {/* Checklist & Core System Routes */}
         <Route path="dashboard" element={<DashboardRouter />} />
+        <Route
+          path="admin/dashboard"
+          element={
+            <AdminOnlyRoute>
+              <MainAdminDashboard />
+            </AdminOnlyRoute>
+          }
+        />
         <Route path="checklist/dashboard" element={<UnifiedDashboard />} />
         <Route path="checklist" element={<Navigate to="/my-tasks" replace />} />
         <Route path="notifications" element={<NotificationsPage />} />
