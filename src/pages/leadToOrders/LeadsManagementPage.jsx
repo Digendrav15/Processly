@@ -36,6 +36,7 @@ import {
   generateLeadId
 } from '../../services/leadToOrderStorageService';
 import { getCurrentUser } from '../../services/otdStorageService';
+import { MarkDealLostModal } from '../../components/leadToOrders/MarkDealLostModal';
 
 const LEAD_TABS = [
   { id: 'all', label: 'All Leads' },
@@ -97,6 +98,7 @@ export function LeadsManagementPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isLossModalOpen, setIsLossModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -253,15 +255,10 @@ export function LeadsManagementPage() {
     setIsVerifyModalOpen(false);
   };
 
-  // Quick Reject
+  // Quick Reject / Record Deal Loss
   const handleQuickReject = (lead) => {
-    if (window.confirm(`Are you sure you want to reject lead ${lead.leadId}?`)) {
-      updateLead(lead.id, {
-        status: 'Rejected',
-        currentStage: 'Closed',
-        remarks: 'Rejected directly during verification review.'
-      });
-    }
+    setSelectedLead(lead);
+    setIsLossModalOpen(true);
   };
 
   // Delete Lead
@@ -1205,6 +1202,13 @@ export function LeadsManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Record Deal Loss Modal */}
+      <MarkDealLostModal
+        isOpen={isLossModalOpen}
+        onClose={() => setIsLossModalOpen(false)}
+        lead={selectedLead}
+      />
     </div>
   );
 }

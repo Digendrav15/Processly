@@ -23,7 +23,8 @@ import {
   Save,
   AlertTriangle,
   RotateCcw,
-  Sparkles
+  Sparkles,
+  Award
 } from 'lucide-react';
 import { usePurchaseStorage } from '../../hooks/usePurchaseStorage';
 import {
@@ -40,6 +41,7 @@ import {
   DEFAULT_PURCHASE_VENDORS
 } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { ComparativeMatrixModal } from '../../components/purchase/ComparativeMatrixModal';
 
 // Master Vendor Profile Lookup Helper
 function getVendorProfile(vendorName, storedVendors = []) {
@@ -130,6 +132,7 @@ export function PurchaseOrderPage() {
   // Active View Tab: 'document' (Direct PO Format on page) | 'history' (Past PO Table)
   const [activeView, setActiveView] = useState('document');
   const [historySearch, setHistorySearch] = useState('');
+  const [isComparativeMatrixOpen, setIsComparativeMatrixOpen] = useState(false);
 
   // PO Revision Mode State
   const [isRevising, setIsRevising] = useState(false);
@@ -373,6 +376,24 @@ export function PurchaseOrderPage() {
     navigate('/purchase/lifting-dispatch');
   };
 
+  // Apply Winning Quote from Comparative Matrix (L1/L2/L3)
+  const handleApplyWinningQuote = (winningQuote, deviationReason) => {
+    const profile = getVendorProfile(winningQuote.vendorName, masterVendors);
+    setVendorDetails(profile);
+    if (winningQuote.paymentTerms) {
+      setShippingTerms(winningQuote.paymentTerms);
+    }
+    if (winningQuote.freightCharges) {
+      setShippingCost(winningQuote.freightCharges);
+    }
+    // Update items rate and total
+    setPoItems(prev => prev.map(item => ({
+      ...item,
+      unitPrice: winningQuote.quotedRate || item.unitPrice,
+      total: (winningQuote.quotedRate || item.unitPrice) * item.qty
+    })));
+  };
+
   // Print Document Function
   const handlePrintDocument = () => {
     window.print();
@@ -444,8 +465,19 @@ export function PurchaseOrderPage() {
           </p>
         </div>
 
-        {/* View Switcher Only */}
+        {/* View Switcher & Compare Quotes */}
         <div className="flex items-center gap-2">
+          {activeIndent && (
+            <button
+              type="button"
+              onClick={() => setIsComparativeMatrixOpen(true)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-amber-600/20 transition-all cursor-pointer transform active:scale-95"
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Compare Quotes (L1/L2/L3)</span>
+            </button>
+          )}
+
           <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1.5 text-xs font-bold">
             <button
               onClick={() => setActiveView('document')}
@@ -1010,6 +1042,15 @@ export function PurchaseOrderPage() {
           </div>
         </div>
       )}
+
+      {/* Comparative Quotation Matrix (L1/L2/L3) Modal */}
+      <ComparativeMatrixModal
+        isOpen={isComparativeMatrixOpen}
+        onClose={() => setIsComparativeMatrixOpen(false)}
+        indent={activeIndent}
+        masterVendors={masterVendors}
+        onApplyWinningQuote={handleApplyWinningQuote}
+      />
     </div>
   );
 }

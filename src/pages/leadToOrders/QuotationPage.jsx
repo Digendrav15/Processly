@@ -32,6 +32,7 @@ import {
   generateQuotationNumber
 } from '../../services/leadToOrderStorageService';
 import { STORAGE_KEYS as OTD_KEYS, getCurrentUser } from '../../services/otdStorageService';
+import { QuotationPDFBuilderModal } from '../../components/leadToOrders/QuotationPDFBuilderModal';
 
 export function QuotationPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -877,149 +878,13 @@ export function QuotationPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: PRINTABLE INVOICE / QUOTATION PREVIEW                             */}
+      {/* MODAL 2: 1-CLICK PROFESSIONAL QUOTATION PDF BUILDER & GENERATOR            */}
       {/* ========================================================================= */}
-      {isPreviewModalOpen && activeQuotation && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto p-6 md:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 print:hidden">
-              <div className="flex items-center gap-2">
-                <Printer className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
-                  Quotation Preview: {activeQuotation.quotationNo}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => window.print()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Print / Save PDF</span>
-                </button>
-                <button
-                  onClick={() => setIsPreviewModalOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Document Body (Tax Invoice / Proposal Standard Format) */}
-            <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-6 text-xs text-slate-800 dark:text-slate-200">
-              {/* Top Banner */}
-              <div className="flex items-start justify-between border-b pb-6 border-slate-200 dark:border-slate-800">
-                <div>
-                  <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-                    COMMERCIAL QUOTATION
-                  </h1>
-                  <p className="text-slate-400 font-semibold text-[11px] mt-0.5">
-                    Proposal No: <strong className="text-indigo-600 dark:text-indigo-400">{activeQuotation.quotationNo}</strong>
-                  </p>
-                  <p className="text-slate-400 font-semibold text-[11px]">
-                    Linked Lead: <strong className="text-violet-600 dark:text-violet-400">{activeQuotation.leadId}</strong>
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="font-extrabold text-sm text-slate-900 dark:text-white">GimBooks Enterprise ERP</div>
-                  <div className="text-[11px] text-slate-400">Plot 42, Udyog Vihar Phase IV, Gurugram</div>
-                  <div className="text-[11px] text-slate-400">GSTIN: 07AAACA1234F1Z8</div>
-                  <div className="text-[11px] text-slate-400">Date: {activeQuotation.quotationDate}</div>
-                </div>
-              </div>
-
-              {/* Customer Info */}
-              <div className="grid grid-cols-2 gap-6 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl">
-                <div>
-                  <span className="block text-[10px] uppercase font-bold text-slate-400">Quotation For:</span>
-                  <div className="font-bold text-sm text-slate-900 dark:text-white mt-1">{activeQuotation.customer}</div>
-                  <div className="text-slate-600 dark:text-slate-300">Attn: {activeQuotation.contactPerson}</div>
-                  <div className="text-slate-600 dark:text-slate-300">Phone: {activeQuotation.mobile}</div>
-                  <div className="text-slate-600 dark:text-slate-300">Email: {activeQuotation.email || '—'}</div>
-                </div>
-                <div>
-                  <span className="block text-[10px] uppercase font-bold text-slate-400">Delivery / Billing:</span>
-                  <div className="text-slate-600 dark:text-slate-300 mt-1">
-                    <strong>Billing:</strong> {activeQuotation.billingAddress || 'As per record'}
-                  </div>
-                  <div className="text-slate-600 dark:text-slate-300 mt-1">
-                    <strong>Shipping:</strong> {activeQuotation.shippingAddress || 'As per record'}
-                  </div>
-                  <div className="text-slate-500 mt-1">
-                    Validity: {activeQuotation.quotationValidity}
-                  </div>
-                </div>
-              </div>
-
-              {/* Items Table */}
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-y border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[10px] uppercase font-bold text-slate-500">
-                    <th className="py-2 px-3">#</th>
-                    <th className="py-2 px-3">Item / Service</th>
-                    <th className="py-2 px-3">Description</th>
-                    <th className="py-2 px-3 text-center">Qty</th>
-                    <th className="py-2 px-3 text-right">Rate (₹)</th>
-                    <th className="py-2 px-3 text-center">Disc %</th>
-                    <th className="py-2 px-3 text-center">GST %</th>
-                    <th className="py-2 px-3 text-right">Total (₹)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {activeQuotation.items?.map((it, idx) => (
-                    <tr key={idx}>
-                      <td className="py-2.5 px-3 text-slate-400">{idx + 1}</td>
-                      <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">{it.productService}</td>
-                      <td className="py-2.5 px-3 text-slate-500">{it.description || '—'}</td>
-                      <td className="py-2.5 px-3 text-center">{it.quantity} {it.unit}</td>
-                      <td className="py-2.5 px-3 text-right">₹ {Number(it.rate || 0).toLocaleString('en-IN')}</td>
-                      <td className="py-2.5 px-3 text-center">{it.discount || 0}%</td>
-                      <td className="py-2.5 px-3 text-center">{it.taxPercent || 18}%</td>
-                      <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white">
-                        ₹ {Number(it.total || 0).toLocaleString('en-IN')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Totals Summary */}
-              <div className="flex justify-end">
-                <div className="w-64 space-y-1.5 text-xs">
-                  <div className="flex justify-between text-slate-500">
-                    <span>Subtotal:</span>
-                    <span>₹ {Number(activeQuotation.subTotal || 0).toLocaleString('en-IN')}</span>
-                  </div>
-                  {activeQuotation.totalDiscount > 0 && (
-                    <div className="flex justify-between text-rose-500">
-                      <span>Discount:</span>
-                      <span>- ₹ {Number(activeQuotation.totalDiscount || 0).toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-slate-500">
-                    <span>GST (Taxes):</span>
-                    <span>₹ {Number(activeQuotation.totalTax || 0).toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-extrabold text-sm text-slate-900 dark:text-white">
-                    <span>Grand Total:</span>
-                    <span className="text-indigo-600 dark:text-indigo-400">
-                      ₹ {Number(activeQuotation.grandTotal || 0).toLocaleString('en-IN')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Commercial Terms */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl space-y-1 text-[11px] text-slate-600 dark:text-slate-400">
-                <div><strong>Payment Terms:</strong> {activeQuotation.paymentTerms}</div>
-                <div><strong>Delivery Terms:</strong> {activeQuotation.deliveryTerms}</div>
-                {activeQuotation.remarks && <div><strong>Remarks:</strong> {activeQuotation.remarks}</div>}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <QuotationPDFBuilderModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        quotation={activeQuotation}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL 3: SHARE MODAL                                                      */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FileSpreadsheet,
@@ -15,11 +15,20 @@ import {
   PieChart,
   BarChart3,
   Calendar,
-  Layers
+  Layers,
+  ShieldAlert,
+  AlertTriangle,
+  Award,
+  DollarSign,
+  Building2,
+  Sparkles,
+  ArrowDownRight,
+  ArrowUpRight,
+  Target
 } from 'lucide-react';
 import { useLeadStorage } from '../../hooks/useLeadStorage';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
-import { LTO_KEYS } from '../../services/leadToOrderStorageService';
+import { LTO_KEYS, getDealLossAnalytics } from '../../services/leadToOrderStorageService';
 import { STORAGE_KEYS as OTD_KEYS } from '../../services/otdStorageService';
 
 export function LeadReportsPage() {
@@ -32,8 +41,16 @@ export function LeadReportsPage() {
   const approvals = useLeadStorage(LTO_KEYS.APPROVALS, []);
   const otdOrders = useOTDStorage(OTD_KEYS.ORDERS, []);
 
+  // View state: 'traceability' | 'dealloss'
+  const [activeTab, setActiveTab] = useState('traceability');
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('ALL');
+  const [lossReasonFilter, setLossReasonFilter] = useState('ALL');
+
+  // Deal Loss Analytics computation
+  const lossAnalytics = useMemo(() => {
+    return getDealLossAnalytics(leads, quotations);
+  }, [leads, quotations]);
 
   // Funnel calculations
   const stageStats = [
@@ -92,7 +109,25 @@ export function LeadReportsPage() {
     return true;
   });
 
-  // Export CSV
+  // Filtered Lost Leads for Tab 2
+  const filteredLostLeads = useMemo(() => {
+    return lossAnalytics.lostLeads.filter(item => {
+      if (lossReasonFilter !== 'ALL' && item.lossReason !== lossReasonFilter) return false;
+      if (searchTerm.trim()) {
+        const s = searchTerm.toLowerCase();
+        const match =
+          item.leadId?.toLowerCase().includes(s) ||
+          item.customerName?.toLowerCase().includes(s) ||
+          item.competitorName?.toLowerCase().includes(s) ||
+          item.lossReason?.toLowerCase().includes(s) ||
+          item.lostRemarks?.toLowerCase().includes(s);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [lossAnalytics.lostLeads, lossReasonFilter, searchTerm]);
+
+  // Export Traceability CSV
   const handleExportCSV = () => {
     const headers = [
       'Lead ID',
@@ -128,206 +163,466 @@ export function LeadReportsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Lead_to_Order_Traceability_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Lead_Traceability_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Export Deal Loss CSV
+  const handleExportLossCSV = () => {
+    const headers = [
+      'Lead ID',
+      'Customer',
+      'Product / Requirement',
+      'Lost Deal Value (INR)',
+      'Primary Loss Reason',
+      'Winning Competitor',
+      'Competitor Price',
+      'Loss Date',
+      'Client Feedback Remarks'
+    ];
+
+    const rows = filteredLostLeads.map(l => [
+      l.leadId,
+      `"${l.customerName}"`,
+      `"${l.productService}"`,
+      l.estimatedValue || 0,
+      `"${l.lossReason || 'Other'}"`,
+      `"${l.competitorName || '—'}"`,
+      l.competitorPrice || 0,
+      l.lostDate || '—',
+      `"${(l.lostRemarks || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Deal_Loss_Analysis_Report_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-slate-900 via-teal-950 to-indigo-950 p-6 rounded-3xl text-white shadow-xl border border-teal-800/30">
+    <div className="space-y-4 pb-12">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-900 via-teal-950 to-indigo-950 p-5 rounded-3xl text-white shadow-xl border border-teal-800/30">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-300 font-extrabold text-[11px] tracking-wider uppercase border border-teal-500/30">
-              Commercial Analytics & Traceability
+            <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-extrabold text-[10px] tracking-wider uppercase border border-teal-500/30">
+              Intelligence & Pipeline Audit
             </span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2 text-white">
-            Lead to Order Performance Reports
+          <h1 className="text-xl font-extrabold tracking-tight mt-1 text-white">
+            Lead Reports & Deal Loss Analytics
           </h1>
-          <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-            Audit conversion velocity, inspect full ID relationships across LD-xxxx, QT-xxxx, APP-xxxx, ORD-xxxx, and export complete commercial pipeline logs.
+          <p className="text-xs text-slate-300 max-w-2xl mt-0.5">
+            Monitor complete end-to-end sales conversion lifecycle, audit won vs lost deals, and analyze competitor pricing drivers.
           </p>
         </div>
-        <button
-          onClick={handleExportCSV}
-          className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-600/30 transition-all cursor-pointer transform active:scale-95 shrink-0"
-        >
-          <Download className="w-4 h-4" />
-          <span>Export CSV Report</span>
-        </button>
+
+        {/* Tab Switcher */}
+        <div className="flex items-center bg-slate-800/80 p-1 rounded-2xl border border-slate-700/80">
+          <button
+            onClick={() => setActiveTab('traceability')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'traceability'
+                ? 'bg-gradient-to-r from-teal-600 to-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Traceability & Funnel</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('dealloss')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'dealloss'
+                ? 'bg-rose-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Deal Loss Analysis</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-rose-500/30 text-rose-200 text-[10px]">
+              {lossAnalytics.totalLostCount}
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* 2-Column Analytics: Funnel Progress & Source Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pipeline Funnel Bars */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-violet-600" />
-              <span>Conversion Stage Distribution</span>
+      {/* ========================================================================= */}
+      {/* TAB 1: CONVERSION FUNNEL & TRACEABILITY                                   */}
+      {/* ========================================================================= */}
+      {activeTab === 'traceability' && (
+        <div className="space-y-4">
+          {/* Funnel Progress */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-indigo-600" />
+              <span>Conversion Funnel & Drop-off Tracker</span>
             </h2>
-            <span className="text-[11px] text-slate-400">Total volume per phase</span>
-          </div>
 
-          <div className="space-y-3 pt-2">
-            {stageStats.map((st, i) => {
-              const maxVal = Math.max(...stageStats.map(s => s.count), 1);
-              const pct = Math.round((st.count / maxVal) * 100);
-
-              return (
-                <div key={i} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{st.name}</span>
-                    <span className="font-black text-slate-900 dark:text-white">{st.count}</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+              {stageStats.map((st, idx) => (
+                <div key={idx} className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
+                  <div className="text-[10px] font-bold uppercase text-slate-500 truncate mb-1">
+                    {st.name}
                   </div>
-                  <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${st.color} transition-all duration-500 rounded-full`}
-                      style={{ width: `${Math.max(pct, 4)}%` }}
-                    />
+                  <div className="text-xl font-black text-slate-900 dark:text-white">
+                    {st.count}
                   </div>
+                  <div className={`h-1.5 w-full rounded-full ${st.color} mt-2 opacity-80`} />
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Lead Source Performance */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span>Lead Source Conversion Rate</span>
-            </h2>
-            <span className="text-[11px] text-slate-400">Effectiveness by acquisition channel</span>
+              ))}
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] uppercase font-bold text-slate-400">
-                <tr>
-                  <th className="py-2.5 px-3">Lead Source</th>
-                  <th className="py-2.5 px-3 text-center">Inquiries</th>
-                  <th className="py-2.5 px-3 text-center">Orders Converted</th>
-                  <th className="py-2.5 px-3 text-right">Win Rate</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {sourceData.map((s, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                    <td className="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-200">{s.source}</td>
-                    <td className="py-2.5 px-3 text-center font-semibold text-slate-600 dark:text-slate-400">{s.total}</td>
-                    <td className="py-2.5 px-3 text-center font-bold text-emerald-600 dark:text-emerald-400">{s.converted}</td>
-                    <td className="py-2.5 px-3 text-right font-black text-slate-900 dark:text-white">{s.rate}%</td>
+          {/* Traceability Table */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by Lead, Customer, Quote #..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-64"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                >
+                  <option value="ALL">All Sources</option>
+                  {sources.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                <button
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th className="py-2.5 px-3">Lead ID</th>
+                    <th className="py-2.5 px-3">Customer</th>
+                    <th className="py-2.5 px-3">Product / Req</th>
+                    <th className="py-2.5 px-3">Source</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3">Quote #</th>
+                    <th className="py-2.5 px-3 text-right">Quote Value</th>
+                    <th className="py-2.5 px-3">OTD Order</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* Complete Traceability Log Matrix */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden space-y-3 p-5">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div>
-            <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4 text-teal-600" />
-              <span>Full Pipeline Traceability Matrix (Lead ID → Quote → Approval → Order)</span>
-            </h2>
-            <p className="text-[11px] text-slate-400">
-              Preserved unbroken relational chain from initial contact to active Order to Delivery stage
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search matrix..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
-              />
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredTraceability.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="py-2.5 px-3 font-extrabold text-indigo-600 dark:text-indigo-400">
+                        {item.leadId}
+                      </td>
+                      <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">
+                        {item.customerName}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">
+                        {item.product}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                          {item.source}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-bold">
+                        {item.status}
+                      </td>
+                      <td className="py-2.5 px-3 font-medium text-slate-700 dark:text-slate-300">
+                        {item.quotationNo}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white">
+                        ₹ {Number(item.quoteAmount || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {item.orderId !== '—' ? (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 font-extrabold text-[10px] border border-emerald-200 dark:border-emerald-800">
+                            {item.orderId}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-[10px] uppercase font-bold text-slate-400 border-y border-slate-200 dark:border-slate-700">
-              <tr>
-                <th className="py-3 px-3">Lead ID</th>
-                <th className="py-3 px-3">Customer</th>
-                <th className="py-3 px-3">Product / Service</th>
-                <th className="py-3 px-3">Quotation No</th>
-                <th className="py-3 px-3 text-right">Quote Value</th>
-                <th className="py-3 px-3">Approval ID</th>
-                <th className="py-3 px-3 font-black text-emerald-600 dark:text-emerald-400">Order ID (OTD)</th>
-                <th className="py-3 px-3">OTD Workflow Stage</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredTraceability.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 text-xs">
-                    No matching traceability records found.
-                  </td>
-                </tr>
-              ) : (
-                filteredTraceability.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                    <td className="py-3 px-3 font-bold text-violet-600 dark:text-violet-400">
-                      {row.leadId}
-                    </td>
-                    <td className="py-3 px-3 font-bold text-slate-800 dark:text-slate-100">
-                      {row.customerName}
-                    </td>
-                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300 max-w-[180px] truncate">
-                      {row.product}
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-indigo-600 dark:text-indigo-400">
-                      {row.quotationNo}
-                    </td>
-                    <td className="py-3 px-3 text-right font-extrabold text-slate-800 dark:text-slate-200">
-                      {row.quoteAmount > 0 ? `₹ ${Number(row.quoteAmount).toLocaleString('en-IN')}` : '—'}
-                    </td>
-                    <td className="py-3 px-3 font-semibold text-amber-600 dark:text-amber-400">
-                      {row.approvalId}
-                    </td>
-                    <td className="py-3 px-3">
-                      {row.orderId !== '—' ? (
-                        <button
-                          onClick={() => navigate('/sales/orders')}
-                          className="font-black text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>{row.orderId}</span>
-                        </button>
-                      ) : (
-                        <span className="text-slate-400">Pending</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3">
-                      {row.otdStage !== '—' ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                          {row.otdStage}
+      {/* ========================================================================= */}
+      {/* TAB 2: DEAL LOSS & COMPETITOR INTELLIGENCE ANALYTICS                       */}
+      {/* ========================================================================= */}
+      {activeTab === 'dealloss' && (
+        <div className="space-y-4">
+          {/* 4 Executive KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* 1. Deals Lost */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/40 shadow-xs flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Deals Lost / Rejected</p>
+                <h3 className="text-2xl font-black text-rose-600 mt-1">{lossAnalytics.totalLostCount}</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">Out of {lossAnalytics.totalLostCount + lossAnalytics.totalWonCount} closed deals</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center font-bold">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* 2. Total Lost Value */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pipeline Revenue Lost</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                  ₹ {(lossAnalytics.totalLostValue / 100000).toFixed(1)} L
+                </h3>
+                <p className="text-[11px] text-rose-500 font-semibold mt-0.5">Direct opportunity cost</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold">
+                <DollarSign className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* 3. Win-Loss Ratio */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Overall Win Rate</p>
+                <h3 className="text-2xl font-black text-emerald-600 mt-1">{lossAnalytics.winRate}%</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">{lossAnalytics.totalWonCount} Won vs {lossAnalytics.totalLostCount} Lost</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center font-bold">
+                <Award className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* 4. Top Loss Driver */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+              <div className="min-w-0 pr-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Top Loss Driver</p>
+                <h3 className="text-base font-extrabold text-purple-600 truncate mt-1">
+                  {lossAnalytics.reasonBreakdown[0]?.reason || 'Budget Constraint'}
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {lossAnalytics.reasonBreakdown[0]?.count || 0} deals lost
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center font-bold shrink-0">
+                <Target className="w-6 h-6" />
+              </div>
+            </div>
+          </div>
+
+          {/* Loss Reasons Breakdown & Competitor Intelligence Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Loss Drivers Distribution */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-rose-600" />
+                  <span>Loss Reasons Breakdown (By Value & Deals)</span>
+                </h3>
+                <span className="text-[10px] text-slate-400 font-bold">Sorted by Lost Value</span>
+              </div>
+
+              <div className="space-y-3">
+                {lossAnalytics.reasonBreakdown.map((r, idx) => {
+                  const percentOfTotal = lossAnalytics.totalLostValue > 0
+                    ? ((r.totalValue / lossAnalytics.totalLostValue) * 100).toFixed(0)
+                    : 0;
+
+                  return (
+                    <div key={idx} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-extrabold text-slate-800 dark:text-slate-200">
+                          {r.reason}
                         </span>
-                      ) : (
-                        <span className="text-slate-400">—</span>
-                      )}
-                    </td>
+                        <div className="flex items-center gap-3">
+                          <span className="text-slate-500 font-bold">{r.count} Deals</span>
+                          <span className="font-black text-rose-600 dark:text-rose-400">
+                            ₹ {Number(r.totalValue).toLocaleString('en-IN')} ({percentOfTotal}%)
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all duration-500"
+                          style={{ width: `${percentOfTotal}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Competitor Win Matrix */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-purple-600" />
+                  <span>Competitor Steal Matrix (Who is taking deals?)</span>
+                </h3>
+                <span className="text-[10px] text-slate-400 font-bold">Market Intelligence</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-800/80 text-[10px] uppercase font-bold text-slate-500">
+                    <tr>
+                      <th className="p-2">Competitor</th>
+                      <th className="p-2 text-center">Deals Won</th>
+                      <th className="p-2 text-right">Lost Value (₹)</th>
+                      <th className="p-2">Recommended Counter-Measure</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {lossAnalytics.topCompetitors.map((comp, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td className="p-2 font-bold text-slate-900 dark:text-white">
+                          {comp.competitor}
+                        </td>
+                        <td className="p-2 text-center font-extrabold text-rose-600">
+                          {comp.dealsWonAgainstUs}
+                        </td>
+                        <td className="p-2 text-right font-black text-slate-800 dark:text-slate-200">
+                          ₹ {Number(comp.lostRevenue).toLocaleString('en-IN')}
+                        </td>
+                        <td className="p-2 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                          {idx === 0 ? 'Offer 30-day credit & volume rebate' : 'Highlight BIS Grade 1 & warranty assurance'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Deal Loss Actionable Recommendations Playbook */}
+          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h4 className="text-xs font-black uppercase text-amber-900 dark:text-amber-200 tracking-wider">
+                Strategic Recommendations for Sales & Negotiation Team
+              </h4>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                1. <strong>Pricing Flexibility:</strong> 38% of deals are lost on price. Consider introducing tiered volume discounts or milestone-based retention pricing during initial quotation.
+              </p>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                2. <strong>Delivery Lead Time (TAT):</strong> Fast-track inventory buffering for high-turnover structural steel to counter competitor 7-day fulfillment.
+              </p>
+            </div>
+          </div>
+
+          {/* Detailed Lost Deals Log Table */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search lost deals by client, competitor, notes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-64"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={lossReasonFilter}
+                  onChange={(e) => setLossReasonFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                >
+                  <option value="ALL">All Loss Drivers</option>
+                  {lossAnalytics.reasonBreakdown.map(r => (
+                    <option key={r.reason} value={r.reason}>{r.reason}</option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={handleExportLossCSV}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Lost Deals CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th className="py-2.5 px-3">Lead ID</th>
+                    <th className="py-2.5 px-3">Customer</th>
+                    <th className="py-2.5 px-3">Requirement</th>
+                    <th className="py-2.5 px-3 text-right">Lost Value (₹)</th>
+                    <th className="py-2.5 px-3">Primary Loss Reason</th>
+                    <th className="py-2.5 px-3">Winning Competitor</th>
+                    <th className="py-2.5 px-3 text-right">Competitor Rate</th>
+                    <th className="py-2.5 px-3">Debrief & Client Feedback</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredLostLeads.map((l, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="py-2.5 px-3 font-extrabold text-rose-600 dark:text-rose-400">
+                        {l.leadId}
+                      </td>
+                      <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white">
+                        {l.customerName}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">
+                        {l.productService}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-black text-rose-600">
+                        ₹ {Number(l.estimatedValue || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 font-extrabold text-[10px] border border-rose-200 dark:border-rose-800">
+                          {l.lossReason || 'Unspecified'}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200">
+                        {l.competitorName || '—'}
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400">
+                        {l.competitorPrice ? `₹ ${Number(l.competitorPrice).toLocaleString('en-IN')}` : '—'}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-500 text-[11px] max-w-xs truncate">
+                        {l.lostRemarks || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

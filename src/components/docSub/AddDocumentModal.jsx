@@ -12,6 +12,7 @@ import {
   UploadCloud,
   ShieldCheck
 } from 'lucide-react';
+import { AIDocumentScanner } from './AIDocumentScanner';
 
 export function AddDocumentModal({ isOpen, onClose, onSuccess, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -72,7 +73,7 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess, initialData = nul
       isOpen={isOpen}
       onClose={onClose}
       title={initialData ? "Edit Document Record" : "Register New Document"}
-      maxWidth="max-w-2xl"
+      maxWidth="max-w-3xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
@@ -80,6 +81,29 @@ export function AddDocumentModal({ isOpen, onClose, onSuccess, initialData = nul
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
+        )}
+
+        {/* AI / OCR Document Scanner */}
+        {!initialData && (
+          <AIDocumentScanner
+            onApplyData={(extracted) => {
+              setFormData((prev) => ({
+                ...prev,
+                title: extracted.title || prev.title,
+                category: extracted.category || prev.category,
+                docNumber: extracted.docNumber || prev.docNumber,
+                issuer: extracted.issuer || prev.issuer,
+                issueDate: extracted.issueDate || prev.issueDate,
+                expiryDate: extracted.expiryDate || prev.expiryDate,
+                isPerpetual: extracted.isPerpetual !== undefined ? extracted.isPerpetual : prev.isPerpetual,
+                department: extracted.department || prev.department,
+                custodian: extracted.custodian || prev.custodian,
+                criticality: extracted.criticality || prev.criticality,
+                fileName: extracted.fileName || prev.fileName,
+                notes: extracted.notes || prev.notes
+              }));
+            }}
+          />
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

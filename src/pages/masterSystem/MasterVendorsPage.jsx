@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Users2, ShoppingCart, Truck, Plus, Edit2, Trash2, AlertTriangle, Building2, Phone, Mail } from 'lucide-react';
+import { Users2, ShoppingCart, Truck, Plus, Edit2, Trash2, AlertTriangle, Building2, Phone, Mail, Award, Star } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, setData, generateId, logAuditAction } from '../../services/otdStorageService';
+import { VendorScorecardModal } from '../../components/purchase/VendorScorecardModal';
 
 export function MasterVendorsPage() {
   const [subTab, setSubTab] = useState('sales'); // 'sales', 'purchase', 'transporter'
@@ -13,6 +14,8 @@ export function MasterVendorsPage() {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [isScorecardModalOpen, setIsScorecardModalOpen] = useState(false);
+  const [selectedVendorForScorecard, setSelectedVendorForScorecard] = useState(null);
   const [form, setForm] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -226,9 +229,10 @@ export function MasterVendorsPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-xs border-b border-slate-200 dark:border-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                      <th className="px-3 py-2 w-20">Actions</th>
+                      <th className="px-3 py-2 w-24">Actions</th>
                       <th className="px-3 py-2">Code</th>
                       <th className="px-3 py-2">Purchase Vendor Name</th>
+                      <th className="px-3 py-2">Scorecard & Rating</th>
                       <th className="px-3 py-2">GSTIN</th>
                       <th className="px-3 py-2">Contact Person</th>
                       <th className="px-3 py-2">Mobile & Email</th>
@@ -243,13 +247,45 @@ export function MasterVendorsPage() {
                             <button onClick={() => handleOpenModal(v)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-indigo-600 transition-colors" title="Edit">
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => handleDelete(v.id, 'Purchase Vendor', STORAGE_KEYS.PURCHASE_VENDORS, purchaseVendors)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-rose-600 transition-colors" title="Delete">
+                            <button
+                              onClick={() => {
+                                setSelectedVendorForScorecard(v);
+                                setIsScorecardModalOpen(true);
+                              }}
+                              className="p-1 hover:bg-amber-100 dark:hover:bg-amber-950/40 rounded text-amber-600 dark:text-amber-400 transition-colors cursor-pointer"
+                              title="Vendor Scorecard & Performance"
+                            >
+                              <Award className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDelete(v.id, 'Purchase Vendor', STORAGE_KEYS.PURCHASE_VENDORS, purchaseVendors)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 hover:text-rose-600 transition-colors cursor-pointer" title="Delete">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>
                         <td className="px-3 py-1.5 font-mono font-bold text-amber-600 dark:text-amber-400 text-[11px]">{v.code}</td>
                         <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-white text-[11.5px]">{v.name}</td>
+                        <td className="px-3 py-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedVendorForScorecard(v);
+                              setIsScorecardModalOpen(true);
+                            }}
+                            className="flex flex-col text-left group cursor-pointer"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-amber-600 flex items-center text-xs">
+                                ★ {v.rating || 4.7}
+                              </span>
+                              <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-extrabold text-[9px]">
+                                {v.vendorGrade || 'Grade A+'}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 group-hover:text-amber-600 transition-colors">
+                              OTD: {v.deliveryScore || 95}% • Rej: {v.qualityRejectionRate || 1.2}%
+                            </span>
+                          </button>
+                        </td>
                         <td className="px-3 py-1.5 font-mono text-slate-500 dark:text-slate-400 text-[11px]">{v.gstin || '-'}</td>
                         <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">{v.contactPerson || '-'}</td>
                         <td className="px-3 py-1.5 text-slate-500 dark:text-slate-400 text-[11px]">{v.mobile} {v.email ? `(${v.email})` : ''}</td>
@@ -383,6 +419,14 @@ export function MasterVendorsPage() {
           </div>
         </div>
       )}
+
+      {/* Vendor Rating & Scorecard Modal */}
+      <VendorScorecardModal
+        isOpen={isScorecardModalOpen}
+        onClose={() => setIsScorecardModalOpen(false)}
+        vendor={selectedVendorForScorecard}
+        allVendors={purchaseVendors}
+      />
     </div>
   );
 }

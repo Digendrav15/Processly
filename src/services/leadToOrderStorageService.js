@@ -91,8 +91,20 @@ export const LEAD_STATUS_OPTIONS = [
   'Approved',
   'Converted to Order',
   'Rejected',
+  'Lost',
   'Closed',
   'Hold'
+];
+
+export const DEAL_LOSS_REASONS = [
+  'High Price / Budget Issue',
+  'Competitor Won',
+  'Delivery Delay / Long Lead Time',
+  'Product Specifications / Quality Mismatch',
+  'Project Cancelled / Deferred',
+  'Payment Terms Dispute',
+  'Lack of Follow-up / Response',
+  'Other'
 ];
 
 // Initial Seed Data for immediate testing & demo
@@ -271,6 +283,131 @@ export const DEFAULT_LEADS = [
     convertedOrderId: 'ORD-0001',
     createdAt: '2026-09-18T10:00:00.000Z',
     updatedAt: '2026-09-23T09:00:00.000Z'
+  },
+  {
+    id: 'lto-lead-007',
+    leadId: 'LD-1007',
+    leadDate: '2026-09-15',
+    leadSource: 'Reference',
+    customerType: 'Corporate',
+    customerName: 'Jindal Steel & Power Sub-Pkg',
+    contactPerson: 'Sunil Aggarwal',
+    mobile: '+91 98112 33445',
+    email: 'sunil.a@jindalsteel.com',
+    productService: 'Structural Heavy Angles & Channels',
+    expectedQuantity: '80 MT',
+    estimatedValue: 4800000,
+    priority: 'High',
+    assignedTo: 'Rahul Mehta',
+    status: 'Lost',
+    currentStage: 'Closed',
+    lossReason: 'High Price / Budget Issue',
+    competitorName: 'Kamdhenu Steel Ltd',
+    competitorPrice: 4450000,
+    lostRemarks: 'Client had rigid budget cap. Competitor offered 7.5% lower rate with 45-day credit line.',
+    lostDate: '2026-09-22',
+    createdAt: '2026-09-15T10:00:00.000Z',
+    updatedAt: '2026-09-22T16:00:00.000Z'
+  },
+  {
+    id: 'lto-lead-008',
+    leadId: 'LD-1008',
+    leadDate: '2026-09-16',
+    leadSource: 'Website',
+    customerType: 'Corporate',
+    customerName: 'DLF CyberCity Phase 3 HVAC',
+    contactPerson: 'Rajesh Varma',
+    mobile: '+91 99100 22881',
+    email: 'rvarma@dlf.in',
+    productService: 'Spiral Galvanized Ducting Works',
+    expectedQuantity: '4,000 Sqft',
+    estimatedValue: 2850000,
+    priority: 'Urgent',
+    assignedTo: 'Sneha Kulkarni',
+    status: 'Lost',
+    currentStage: 'Closed',
+    lossReason: 'Competitor Won',
+    competitorName: 'Blue Star Industrial HVAC',
+    competitorPrice: 2720000,
+    lostRemarks: 'Competitor had existing corporate vendor master tie-up with DLF real estate arm.',
+    lostDate: '2026-09-24',
+    createdAt: '2026-09-16T11:30:00.000Z',
+    updatedAt: '2026-09-24T14:15:00.000Z'
+  },
+  {
+    id: 'lto-lead-009',
+    leadId: 'LD-1009',
+    leadDate: '2026-09-17',
+    leadSource: 'Phone',
+    customerType: 'OEM',
+    customerName: 'Adani Solar Plant Structure',
+    contactPerson: 'Bhavin Patel',
+    mobile: '+91 98250 88991',
+    email: 'bhavin.p@adanisolar.com',
+    productService: 'Solar Module Mounting Structures (MMS)',
+    expectedQuantity: '250 Sets',
+    estimatedValue: 6200000,
+    priority: 'Urgent',
+    assignedTo: 'Amitabh Joshi',
+    status: 'Lost',
+    currentStage: 'Closed',
+    lossReason: 'Delivery Delay / Long Lead Time',
+    competitorName: 'Vikram Solar Structure',
+    competitorPrice: 6150000,
+    lostRemarks: 'Client project commission was strict 10 days away. Our factory lead time was 24 days.',
+    lostDate: '2026-09-23',
+    createdAt: '2026-09-17T09:00:00.000Z',
+    updatedAt: '2026-09-23T11:00:00.000Z'
+  },
+  {
+    id: 'lto-lead-010',
+    leadId: 'LD-1010',
+    leadDate: '2026-09-19',
+    leadSource: 'WhatsApp',
+    customerType: 'OEM',
+    customerName: 'Hero MotoCorp Component Line',
+    contactPerson: 'Sandeep Khurana',
+    mobile: '+91 98110 99443',
+    email: 's.khurana@heromotocorp.com',
+    productService: 'Custom Stamping Die Fixtures',
+    expectedQuantity: '12 Units',
+    estimatedValue: 1450000,
+    priority: 'Medium',
+    assignedTo: 'Priya Sharma',
+    status: 'Lost',
+    currentStage: 'Closed',
+    lossReason: 'Product Specifications / Quality Mismatch',
+    competitorName: 'Minda Corp Tooling',
+    competitorPrice: 1520000,
+    lostRemarks: 'Client tooling required JIS G3141 standard steel which was not available in our current billet stock.',
+    lostDate: '2026-09-25',
+    createdAt: '2026-09-19T14:00:00.000Z',
+    updatedAt: '2026-09-25T15:30:00.000Z'
+  },
+  {
+    id: 'lto-lead-011',
+    leadId: 'LD-1011',
+    leadDate: '2026-09-20',
+    leadSource: 'Email',
+    customerType: 'Corporate',
+    customerName: 'Max Healthcare Hospital Expansion',
+    contactPerson: 'Dr. Vivek Saxena',
+    mobile: '+91 98100 66778',
+    email: 'v.saxena@maxhealthcare.com',
+    productService: 'Stainless Medical Gas Piping 316L',
+    expectedQuantity: '800 Metres',
+    estimatedValue: 1850000,
+    priority: 'Low',
+    assignedTo: 'Rahul Mehta',
+    status: 'Lost',
+    currentStage: 'Closed',
+    lossReason: 'Project Cancelled / Deferred',
+    competitorName: 'None (Dropped)',
+    competitorPrice: 0,
+    lostRemarks: 'Hospital board deferred the phase 2 wing expansion until Q2 next financial year.',
+    lostDate: '2026-09-26',
+    createdAt: '2026-09-20T16:00:00.000Z',
+    updatedAt: '2026-09-26T17:00:00.000Z'
   }
 ];
 
@@ -971,3 +1108,88 @@ export function convertApprovalToOrderToDelivery(approvalId, approvedBy = '', re
     approvalId: approval.approvalId
   };
 }
+
+/**
+ * Mark a Lead or Negotiation as Lost with structured loss driver metadata
+ */
+export function markLeadAsLost(leadId, lossData = {}) {
+  const leads = getData(LTO_KEYS.LEADS, DEFAULT_LEADS);
+  const updated = leads.map(l => {
+    if (l.id === leadId || l.leadId === leadId) {
+      return {
+        ...l,
+        status: 'Lost',
+        currentStage: 'Closed',
+        lossReason: lossData.lossReason || 'Other',
+        competitorName: lossData.competitorName || '—',
+        competitorPrice: Number(lossData.competitorPrice || 0),
+        lostRemarks: lossData.lostRemarks || '',
+        lostDate: lossData.lostDate || new Date().toISOString().split('T')[0],
+        estimatedValue: Number(lossData.estimatedValue || l.estimatedValue || 250000),
+        updatedAt: new Date().toISOString()
+      };
+    }
+    return l;
+  });
+  setData(LTO_KEYS.LEADS, updated);
+  logAuditAction('Lead Marked as Lost', 'Lead to Orders', leadId, lossData);
+  notifyLTOUpdate(LTO_KEYS.LEADS);
+  return updated;
+}
+
+/**
+ * Computes Deal Loss & Win/Loss Analytics metrics across leads and quotations
+ */
+export function getDealLossAnalytics(leads = [], quotations = []) {
+  const lostLeads = leads.filter(l => l.status === 'Lost' || l.status === 'Rejected');
+  const wonLeads = leads.filter(l => l.status === 'Approved' || l.convertedOrderId);
+
+  const totalLostValue = lostLeads.reduce((acc, l) => acc + (Number(l.estimatedValue) || 0), 0);
+  const totalWonValue = wonLeads.reduce((acc, l) => {
+    const q = quotations.find(qt => qt.leadId === l.leadId || qt.quotationNo === l.quotationNo);
+    return acc + (Number(q?.grandTotal) || Number(l.estimatedValue) || 0);
+  }, 0);
+
+  const totalClosedDeals = lostLeads.length + wonLeads.length;
+  const winRate = totalClosedDeals > 0 ? ((wonLeads.length / totalClosedDeals) * 100).toFixed(1) : '0.0';
+
+  // Group by Reason
+  const reasonMap = {};
+  lostLeads.forEach(l => {
+    const r = l.lossReason || 'Unspecified / Other';
+    if (!reasonMap[r]) {
+      reasonMap[r] = { reason: r, count: 0, totalValue: 0 };
+    }
+    reasonMap[r].count += 1;
+    reasonMap[r].totalValue += (Number(l.estimatedValue) || 0);
+  });
+
+  const reasonBreakdown = Object.values(reasonMap).sort((a, b) => b.totalValue - a.totalValue);
+
+  // Group by Competitor
+  const competitorMap = {};
+  lostLeads.forEach(l => {
+    const comp = l.competitorName && l.competitorName !== '—' && l.competitorName !== 'None' ? l.competitorName : null;
+    if (comp) {
+      if (!competitorMap[comp]) {
+        competitorMap[comp] = { competitor: comp, dealsWonAgainstUs: 0, lostRevenue: 0 };
+      }
+      competitorMap[comp].dealsWonAgainstUs += 1;
+      competitorMap[comp].lostRevenue += (Number(l.estimatedValue) || 0);
+    }
+  });
+
+  const topCompetitors = Object.values(competitorMap).sort((a, b) => b.lostRevenue - a.lostRevenue);
+
+  return {
+    totalLostCount: lostLeads.length,
+    totalWonCount: wonLeads.length,
+    totalLostValue,
+    totalWonValue,
+    winRate,
+    reasonBreakdown,
+    topCompetitors,
+    lostLeads
+  };
+}
+

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useSystem } from '../../context/SystemContext';
 import { ThemeToggle } from '../common/ThemeToggle';
-import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Users as UsersIcon } from 'lucide-react';
+import { GlobalSearchModal } from '../common/GlobalSearchModal';
+import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Users as UsersIcon, Search } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { INITIAL_USERS } from '../../services/mockData';
 
@@ -13,6 +14,7 @@ export function Header({ onOpenMobileMenu }) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,44 +22,81 @@ export function Header({ onOpenMobileMenu }) {
   const dashboardTitle = isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'My Dashboard';
   const dashboardBadge = isAdmin ? 'All Systems Hub' : isManager ? 'Team Review' : 'My Workspace';
 
+  // Global Ctrl + K / Cmd + K shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-      {/* Left Mobile Menu Toggle + Title */}
-      <div className="flex items-center space-x-3">
-        <button
-          onClick={onOpenMobileMenu}
-          className="md:hidden p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <div className="hidden sm:block">
-          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Acme Corporate Enterprise</p>
-          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>{isMainDashboard ? dashboardTitle : currentSystem.name}</span>
-            <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-2 py-0.5 rounded-full">
-              {isMainDashboard ? dashboardBadge : currentSystem.badge}
-            </span>
-          </h2>
-        </div>
-      </div>
-
-      {/* Right Controls */}
-      <div className="flex items-center space-x-3">
-        {/* Dark Mode Toggle */}
-        <ThemeToggle />
-
-        {/* Notifications Popover */}
-        <div className="relative">
+    <>
+      <GlobalSearchModal isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
+      <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+        {/* Left Mobile Menu Toggle + Title */}
+        <div className="flex items-center space-x-3">
           <button
-            onClick={() => setShowNotifPopover(!showNotifPopover)}
-            className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 relative transition-colors"
+            onClick={onOpenMobileMenu}
+            className="md:hidden p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            <Bell className="w-5 h-5" />
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="hidden sm:block">
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Acme Corporate Enterprise</p>
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <span>{isMainDashboard ? dashboardTitle : currentSystem.name}</span>
+              <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-2 py-0.5 rounded-full">
+                {isMainDashboard ? dashboardBadge : currentSystem.badge}
+              </span>
+            </h2>
+          </div>
+        </div>
+
+        {/* Center Quick Search Bar (Ctrl + K) */}
+        <button
+          onClick={() => setShowGlobalSearch(true)}
+          className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 bg-slate-100/80 dark:bg-slate-800/70 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-200 dark:border-slate-700/80 text-xs font-medium transition-all cursor-pointer shadow-xs w-64 lg:w-96 justify-between group"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors shrink-0" />
+            <span className="truncate">Search Orders, Leads, POs, Employees...</span>
+          </div>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-slate-500 shadow-2xs shrink-0">
+            Ctrl K
+          </kbd>
+        </button>
+
+        {/* Right Controls */}
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Mobile Search Button */}
+          <button
+            onClick={() => setShowGlobalSearch(true)}
+            className="md:hidden p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 relative transition-colors"
+            title="Global Search (Ctrl + K)"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+
+          {/* Dark Mode Toggle */}
+          <ThemeToggle />
+
+          {/* Notifications Popover */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifPopover(!showNotifPopover)}
+              className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 relative transition-colors"
+            >
+              <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse">
                 {unreadCount}
@@ -207,5 +246,6 @@ export function Header({ onOpenMobileMenu }) {
         </div>
       </div>
     </header>
+    </>
   );
 }
