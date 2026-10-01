@@ -200,11 +200,29 @@ export default function DocumentsManagementPage() {
       {/* Page Title & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 flex-wrap">
             <div className="p-2 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
               <FileText className="w-5 h-5" />
             </div>
-            Corporate Documents & Contracts
+            <span>Corporate Documents & Contracts</span>
+            {activeTab === 'pending' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 rounded-full border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Pending Verification ({tabCounts.pending})
+              </span>
+            )}
+            {activeTab === 'expiring' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-orange-100 text-orange-800 dark:bg-orange-950/80 dark:text-orange-300 rounded-full border border-orange-300 dark:border-orange-800 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                Expiring Soon (&le;30d) ({tabCounts.expiring})
+              </span>
+            )}
+            {activeTab === 'expired' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 rounded-full border border-rose-300 dark:border-rose-800 flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Expired ({tabCounts.expired})
+              </span>
+            )}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Statutory licenses, company registrations, agreements, SLAs, and compliance certificates
@@ -214,7 +232,7 @@ export default function DocumentsManagementPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             Export CSV
@@ -224,80 +242,12 @@ export default function DocumentsManagementPage() {
               setEditingDoc(null);
               setShowAddModal(true);
             }}
-            className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-[1.02]"
+            className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add Document
           </button>
         </div>
-      </div>
-
-      {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1">
-        <button
-          onClick={() => setSearchParams({ tab: 'all' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'all'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <span>All Documents</span>
-          <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-            {tabCounts.all}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'pending' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'pending'
-              ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4 text-amber-500" />
-          <span>Pending Verification</span>
-          {tabCounts.pending > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold">
-              {tabCounts.pending}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'expiring' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'expiring'
-              ? 'border-orange-500 text-orange-600 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <Clock className="w-4 h-4 text-orange-500" />
-          <span>Expiring Soon (&le;30d)</span>
-          {tabCounts.expiring > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 font-bold">
-              {tabCounts.expiring}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'expired' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'expired'
-              ? 'border-rose-600 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <AlertTriangle className="w-4 h-4 text-rose-500" />
-          <span>Expired</span>
-          {tabCounts.expired > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-bold">
-              {tabCounts.expired}
-            </span>
-          )}
-        </button>
       </div>
 
       {/* Filter Bar */}

@@ -20,6 +20,7 @@ import {
   generateGRNNumber
 } from '../../services/purchaseStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function GRNPage() {
   const navigate = useNavigate();
@@ -225,6 +226,7 @@ export function GRNPage() {
                   <th className="py-2 px-3 text-center">Bin Location</th>
                   <th className="py-2 px-3 text-center">GRN Date</th>
                   <th className="py-2 px-3 text-center">Store Incharge</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -251,6 +253,14 @@ export function GRNPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {item.storeIncharge || 'Store Head'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.grnDate || item.stageDetails?.['GRN']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

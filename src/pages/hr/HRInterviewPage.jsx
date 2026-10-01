@@ -21,7 +21,8 @@ import {
   Phone,
   Mail,
   Send,
-  RotateCcw
+  RotateCcw,
+  History
 } from 'lucide-react';
 import { useHRStorage } from '../../hooks/useHRStorage';
 import {
@@ -30,12 +31,15 @@ import {
   recordInterviewSelection,
   addActivityLog
 } from '../../services/hrStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function HRInterviewPage() {
   const { data: interviews, setItem: setInterviews } = useHRStorage(HR_KEYS.INTERVIEWS, []);
   const { data: candidates } = useHRStorage(HR_KEYS.CANDIDATES, []);
 
   // Filter & Search states
+  const [activeTab, setActiveTab] = useState('pending');
+  const todayStr = new Date().toISOString().split('T')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [roundFilter, setRoundFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -224,9 +228,15 @@ export function HRInterviewPage() {
     }
   };
 
+  const pendingInterviews = interviews.filter(i => i.status === 'Scheduled');
+  const historyInterviews = interviews.filter(i => i.status !== 'Scheduled');
+
   // Filtered interviews
   const filteredInterviews = useMemo(() => {
     return interviews.filter(item => {
+      if (activeTab === 'pending' && item.status !== 'Scheduled') return false;
+      if (activeTab === 'history' && item.status === 'Scheduled') return false;
+
       const matchesSearch =
         (item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.interviewId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -238,7 +248,7 @@ export function HRInterviewPage() {
 
       return matchesSearch && matchesRound && matchesStatus;
     });
-  }, [interviews, searchTerm, roundFilter, statusFilter]);
+  }, [interviews, activeTab, searchTerm, roundFilter, statusFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -272,13 +282,42 @@ export function HRInterviewPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowScheduleModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Schedule Interview</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingInterviews.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyInterviews.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => setShowScheduleModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Schedule Interview</span>
+          </button>
+        </div>
       </div>
 
       {/* Compact Filters */}
@@ -334,15 +373,16 @@ export function HRInterviewPage() {
                 <th className="py-2 px-3">Date & Time</th>
                 <th className="py-2 px-3">Rating & Result</th>
                 <th className="py-2 px-3">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredInterviews.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 9 : 11} className="py-12 text-center text-slate-400">
                     <Clock className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
-                    <p className="font-semibold">No interviews found</p>
+                    <p className="font-semibold">No {activeTab} interviews found</p>
                   </td>
                 </tr>
               ) : (
@@ -434,6 +474,15 @@ export function HRInterviewPage() {
                         {intItem.status || 'Scheduled'}
                       </span>
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={intItem.scheduledDate || todayStr} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={intItem.scheduledDate || todayStr}
+                        actualDate={intItem.completedDate || intItem.updatedAt?.split('T')[0] || intItem.scheduledDate || todayStr}
+                      />
+                    )}
 
                     {/* Actions */}
                     <td className="py-2 px-3 text-right">

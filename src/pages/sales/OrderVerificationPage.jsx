@@ -18,6 +18,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { calculateDelayInfo, formatShortDate } from '../../services/tatCalculationService';
 
 export function OrderVerificationPage() {
   const navigate = useNavigate();
@@ -281,7 +282,7 @@ export function OrderVerificationPage() {
                   </p>
 
                   <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2">
-                    <span>{o.orderDate}</span>
+                    <span>Date: {o.orderDate}</span>
                     <span
                       className={`px-2 py-0.5 rounded font-bold ${
                         o.verificationStatus === 'Verified'
@@ -295,6 +296,18 @@ export function OrderVerificationPage() {
                     >
                       {o.verificationStatus || 'Pending Verification'}
                     </span>
+                  </div>
+
+                  {/* Planned / History TAT tags */}
+                  <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500 font-medium">
+                      Planned: <strong className="text-slate-700 dark:text-slate-300">{formatShortDate(o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate)}</strong>
+                    </span>
+                    {activeTab === 'history' && (
+                      <span className={`px-1.5 py-0.5 rounded font-bold ${calculateDelayInfo(o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate, o.verificationDate || o.updatedAt).badgeClass}`}>
+                        {calculateDelayInfo(o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate, o.verificationDate || o.updatedAt).text}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -331,9 +344,39 @@ export function OrderVerificationPage() {
                   <strong className="text-slate-900 dark:text-white">{activeOrder.orderDate}</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Expected Delivery</span>
-                  <strong className="text-slate-900 dark:text-white">{activeOrder.expectedDeliveryDate || 'N/A'}</strong>
+                  <span className="text-slate-400 block text-[11px]">Planned Completion</span>
+                  <strong className="text-indigo-600 font-extrabold">
+                    {formatShortDate(activeOrder.plannedCompletionDate || activeOrder.expectedDeliveryDate || activeOrder.orderDate)}
+                  </strong>
                 </div>
+                {activeTab === 'history' && (
+                  <>
+                    <div>
+                      <span className="text-slate-400 block text-[11px]">Actual Date</span>
+                      <strong className="text-emerald-600 font-extrabold">
+                        {formatShortDate(activeOrder.verificationDate || activeOrder.updatedAt)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[11px]">Time Delay</span>
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold border ${
+                          calculateDelayInfo(
+                            activeOrder.plannedCompletionDate || activeOrder.expectedDeliveryDate || activeOrder.orderDate,
+                            activeOrder.verificationDate || activeOrder.updatedAt
+                          ).badgeClass
+                        }`}
+                      >
+                        {
+                          calculateDelayInfo(
+                            activeOrder.plannedCompletionDate || activeOrder.expectedDeliveryDate || activeOrder.orderDate,
+                            activeOrder.verificationDate || activeOrder.updatedAt
+                          ).text
+                        }
+                      </span>
+                    </div>
+                  </>
+                )}
                 <div>
                   <span className="text-slate-400 block text-[11px]">Grand Total</span>
                   <strong className="text-emerald-600 font-extrabold text-sm">

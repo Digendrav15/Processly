@@ -18,7 +18,8 @@ import {
   X,
   Share2,
   Globe,
-  Tag
+  Tag,
+  History
 } from 'lucide-react';
 import { useHRStorage } from '../../hooks/useHRStorage';
 import {
@@ -27,6 +28,7 @@ import {
   generateCandidateId,
   addActivityLog
 } from '../../services/hrStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function HRJobEnquiryPage() {
   const { data: enquiries, setItem: setEnquiries } = useHRStorage(HR_KEYS.JOB_ENQUIRIES, []);
@@ -34,6 +36,8 @@ export function HRJobEnquiryPage() {
   const { data: candidates, setItem: setCandidates } = useHRStorage(HR_KEYS.CANDIDATES, []);
 
   // Filter & Search states
+  const [activeTab, setActiveTab] = useState('pending');
+  const todayStr = new Date().toISOString().split('T')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSource, setSelectedSource] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -177,9 +181,15 @@ export function HRJobEnquiryPage() {
     addActivityLog('HR Recruiter', 'Advanced to Screening', 'Recruitment', enquiry.enquiryId || enquiry.id, 'In Sourcing', 'Candidate Screening', `Moved ${enquiry.candidateName} to Screening stage`);
   };
 
+  const pendingEnquiries = enquiries.filter(e => e.status !== 'Moved to Screening' && e.status !== 'Rejected');
+  const historyEnquiries = enquiries.filter(e => e.status === 'Moved to Screening' || e.status === 'Rejected');
+
   // Filtered list
   const filteredEnquiries = useMemo(() => {
     return enquiries.filter(item => {
+      if (activeTab === 'pending' && (item.status === 'Moved to Screening' || item.status === 'Rejected')) return false;
+      if (activeTab === 'history' && item.status !== 'Moved to Screening' && item.status !== 'Rejected') return false;
+
       const matchesSearch =
         (item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.designation?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -192,7 +202,7 @@ export function HRJobEnquiryPage() {
 
       return matchesSearch && matchesSource && matchesStatus && matchesIndent;
     });
-  }, [enquiries, searchTerm, selectedSource, selectedStatus, selectedIndent]);
+  }, [enquiries, activeTab, searchTerm, selectedSource, selectedStatus, selectedIndent]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -225,6 +235,33 @@ export function HRJobEnquiryPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingEnquiries.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyEnquiries.length})</span>
+            </button>
+          </div>
+
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
@@ -302,15 +339,16 @@ export function HRJobEnquiryPage() {
                 <th className="py-3 px-4">Experience & Skills</th>
                 <th className="py-3 px-4">Channel</th>
                 <th className="py-3 px-4">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredEnquiries.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 8 : 10} className="py-12 text-center text-slate-400">
                     <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
-                    <p className="font-semibold">No candidate enquiries match the current filters</p>
+                    <p className="font-semibold">No {activeTab} candidate enquiries match the current filters</p>
                     <p className="text-[11px] text-slate-500 mt-1">Try resetting filters or log a new candidate</p>
                   </td>
                 </tr>
@@ -400,6 +438,15 @@ export function HRJobEnquiryPage() {
                         {enq.status || 'In Sourcing'}
                       </span>
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={enq.enquiryDate || enq.createdAt?.split('T')[0] || todayStr} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={enq.enquiryDate || enq.createdAt?.split('T')[0] || todayStr}
+                        actualDate={enq.updatedAt?.split('T')[0] || enq.enquiryDate || todayStr}
+                      />
+                    )}
 
                     {/* Actions */}
                     <td className="py-3.5 px-4 text-right">

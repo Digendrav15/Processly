@@ -19,6 +19,7 @@ import {
   advancePurchaseStage
 } from '../../services/purchaseStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function PurchaseQCPage() {
   const navigate = useNavigate();
@@ -257,6 +258,7 @@ export function PurchaseQCPage() {
                   <th className="py-2 px-3 text-center">Rejected</th>
                   <th className="py-2 px-3 text-center">QC Status</th>
                   <th className="py-2 px-3 text-center">Inspector</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -295,6 +297,14 @@ export function PurchaseQCPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {item.qcInspector || 'Inspector'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.qcDate || item.stageDetails?.['Quality Check']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

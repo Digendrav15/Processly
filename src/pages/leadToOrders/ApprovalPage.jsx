@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  History,
   Search,
   Eye,
   X,
@@ -27,6 +28,7 @@ import {
   convertApprovalToOrderToDelivery
 } from '../../services/leadToOrderStorageService';
 import { getCurrentUser } from '../../services/otdStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 const APPROVAL_STATUSES = ['Pending', 'Approved', 'Rejected', 'Hold'];
 
@@ -41,7 +43,8 @@ export function ApprovalPage() {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Filters
+  // Tabs & Filters
+  const [activeTab, setActiveTab] = useState('pending');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -133,8 +136,14 @@ export function ApprovalPage() {
     }
   };
 
+  // Pending / History split
+  const pendingApprovals = approvals.filter(a => a.approvalStatus !== 'Approved' && a.approvalStatus !== 'Rejected');
+  const historyApprovals = approvals.filter(a => a.approvalStatus === 'Approved' || a.approvalStatus === 'Rejected');
+
   // Filter list
   const filteredApprovals = approvals.filter(a => {
+    if (activeTab === 'pending' && (a.approvalStatus === 'Approved' || a.approvalStatus === 'Rejected')) return false;
+    if (activeTab === 'history' && a.approvalStatus !== 'Approved' && a.approvalStatus !== 'Rejected') return false;
     if (statusFilter !== 'ALL' && a.approvalStatus !== statusFilter) return false;
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
@@ -182,6 +191,33 @@ export function ApprovalPage() {
           <p className="text-[11px] text-slate-300 max-w-2xl">
             Review finalized quotations and commercial terms. Approving a proposal automatically pushes the complete customer and order details directly into the <strong>Order to Delivery module</strong>.
           </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'pending'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending ({pendingApprovals.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'history'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>History ({historyApprovals.length})</span>
+          </button>
         </div>
       </div>
 
@@ -231,14 +267,15 @@ export function ApprovalPage() {
                 <th className="py-2 px-3">Submitted By</th>
                 <th className="py-2 px-3">Submitted Date</th>
                 <th className="py-2 px-3">Approval Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredApprovals.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-400 text-xs">
-                    No approval requests found in this view.
+                  <td colSpan={11} className="py-12 text-center text-slate-400 text-xs">
+                    No {activeTab} approval requests found in this view.
                   </td>
                 </tr>
               ) : (
@@ -279,6 +316,14 @@ export function ApprovalPage() {
                         {app.approvalStatus}
                       </span>
                     </td>
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={app.submittedDate || todayStr} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={app.submittedDate || todayStr}
+                        actualDate={app.approvalDate || app.updatedAt?.split('T')[0] || todayStr}
+                      />
+                    )}
                     <td className="py-1.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         {/* View Quotation Info */}

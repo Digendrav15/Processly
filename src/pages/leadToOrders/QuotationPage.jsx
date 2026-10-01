@@ -11,6 +11,7 @@ import {
   Send,
   CheckCircle2,
   Clock,
+  History,
   Printer,
   X,
   AlertCircle,
@@ -33,6 +34,7 @@ import {
 } from '../../services/leadToOrderStorageService';
 import { STORAGE_KEYS as OTD_KEYS, getCurrentUser } from '../../services/otdStorageService';
 import { QuotationPDFBuilderModal } from '../../components/leadToOrders/QuotationPDFBuilderModal';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function QuotationPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,6 +52,7 @@ export function QuotationPage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeQuotation, setActiveQuotation] = useState(null);
+  const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -272,8 +275,13 @@ export function QuotationPage() {
     }
   };
 
+  // Pending / History split
+  const pendingQuotes = quotations.filter(q => q.status !== 'Approved' && q.status !== 'Rejected');
+  const historyQuotes = quotations.filter(q => q.status === 'Approved' || q.status === 'Rejected');
+  const baseQuotes = activeTab === 'pending' ? pendingQuotes : historyQuotes;
+
   // Filtering
-  const filteredQuotations = quotations.filter(q => {
+  const filteredQuotations = baseQuotes.filter(q => {
     if (statusFilter !== 'ALL' && q.status !== statusFilter) return false;
     if (searchTerm.trim()) {
       const s = searchTerm.toLowerCase();
@@ -319,13 +327,43 @@ export function QuotationPage() {
             Create professional commercial proposals linked to Lead IDs with automatic multi-item tax, discount calculations, terms, and direct routing to Negotiation or Approval.
           </p>
         </div>
-        <button
-          onClick={() => handleOpenCreateModal()}
-          className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-lg shadow-sm shadow-indigo-600/30 transition-all cursor-pointer transform active:scale-95 shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Create Quotation</span>
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingQuotes.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyQuotes.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => handleOpenCreateModal()}
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-lg shadow-sm shadow-indigo-600/30 transition-all cursor-pointer transform active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Create Quotation</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -375,13 +413,14 @@ export function QuotationPage() {
                 <th className="py-2 px-3 text-right">Tax (GST)</th>
                 <th className="py-2 px-3 text-right">Grand Total</th>
                 <th className="py-2 px-3">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredQuotations.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-400 text-xs">
+                  <td colSpan={11} className="py-12 text-center text-slate-400 text-xs">
                     No quotation records found. Click "+ Create Quotation" to generate your first proposal.
                   </td>
                 </tr>
@@ -418,6 +457,14 @@ export function QuotationPage() {
                         {quote.status}
                       </span>
                     </td>
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={quote.expectedDeliveryDate || quote.quotationDate} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={quote.expectedDeliveryDate || quote.quotationDate}
+                        actualDate={quote.updatedAt?.split('T')[0] || quote.quotationDate}
+                      />
+                    )}
                     <td className="py-1.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         {/* Preview / Print */}

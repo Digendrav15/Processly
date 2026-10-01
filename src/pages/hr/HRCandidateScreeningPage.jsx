@@ -21,7 +21,8 @@ import {
   Tag,
   ThumbsUp,
   ThumbsDown,
-  AlertCircle
+  AlertCircle,
+  History
 } from 'lucide-react';
 import { useHRStorage } from '../../hooks/useHRStorage';
 import {
@@ -30,12 +31,15 @@ import {
   shortlistCandidate,
   addActivityLog
 } from '../../services/hrStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function HRCandidateScreeningPage() {
   const { data: candidates, setItem: setCandidates } = useHRStorage(HR_KEYS.CANDIDATES, []);
   const { data: indents } = useHRStorage(HR_KEYS.INDENTS, []);
 
   // Filter & Search states
+  const [activeTab, setActiveTab] = useState('pending');
+  const todayStr = new Date().toISOString().split('T')[0];
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [departmentFilter, setDepartmentFilter] = useState('All');
@@ -71,9 +75,15 @@ export function HRCandidateScreeningPage() {
     evaluationNotes: ''
   });
 
+  const pendingCandidates = candidates.filter(c => c.screeningStatus !== 'Shortlisted' && c.screeningStatus !== 'Rejected');
+  const historyCandidates = candidates.filter(c => c.screeningStatus === 'Shortlisted' || c.screeningStatus === 'Rejected');
+
   // Filter candidates
   const filteredCandidates = useMemo(() => {
     return candidates.filter(c => {
+      if (activeTab === 'pending' && (c.screeningStatus === 'Shortlisted' || c.screeningStatus === 'Rejected')) return false;
+      if (activeTab === 'history' && c.screeningStatus !== 'Shortlisted' && c.screeningStatus !== 'Rejected') return false;
+
       const matchesSearch =
         (c.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (c.candidateId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -85,7 +95,7 @@ export function HRCandidateScreeningPage() {
 
       return matchesSearch && matchesStatus && matchesDept;
     });
-  }, [candidates, searchTerm, statusFilter, departmentFilter]);
+  }, [candidates, activeTab, searchTerm, statusFilter, departmentFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -239,13 +249,42 @@ export function HRCandidateScreeningPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Add Candidate Profile</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingCandidates.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyCandidates.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Add Candidate Profile</span>
+          </button>
+        </div>
       </div>
 
       {/* Compact Filter and Search Bar */}
@@ -302,15 +341,16 @@ export function HRCandidateScreeningPage() {
                 <th className="py-2 px-3">CTC (Current / Exp)</th>
                 <th className="py-2 px-3">Skills</th>
                 <th className="py-2 px-3">Screening Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 9 : 11} className="py-12 text-center text-slate-400">
                     <UserCheck className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
-                    <p className="font-semibold">No candidates match your current filter criteria</p>
+                    <p className="font-semibold">No {activeTab} candidates match your current filter criteria</p>
                   </td>
                 </tr>
               ) : (
@@ -417,6 +457,15 @@ export function HRCandidateScreeningPage() {
                         {cand.screeningStatus || 'Pending'}
                       </span>
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={cand.screeningDate || cand.createdAt?.split('T')[0] || todayStr} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={cand.screeningDate || cand.createdAt?.split('T')[0] || todayStr}
+                        actualDate={cand.updatedAt?.split('T')[0] || cand.screeningDate || todayStr}
+                      />
+                    )}
 
                     {/* Actions */}
                     <td className="py-2 px-3 text-right">

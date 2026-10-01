@@ -19,6 +19,7 @@ import {
   advancePurchaseStage
 } from '../../services/purchaseStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function IndentApprovalPage() {
   const navigate = useNavigate();
@@ -234,6 +235,7 @@ export function IndentApprovalPage() {
                   <th className="py-2 px-3 text-center">Priority</th>
                   <th className="py-2 px-3 text-right">Est. Amount (₹)</th>
                   <th className="py-2 px-3 text-center">Decision</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -271,6 +273,14 @@ export function IndentApprovalPage() {
                           {dec}
                         </span>
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.approvalDate || item.stageDetails?.['Indent Approval']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

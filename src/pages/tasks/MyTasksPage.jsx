@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { taskService } from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
 import { FilterBar } from '../../components/common/FilterBar';
@@ -6,14 +6,16 @@ import { StatusBadge, PriorityBadge } from '../../components/common/StatusBadge'
 import { TaskUpdateModal } from '../../components/tasks/TaskUpdateModal';
 import { TaskDetailModal } from '../../components/tasks/TaskDetailModal';
 import { formatDate } from '../../lib/utils';
-import { Eye, Edit3, CheckSquare, ListTodo, Paperclip } from 'lucide-react';
+import { Eye, Edit3, CheckSquare, ListTodo, Paperclip, Clock, History as HistoryIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function MyTasksPage() {
   const { user, isAdmin, isManager } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Checklist'); // Checklist OR Delegation only!
+  const [statusTab, setStatusTab] = useState('pending'); // 'pending' | 'history'
 
   // Filters
   const [filters, setFilters] = useState({
@@ -62,6 +64,16 @@ export function MyTasksPage() {
     });
   };
 
+  const pendingTasks = useMemo(() => {
+    return tasks.filter((t) => t.status !== 'Completed');
+  }, [tasks]);
+
+  const historyTasks = useMemo(() => {
+    return tasks.filter((t) => t.status === 'Completed');
+  }, [tasks]);
+
+  const currentTaskList = statusTab === 'pending' ? pendingTasks : historyTasks;
+
   return (
     <div className="space-y-2.5">
       {/* Compact Page Header with Integrated Tabs & Actions */}
@@ -79,7 +91,33 @@ export function MyTasksPage() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Integrated 2 Tabs */}
+          {/* Status Tabs: Pending vs History */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+            <button
+              onClick={() => setStatusTab('pending')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                statusTab === 'pending'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingTasks.length})</span>
+            </button>
+            <button
+              onClick={() => setStatusTab('history')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                statusTab === 'history'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <HistoryIcon className="w-3.5 h-3.5" />
+              <span>History ({historyTasks.length})</span>
+            </button>
+          </div>
+
+          {/* Integrated 2 Type Tabs */}
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
             <button
               onClick={() => setActiveTab('Checklist')}
@@ -123,9 +161,9 @@ export function MyTasksPage() {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-xs text-slate-400">Loading your tasks...</div>
-        ) : tasks.length === 0 ? (
+        ) : currentTaskList.length === 0 ? (
           <div className="p-8 text-center text-xs text-slate-400">
-            No assigned tasks found under {activeTab}.
+            No {statusTab} tasks found under {activeTab}.
           </div>
         ) : (
           <div className="overflow-x-auto max-h-[calc(100vh-210px)] overflow-y-auto custom-scrollbar">
@@ -137,14 +175,18 @@ export function MyTasksPage() {
                   <th className="px-3 py-2">Task Title</th>
                   <th className="px-3 py-2">Frequency</th>
                   <th className="px-3 py-2">Assigned By</th>
-                  <th className="px-3 py-2">Due Date</th>
+                  {statusTab === 'pending' ? (
+                    <PlannedTh />
+                  ) : (
+                    <HistoryTatTh />
+                  )}
                   <th className="px-3 py-2">Priority</th>
                   <th className="px-3 py-2">Attachment</th>
                   <th className="px-3 py-2">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
-                {tasks.map((t) => (
+                {currentTaskList.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     {/* Action */}
                     <td className="px-3 py-1.5 font-semibold">
@@ -180,9 +222,17 @@ export function MyTasksPage() {
                     <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
                       {t.assigned_by_name || 'Manager'}
                     </td>
-                    <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">
-                      {formatDate(t.due_date)}
-                    </td>
+
+                    {/* Planned or History TAT columns */}
+                    {statusTab === 'pending' ? (
+                      <PlannedTd plannedDate={t.due_date} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={t.original_due_date || t.due_date}
+                        actualDate={t.completion_date || t.updated_at}
+                      />
+                    )}
+
                     <td className="px-3 py-1.5">
                       <PriorityBadge priority={t.priority} />
                     </td>

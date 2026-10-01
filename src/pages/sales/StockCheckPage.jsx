@@ -17,6 +17,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function StockCheckPage() {
   const navigate = useNavigate();
@@ -273,10 +274,10 @@ export function StockCheckPage() {
                   <th className="py-2 px-3">Order Number</th>
                   <th className="py-2 px-3">Customer Name</th>
                   <th className="py-2 px-3">Order Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Items Count</th>
                   <th className="py-2 px-3 text-right">Order Total (₹)</th>
                   <th className="py-2 px-3 text-center">Stock Status</th>
-                  <th className="py-2 px-3 text-center">Verification Date</th>
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -293,6 +294,17 @@ export function StockCheckPage() {
                       </td>
                       <td className="py-1.5 px-3 font-bold text-slate-900 dark:text-white">{o.customerName}</td>
                       <td className="py-1.5 px-3 text-slate-500 font-medium">{o.orderDate}</td>
+
+                      {/* Planned or History TAT columns */}
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.stockCheckDate || o.updatedAt}
+                        />
+                      )}
+
                       <td className="py-1.5 px-3 text-center font-bold text-slate-700 dark:text-slate-300">
                         <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold">
                           {itemsCount} {itemsCount > 1 ? 'Items' : 'Item'}
@@ -315,9 +327,6 @@ export function StockCheckPage() {
                         >
                           {stockSt}
                         </span>
-                      </td>
-                      <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
-                        {o.stockCheckDate || '-'}
                       </td>
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (

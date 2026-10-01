@@ -14,6 +14,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function AdvancePaymentPage() {
   const navigate = useNavigate();
@@ -200,6 +201,7 @@ export function AdvancePaymentPage() {
                   <th className="py-2 px-3">Order Number</th>
                   <th className="py-2 px-3">Customer Name</th>
                   <th className="py-2 px-3">Order Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-right">Order Total (₹)</th>
                   <th className="py-2 px-3 text-right">Advance Req. (₹)</th>
                   <th className="py-2 px-3 text-right">Total Paid (₹)</th>
@@ -222,6 +224,17 @@ export function AdvancePaymentPage() {
                       </td>
                       <td className="py-1.5 px-3 font-bold text-slate-900 dark:text-white">{o.customerName}</td>
                       <td className="py-1.5 px-3 text-slate-500 font-medium">{o.orderDate}</td>
+
+                      {/* Planned or History TAT columns */}
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.paymentDate || o.updatedAt}
+                        />
+                      )}
+
                       <td className="py-1.5 px-3 text-right font-extrabold text-slate-900 dark:text-white">
                         ₹ {grand.toLocaleString('en-IN')}
                       </td>

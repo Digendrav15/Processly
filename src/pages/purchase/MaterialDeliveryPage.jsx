@@ -20,6 +20,7 @@ import {
   advancePurchaseStage
 } from '../../services/purchaseStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function MaterialDeliveryPage() {
   const navigate = useNavigate();
@@ -215,6 +216,7 @@ export function MaterialDeliveryPage() {
                   <th className="py-2 px-3">Gate Pass #</th>
                   <th className="py-2 px-3 text-center">Status</th>
                   <th className="py-2 px-3 text-center">Arrival Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -249,6 +251,14 @@ export function MaterialDeliveryPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {item.gateEntryDate || item.dispatchDate || '-'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.gateEntryDate || item.stageDetails?.['Material Delivery']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

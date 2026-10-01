@@ -7,6 +7,10 @@ import { ProfilePage } from './pages/auth/ProfilePage';
 import { DashboardRouter } from './pages/dashboards/DashboardRouter';
 import { MainAdminDashboard } from './pages/dashboards/MainAdminDashboard';
 import { UnifiedDashboard } from './pages/dashboards/UnifiedDashboard';
+import { ChecklistListPage } from './pages/checklist/ChecklistListPage';
+import { CreateChecklistPage } from './pages/checklist/CreateChecklistPage';
+import { DelegationListPage } from './pages/delegation/DelegationListPage';
+import { CreateDelegationPage } from './pages/delegation/CreateDelegationPage';
 import { MyTasksPage } from './pages/tasks/MyTasksPage';
 import { TaskAssignmentPage } from './pages/tasks/TaskAssignmentPage';
 import { LeaveRequestsPage } from './pages/leave/LeaveRequestsPage';
@@ -107,6 +111,7 @@ import DocSubHistoryPage from './pages/docSub/DocSubHistoryPage';
 import WhatsAppInboxPage from './pages/whatsapp/WhatsAppInboxPage';
 import WhatsAppTemplatesPage from './pages/whatsapp/WhatsAppTemplatesPage';
 import WhatsAppSettingsPage from './pages/whatsapp/WhatsAppSettingsPage';
+import { MISSummaryPage } from './pages/misSummary/MISSummaryPage';
 
 import { useSystem } from './context/SystemContext';
 import { Outlet } from 'react-router-dom';
@@ -155,7 +160,7 @@ export default function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         
-        {/* Checklist & Core System Routes */}
+        {/* Checklist & Delegation System Routes */}
         <Route path="dashboard" element={<DashboardRouter />} />
         <Route
           path="admin/dashboard"
@@ -165,8 +170,14 @@ export default function App() {
             </AdminOnlyRoute>
           }
         />
+        {/* Dedicated Checklist & Delegation Dashboard */}
         <Route path="checklist/dashboard" element={<UnifiedDashboard />} />
-        <Route path="checklist" element={<Navigate to="/my-tasks" replace />} />
+        <Route path="checklist" element={<Navigate to="/checklist/dashboard" replace />} />
+        <Route path="checklist/list" element={<ChecklistListPage />} />
+        <Route path="checklist/create" element={<CreateChecklistPage />} />
+        <Route path="delegation" element={<DelegationListPage />} />
+        <Route path="delegation/list" element={<DelegationListPage />} />
+        <Route path="delegation/create" element={<CreateDelegationPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route
           path="task-assignment"
@@ -310,6 +321,11 @@ export default function App() {
           <Route path="inbox" element={<WhatsAppInboxPage />} />
           <Route path="templates" element={<WhatsAppTemplatesPage />} />
           <Route path="settings" element={<WhatsAppSettingsPage />} />
+        </Route>
+
+        {/* MIS Summary Module Routes */}
+        <Route path="mis-summary" element={<ModuleRoute systemId="mis-summary" />}>
+          <Route index element={<MISSummaryPage />} />
         </Route>
       </Route>
 

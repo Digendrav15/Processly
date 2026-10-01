@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { taskService } from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
 import { INITIAL_USERS } from '../../services/mockData';
@@ -7,15 +8,23 @@ import { TaskCompletionModal } from '../../components/tasks/TaskCompletionModal'
 import { TaskDetailModal } from '../../components/tasks/TaskDetailModal';
 import { formatDate } from '../../lib/utils';
 import {
+  CheckSquare,
   ListTodo,
   Clock,
   AlertTriangle,
   CheckCircle2,
   Filter,
   Eye,
-  CheckSquare,
-  TrendingUp,
   User,
+  Plus,
+  Send,
+  TrendingUp,
+  Calendar,
+  Sparkles,
+  UserCheck,
+  Layers,
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -31,6 +40,7 @@ import {
 export function UnifiedDashboard() {
   const { user, isAdmin, isManager } = useAuth();
   const [allTasks, setAllTasks] = useState([]);
+  const [checklistsCount, setChecklistsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Admin/Manager filter for viewing specific user stats
@@ -49,38 +59,53 @@ export function UnifiedDashboard() {
   const loadTasks = async () => {
     setLoading(true);
     try {
-      // Fetch tasks scoped appropriately
       const data = await taskService.getTasks();
-      setAllTasks(data);
+      setAllTasks(data || []);
+
+      const templates = await taskService.getChecklists();
+      setChecklistsCount((templates || []).length);
     } catch (err) {
-      console.error('Failed to load dashboard tasks:', err);
+      console.error('Failed to load checklist & delegation dashboard tasks:', err);
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-xs text-slate-400">Loading Dashboard...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center p-16 space-y-3">
+        <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          Loading Checklist & Delegation Dashboard...
+        </p>
+      </div>
+    );
   }
 
   // Filter tasks based on selected employee / user scope
-  let displayedTasks = allTasks;
+  let scopedTasks = allTasks;
   if (!isAdmin && !isManager) {
     // Employee role: strictly filter for current user
-    displayedTasks = allTasks.filter((t) => t.assigned_to === user.id);
+    scopedTasks = allTasks.filter((t) => t.assigned_to === user?.id);
   } else if (selectedUserId !== 'ALL') {
     // Admin/Manager filtering specific employee
-    displayedTasks = allTasks.filter((t) => t.assigned_to === selectedUserId);
+    scopedTasks = allTasks.filter((t) => t.assigned_to === selectedUserId);
   }
+
+  // Counts for tabs
+  const countAll = scopedTasks.length;
+  const countChecklists = scopedTasks.filter((t) => t.type === 'checklist').length;
+  const countDelegations = scopedTasks.filter((t) => t.type === 'delegation').length;
 
   // Task Type Filter (Checklist vs Delegation)
+  let displayedTasks = scopedTasks;
   if (selectedTaskType === 'checklist') {
-    displayedTasks = displayedTasks.filter((t) => t.type === 'checklist');
+    displayedTasks = scopedTasks.filter((t) => t.type === 'checklist');
   } else if (selectedTaskType === 'delegation') {
-    displayedTasks = displayedTasks.filter((t) => t.type === 'delegation');
+    displayedTasks = scopedTasks.filter((t) => t.type === 'delegation');
   }
 
-  // Strictly 4 Key Metric Cards Calculations
+  // 4 Key Metric Cards Calculations
   const totalTasksCount = displayedTasks.length;
   const pendingTasksCount = displayedTasks.filter(
     (t) => t.status === 'Pending' || t.status === 'In Progress'
@@ -88,11 +113,24 @@ export function UnifiedDashboard() {
   const overdueTasksCount = displayedTasks.filter((t) => t.status === 'Overdue').length;
   const completedTasksCount = displayedTasks.filter((t) => t.status === 'Completed').length;
 
-  // Compute Daily Completion & Overdue Trend data for Recharts
+  // Additional Sub-Breakdown Metrics
+  const checklistCompleted = displayedTasks.filter(
+    (t) => t.type === 'checklist' && t.status === 'Completed'
+  ).length;
+  const delegationCompleted = displayedTasks.filter(
+    (t) => t.type === 'delegation' && t.status === 'Completed'
+  ).length;
+  const completionRate =
+    totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
+  const highPriorityPending = displayedTasks.filter(
+    (t) => t.priority === 'High' && t.status !== 'Completed'
+  ).length;
+
+  // Compute Daily Completion & Overdue Trend data for Recharts (Real data)
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const dailyTrendData = daysOfWeek.map((day, idx) => {
-    // Group tasks by mock due date day
     const dayTasks = displayedTasks.filter((t) => {
+      if (!t.due_date) return false;
       const d = new Date(t.due_date);
       const dayIndex = (d.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
       return dayIndex === idx;
@@ -103,112 +141,223 @@ export function UnifiedDashboard() {
 
     return {
       day,
-      'Completed Tasks': completed > 0 ? completed : Math.floor(1 + idx * 1.5),
-      'Overdue Tasks': overdue > 0 ? overdue : idx % 3 === 0 ? 1 : 0,
+      'Completed Tasks': completed,
+      'Overdue Tasks': overdue,
     };
   });
 
   return (
-    <div className="space-y-8">
-      {/* Top Header & Filters */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Welcome back, {user?.full_name}! 👋
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {isAdmin || isManager
-              ? 'Company operational dashboard & user task completion metrics'
-              : 'Track your personal assigned tasks, overdue status & daily trends'}
-          </p>
-        </div>
-
-        {/* Filter Controls: Task Type (Checklist vs Delegation) & Admin User Filter */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Task Type Filter */}
-          <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <button
-              onClick={() => setSelectedTaskType('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                selectedTaskType === 'ALL'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              All Tasks
-            </button>
-
-            <button
-              onClick={() => setSelectedTaskType('checklist')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                selectedTaskType === 'checklist'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              Checklist Only
-            </button>
-
-            <button
-              onClick={() => setSelectedTaskType('delegation')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                selectedTaskType === 'delegation'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              Delegation Only
-            </button>
+    <div className="space-y-6 pb-12">
+      {/* 1. Header with System Badge & Quick Action Buttons */}
+      <div className="bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-indigo-900/5 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-slate-900/40 p-6 rounded-3xl border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs backdrop-blur-sm">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+          <div className="space-y-1.5">
+            <div className="flex items-center space-x-2.5">
+              <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-indigo-600 text-white shadow-xs">
+                <CheckSquare className="w-3.5 h-3.5" />
+                <span>Checklist & Delegation System</span>
+              </span>
+              <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+                Operational Module
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Checklist & Delegation Dashboard
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
+              Track recurring daily SOP checklists, one-time task delegations, employee completion rates, and overdue items in one unified operational command center.
+            </p>
           </div>
 
-          {/* Admin/Manager User Filter */}
-          {(isAdmin || isManager) && (
-            <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-              <Filter className="w-4 h-4 text-indigo-600 ml-1" />
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">User:</span>
-              <select
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-                className="text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
-              >
-                <option value="ALL">All Employees</option>
-                {INITIAL_USERS.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.full_name} ({u.role} - {u.department_name})
-                  </option>
-                ))}
-              </select>
+          {/* Quick Actions */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {(isAdmin || isManager) && (
+              <>
+                <Link
+                  to="/checklist/create"
+                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 transition-all transform active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Checklist</span>
+                </Link>
+
+                <Link
+                  to="/delegation/create"
+                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/25 transition-all transform active:scale-95"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Delegate Task</span>
+                </Link>
+
+                <Link
+                  to="/checklist/list"
+                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
+                >
+                  <ListTodo className="w-4 h-4 text-indigo-500" />
+                  <span>Templates ({checklistsCount})</span>
+                </Link>
+              </>
+            )}
+
+            <Link
+              to="/my-tasks"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
+            >
+              <CheckSquare className="w-4 h-4 text-emerald-500" />
+              <span>My Tasks</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Operational Highlights Pill Banner */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-indigo-200/60 dark:border-indigo-900/60">
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
+              <ListTodo className="w-4 h-4" />
             </div>
-          )}
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+                Recurring Checklists
+              </span>
+              <span className="font-extrabold text-slate-900 dark:text-white truncate block">
+                {countChecklists} Active • {checklistCompleted} Done
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+                Delegated Tasks
+              </span>
+              <span className="font-extrabold text-slate-900 dark:text-white truncate block">
+                {countDelegations} Tasks • {delegationCompleted} Done
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+                Completion Rate
+              </span>
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 truncate block">
+                {completionRate}% Completed
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs">
+            <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+                High Priority Pending
+              </span>
+              <span className="font-extrabold text-amber-600 dark:text-amber-400 truncate block">
+                {highPriorityPending} Urgent
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* REQUIREMENT: Strictly 4 Clean Metric Cards */}
+      {/* 2. Interactive Filters: Task Type Switcher & Employee Filter */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {/* Task Type Filter Pills */}
+        <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <button
+            onClick={() => setSelectedTaskType('ALL')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              selectedTaskType === 'ALL'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            All Tasks ({countAll})
+          </button>
+
+          <button
+            onClick={() => setSelectedTaskType('checklist')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              selectedTaskType === 'checklist'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <ListTodo className="w-3.5 h-3.5" />
+            <span>Checklists ({countChecklists})</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedTaskType('delegation')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              selectedTaskType === 'delegation'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>Delegations ({countDelegations})</span>
+          </button>
+        </div>
+
+        {/* Admin/Manager User Filter */}
+        {(isAdmin || isManager) && (
+          <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <Filter className="w-4 h-4 text-indigo-600 ml-1.5" />
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Assignee:</span>
+            <select
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white cursor-pointer"
+            >
+              <option value="ALL">All Team Members</option>
+              {INITIAL_USERS.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.full_name} ({u.role} - {u.department_name})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* 3. 4 Core KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Total Task */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group">
+        {/* 1. Total Tasks */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-800 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Total Task
+                Total Operational Tasks
               </p>
               <h3 className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">
                 {totalTasksCount}
               </h3>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-              <ListTodo className="w-6 h-6" />
+              <CheckSquare className="w-6 h-6" />
             </div>
           </div>
-          <span className="text-[10px] text-slate-400 mt-3 block">Total assigned tasks in system</span>
+          <span className="text-[10px] text-slate-400 mt-3 block">
+            {countChecklists} Checklists • {countDelegations} Delegations
+          </span>
         </div>
 
-        {/* 2. Pending Task */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group">
+        {/* 2. Pending Tasks */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group hover:border-amber-300 dark:hover:border-amber-800 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Pending Task
+                Pending Tasks
               </p>
               <h3 className="text-3xl font-extrabold text-amber-500 dark:text-amber-400 mt-2">
                 {pendingTasksCount}
@@ -218,15 +367,15 @@ export function UnifiedDashboard() {
               <Clock className="w-6 h-6" />
             </div>
           </div>
-          <span className="text-[10px] text-slate-400 mt-3 block">Tasks awaiting completion</span>
+          <span className="text-[10px] text-slate-400 mt-3 block">Tasks awaiting execution</span>
         </div>
 
-        {/* 3. Overdue Task */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group">
+        {/* 3. Overdue Tasks */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group hover:border-rose-300 dark:hover:border-rose-800 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Overdue Task
+                Overdue Tasks
               </p>
               <h3 className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-2">
                 {overdueTasksCount}
@@ -236,15 +385,15 @@ export function UnifiedDashboard() {
               <AlertTriangle className="w-6 h-6" />
             </div>
           </div>
-          <span className="text-[10px] text-slate-400 mt-3 block">Tasks past due date</span>
+          <span className="text-[10px] text-slate-400 mt-3 block">Tasks delayed past due date</span>
         </div>
 
-        {/* 4. Completed Task */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group">
+        {/* 4. Completed Tasks */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs relative overflow-hidden group hover:border-emerald-300 dark:hover:border-emerald-800 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Completed Task
+                Completed Tasks
               </p>
               <h3 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
                 {completedTasksCount}
@@ -254,20 +403,22 @@ export function UnifiedDashboard() {
               <CheckCircle2 className="w-6 h-6" />
             </div>
           </div>
-          <span className="text-[10px] text-slate-400 mt-3 block">Successfully finished tasks</span>
+          <span className="text-[10px] text-slate-400 mt-3 block">
+            {completionRate}% success rate
+          </span>
         </div>
       </div>
 
-      {/* REQUIREMENT: Single Main Chart -> Daily Task Completion & Overdue Trend */}
+      {/* 4. Daily Task Completion & Overdue Trend Chart */}
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
               <TrendingUp className="w-5 h-5 text-indigo-600" />
-              <span>Daily Task Completion & Overdue Trend</span>
+              <span>Checklist & Delegation Weekly Execution Trend</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Comparison of daily completed tasks vs overdue tasks across the week
+              Comparison of completed tasks vs overdue tasks across the week
             </p>
           </div>
         </div>
@@ -295,21 +446,52 @@ export function UnifiedDashboard() {
         </div>
       </div>
 
-      {/* Clean Recent Tasks Table */}
+      {/* 5. Recent Task Activity Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden space-y-4 p-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Recent Task Activity</h3>
-          <span className="text-xs font-semibold text-slate-400">Showing latest tasks</span>
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              Recent Checklist & Delegation Tasks
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Live tasks currently in progress, pending update, or recently marked completed
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-slate-400">
+            Showing {Math.min(displayedTasks.length, 10)} of {displayedTasks.length} tasks
+          </span>
         </div>
 
         {displayedTasks.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">No tasks found for the selected scope.</div>
+          <div className="p-12 text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+            <CheckSquare className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto" />
+            <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
+              No tasks found for the selected scope.
+            </p>
+            {(isAdmin || isManager) && (
+              <div className="flex items-center justify-center space-x-3 pt-2">
+                <Link
+                  to="/checklist/create"
+                  className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-xs"
+                >
+                  Create Checklist
+                </Link>
+                <Link
+                  to="/delegation/create"
+                  className="px-3 py-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-xs"
+                >
+                  Delegate Task
+                </Link>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <th className="px-4 py-3">Task Code</th>
+                  <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">Task Title</th>
                   <th className="px-4 py-3">Assigned Doer</th>
                   <th className="px-4 py-3">Due Date</th>
@@ -319,47 +501,63 @@ export function UnifiedDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                {displayedTasks.slice(0, 7).map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                    <td className="px-4 py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                      {t.task_code}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white max-w-xs truncate">
-                      {t.title || t.description}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">
-                      {t.assigned_to_name || 'Assigned User'}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                      {formatDate(t.due_date)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <PriorityBadge priority={t.priority} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={t.status} />
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        {t.status !== 'Completed' && t.assigned_to === user?.id && (
-                          <button
-                            onClick={() => setSelectedTaskForCompletion(t)}
-                            className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition-colors"
-                          >
-                            Update
-                          </button>
+                {displayedTasks.slice(0, 10).map((t) => {
+                  const isChecklist = t.type === 'checklist';
+                  return (
+                    <tr key={t.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        {t.task_code}
+                      </td>
+                      <td className="px-4 py-3">
+                        {isChecklist ? (
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                            <ListTodo className="w-3 h-3" />
+                            <span>Checklist ({t.frequency || 'Daily'})</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                            <UserCheck className="w-3 h-3" />
+                            <span>Delegation</span>
+                          </span>
                         )}
-                        <button
-                          onClick={() => setSelectedTaskIdForDetail(t.id)}
-                          className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white max-w-xs truncate">
+                        {t.title || t.description}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">
+                        {t.assigned_to_name || 'Assigned User'}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300 font-medium">
+                        {formatDate(t.due_date)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <PriorityBadge priority={t.priority} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={t.status} />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
+                          {t.status !== 'Completed' && t.assigned_to === user?.id && (
+                            <button
+                              onClick={() => setSelectedTaskForCompletion(t)}
+                              className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                            >
+                              Update
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setSelectedTaskIdForDetail(t.id)}
+                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

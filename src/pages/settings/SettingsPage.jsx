@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { INITIAL_SETTINGS } from '../../services/mockData';
 import { reminderService } from '../../services/reminderService';
-import { Settings, Save, CheckCircle2, ShieldCheck, Mail, MessageSquare, Bell } from 'lucide-react';
+import { Settings, Save, CheckCircle2, ShieldCheck, Mail, MessageSquare, Bell, Database, Trash2 } from 'lucide-react';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { cleanAllModulesDummyData } from '../../services/dataCleanupService';
 
 export function SettingsPage() {
   const [settings, setSettings] = useState(INITIAL_SETTINGS);
@@ -13,6 +15,14 @@ export function SettingsPage() {
     e.preventDefault();
     setSavedMessage('System settings and TAT rules successfully updated!');
     setTimeout(() => setSavedMessage(''), 4000);
+  };
+
+  const handleCleanDummyData = () => {
+    if (window.confirm('Are you sure you want to clean all dummy data across all modules? This leaves your system clean on desktop local storage, ready for Supabase.')) {
+      const res = cleanAllModulesDummyData();
+      setSavedMessage(res.message || 'All module dummy data has been cleaned successfully!');
+      setTimeout(() => setSavedMessage(''), 5000);
+    }
   };
 
   return (
@@ -153,6 +163,70 @@ export function SettingsPage() {
                 {integrationStatus.whatsapp.configured ? 'Configured' : 'Awaiting VITE_WHATSAPP_TOKEN'}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Desktop Local & Supabase Integration Status */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Database className="w-4 h-4 text-emerald-500" />
+                <span>4. Desktop Local Storage & Supabase Connectivity</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Current storage mode: Only desktop local (LocalStorage). Dummy data cleaned for smooth Supabase connection.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Desktop Local Storage</span>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                  Active (Offline Ready)
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                All module records (HR, Leads, Purchase, Sales, Petty, DocSub, WhatsApp) run cleanly on local storage.
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Supabase Cloud Sync</span>
+                <span
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                    isSupabaseConfigured
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                  }`}
+                >
+                  {isSupabaseConfigured ? 'Connected' : 'Ready to Connect (Add credentials to .env)'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Schema prepared in <code className="text-indigo-600 dark:text-indigo-400 font-mono">supabase/schema.sql</code>. No dummy records will conflict with your database tables.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Purge / Reset All Module Dummy Data</p>
+              <p className="text-[11px] text-slate-400">
+                Instantly clean all mock/dummy records from your browser localStorage while keeping your active admin session.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCleanDummyData}
+              className="flex items-center space-x-1.5 px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all shrink-0 cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clean All Dummy Data</span>
+            </button>
           </div>
         </div>
 

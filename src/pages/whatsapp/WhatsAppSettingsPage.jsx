@@ -144,7 +144,7 @@ export default function WhatsAppSettingsPage() {
             </label>
             <input
               type="text"
-              value={settings.businessName || 'Multi Systems ERP'}
+              value={settings.businessName || 'Processly ERP'}
               onChange={(e) => setSettings({ ...settings, businessName: e.target.value })}
               className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />

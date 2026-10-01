@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function OrderClosedPage() {
   const orders = useOTDStorage(STORAGE_KEYS.ORDERS, []);
@@ -221,6 +222,7 @@ export function OrderClosedPage() {
                   <th className="py-2 px-3 text-center">Payment</th>
                   <th className="py-2 px-3 text-center">Order Status</th>
                   <th className="py-2 px-3 text-center">Closed Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -272,6 +274,14 @@ export function OrderClosedPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {o.closingDateTime ? o.closingDateTime.split(' ')[0] : '-'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.closingDateTime || o.stageDetails?.['Order Closed']?.completedAt || o.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

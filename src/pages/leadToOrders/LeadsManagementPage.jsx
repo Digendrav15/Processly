@@ -37,6 +37,7 @@ import {
 } from '../../services/leadToOrderStorageService';
 import { getCurrentUser } from '../../services/otdStorageService';
 import { MarkDealLostModal } from '../../components/leadToOrders/MarkDealLostModal';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 const LEAD_TABS = [
   { id: 'all', label: 'All Leads' },
@@ -89,6 +90,9 @@ export function LeadsManagementPage() {
       return next;
     });
   };
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isHistoryTab = activeTab === 'approved' || activeTab === 'rejected' || activeTab === 'closed';
 
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
@@ -468,13 +472,14 @@ export function LeadsManagementPage() {
                 <th className="py-2 px-3">Assigned To</th>
                 <th className="py-2 px-3">Priority</th>
                 <th className="py-2 px-3">Status</th>
+                {isHistoryTab ? <HistoryTatTh /> : <PlannedTh />}
                 <th className="py-2 px-3 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-400 text-xs">
+                  <td colSpan={isHistoryTab ? 13 : 11} className="py-12 text-center text-slate-400 text-xs">
                     No leads found matching your criteria.
                   </td>
                 </tr>
@@ -513,6 +518,14 @@ export function LeadsManagementPage() {
                         {lead.status}
                       </span>
                     </td>
+                    {isHistoryTab ? (
+                      <HistoryTatTd
+                        plannedDate={lead.leadDate || lead.createdAt?.split('T')[0] || todayStr}
+                        actualDate={lead.updatedAt?.split('T')[0] || lead.leadDate || todayStr}
+                      />
+                    ) : (
+                      <PlannedTd plannedDate={lead.leadDate || lead.createdAt?.split('T')[0] || todayStr} />
+                    )}
                     <td className="py-1.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         {/* View Details */}

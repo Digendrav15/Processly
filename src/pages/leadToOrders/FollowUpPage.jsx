@@ -28,6 +28,8 @@ import {
   generateFollowUpId
 } from '../../services/leadToOrderStorageService';
 import { getCurrentUser } from '../../services/otdStorageService';
+import { calculateDelayInfo } from '../../services/tatCalculationService';
+import { DelayBadge } from '../../components/common/TatColumns';
 
 const FOLLOW_UP_MODES = ['Call', 'WhatsApp', 'Email', 'Meeting', 'Visit', 'Other'];
 
@@ -358,6 +360,36 @@ export function FollowUpPage() {
                       <strong className="text-slate-700 dark:text-slate-300">{flw.nextFollowUpDate || '—'}</strong>
                     </div>
                   </div>
+
+                  {/* Planned / History TAT Section */}
+                  {activeTab === 'pending' && (
+                    <div className="flex items-center justify-between bg-amber-50/70 dark:bg-amber-950/20 px-2.5 py-1.5 rounded-lg border border-amber-200/50 text-xs">
+                      <span className="text-[10px] text-amber-800 dark:text-amber-300 font-bold uppercase">Planned</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{flw.nextFollowUpDate || flw.followUpDate}</span>
+                    </div>
+                  )}
+
+                  {activeTab === 'history' && (() => {
+                    const planned = flw.nextFollowUpDate || flw.followUpDate;
+                    const actual = flw.followUpDate || flw.createdAt?.split('T')[0];
+                    const info = calculateDelayInfo(planned, actual, false);
+                    return (
+                      <div className="grid grid-cols-3 gap-1.5 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg border text-xs">
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-bold uppercase">Planned Date</span>
+                          <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-[10px]">{planned || '-'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-bold uppercase">Actual Date</span>
+                          <span className="font-mono font-bold text-slate-700 dark:text-slate-300 text-[10px]">{actual || '-'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-slate-400 block font-bold uppercase">Time Delay</span>
+                          <DelayBadge delayDays={info.delayDays} isPending={false} text={info.text} />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Footer Actions */}

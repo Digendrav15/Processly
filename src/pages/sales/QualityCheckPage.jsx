@@ -17,6 +17,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function QualityCheckPage() {
   const navigate = useNavigate();
@@ -271,6 +272,7 @@ export function QualityCheckPage() {
                   <th className="py-2 px-3 text-center">Rejected</th>
                   <th className="py-2 px-3 text-center">QC Status</th>
                   <th className="py-2 px-3 text-center">Inspector</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -312,6 +314,14 @@ export function QualityCheckPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {o.qcBy || 'Inspector'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.qcDate || o.qcDateTime || o.stageDetails?.['Quality Check (QC)']?.completedAt || o.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

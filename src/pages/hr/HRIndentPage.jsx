@@ -11,6 +11,7 @@ import {
   X,
   CheckCircle2,
   Clock,
+  History,
   Building,
   User,
   MapPin,
@@ -26,6 +27,7 @@ import {
   generateIndentNumber,
   addActivityLog
 } from '../../services/hrStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 const DEPARTMENTS = [
   'Technology & IT',
@@ -46,6 +48,7 @@ export function HRIndentPage() {
   const navigate = useNavigate();
   const indents = useHRStorage(HR_KEYS.INDENTS, []);
 
+  const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [departmentFilter, setDepartmentFilter] = useState('All');
@@ -133,7 +136,12 @@ export function HRIndentPage() {
     }
   };
 
+  const pendingIndents = indents.filter(i => i.status === 'Pending Approval' || i.status === 'Draft');
+  const historyIndents = indents.filter(i => i.status !== 'Pending Approval' && i.status !== 'Draft');
+
   const filteredIndents = indents.filter(i => {
+    if (activeTab === 'pending' && i.status !== 'Pending Approval' && i.status !== 'Draft') return false;
+    if (activeTab === 'history' && (i.status === 'Pending Approval' || i.status === 'Draft')) return false;
     if (statusFilter !== 'All' && i.status !== statusFilter) return false;
     if (departmentFilter !== 'All' && i.department !== departmentFilter) return false;
     if (searchTerm.trim()) {
@@ -187,13 +195,42 @@ export function HRIndentPage() {
           </div>
         </div>
 
-        <button
-          onClick={handleOpenCreateModal}
-          className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Raise Indent</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingIndents.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyIndents.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={handleOpenCreateModal}
+            className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Raise Indent</span>
+          </button>
+        </div>
       </div>
 
       {/* Compact Filters */}
@@ -247,14 +284,15 @@ export function HRIndentPage() {
                 <th className="py-2 px-3">Priority</th>
                 <th className="py-2 px-3">Requested By</th>
                 <th className="py-2 px-3">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {filteredIndents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-slate-400 text-xs">
-                    No manpower indents found matching your filter criteria.
+                  <td colSpan={activeTab === 'pending' ? 10 : 12} className="p-8 text-center text-slate-400 text-xs">
+                    No {activeTab} manpower indents found matching your filter criteria.
                   </td>
                 </tr>
               ) : (
@@ -288,6 +326,14 @@ export function HRIndentPage() {
                         {indent.status}
                       </span>
                     </td>
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={indent.requiredJoiningDate || indent.requirementDate} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={indent.requiredJoiningDate || indent.requirementDate}
+                        actualDate={indent.approvedDate || indent.updatedAt?.split('T')[0] || indent.requirementDate}
+                      />
+                    )}
                     <td className="py-1.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button

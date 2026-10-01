@@ -197,11 +197,29 @@ export default function SubscriptionsManagementPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 flex-wrap">
             <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-500/20">
               <CreditCard className="w-5 h-5" />
             </div>
-            SaaS & Infrastructure Subscriptions
+            <span>SaaS & Infrastructure Subscriptions</span>
+            {activeTab === 'renewalDue' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 rounded-full border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                Renewal Due (&le;30d) ({tabCounts.renewalDue})
+              </span>
+            )}
+            {activeTab === 'paymentDue' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 rounded-full border border-rose-300 dark:border-rose-800 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
+                Payment Due ({tabCounts.paymentDue})
+              </span>
+            )}
+            {activeTab === 'expired' && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 rounded-full border border-rose-300 dark:border-rose-800 flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Expired ({tabCounts.expired})
+              </span>
+            )}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Track software licenses, cloud servers, domains, renewal deadlines, and billing cycles
@@ -211,7 +229,7 @@ export default function SubscriptionsManagementPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             Export CSV
@@ -221,80 +239,12 @@ export default function SubscriptionsManagementPage() {
               setEditingSub(null);
               setShowAddModal(true);
             }}
-            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-500/20 flex items-center gap-2 transition-all hover:scale-[1.02]"
+            className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-500/20 flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add Subscription
           </button>
         </div>
-      </div>
-
-      {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1">
-        <button
-          onClick={() => setSearchParams({ tab: 'all' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'all'
-              ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <span>All Subscriptions</span>
-          <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-            {tabCounts.all}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'renewalDue' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'renewalDue'
-              ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <Clock className="w-4 h-4 text-amber-500" />
-          <span>Renewal Due (&le;30d)</span>
-          {tabCounts.renewalDue > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-bold">
-              {tabCounts.renewalDue}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'paymentDue' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'paymentDue'
-              ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <DollarSign className="w-4 h-4 text-rose-500" />
-          <span>Payment Due</span>
-          {tabCounts.paymentDue > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-bold">
-              {tabCounts.paymentDue}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => setSearchParams({ tab: 'expired' })}
-          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all border-b-2 flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'expired'
-              ? 'border-rose-600 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20'
-              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
-        >
-          <AlertTriangle className="w-4 h-4 text-rose-500" />
-          <span>Expired</span>
-          {tabCounts.expired > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-bold">
-              {tabCounts.expired}
-            </span>
-          )}
-        </button>
       </div>
 
       {/* Filters Bar */}

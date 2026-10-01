@@ -42,6 +42,7 @@ import {
 } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
 import { ComparativeMatrixModal } from '../../components/purchase/ComparativeMatrixModal';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 // Master Vendor Profile Lookup Helper
 function getVendorProfile(vendorName, storedVendors = []) {
@@ -188,7 +189,7 @@ export function PurchaseOrderPage() {
 
   const [shipToDetails, setShipToDetails] = useState({
     name: 'Store Incharge (Inward Dock)',
-    company: 'Multi Systems App Engineering Plant',
+    company: 'Processly Engineering Plant',
     address: 'Survey No. 88, National Highway 48',
     cityStateZip: 'Bhiwadi, Rajasthan 301019',
     phone: '+91 (01493) 245-100'
@@ -973,6 +974,7 @@ export function PurchaseOrderPage() {
                       <th className="py-2 px-3">Department</th>
                       <th className="py-2 px-3 text-right">PO Total (₹)</th>
                       <th className="py-2 px-3 text-center">PO Date</th>
+                      <HistoryTatTh />
                       <th className="py-2 px-3 text-center">Action</th>
                     </tr>
                   </thead>
@@ -1003,6 +1005,10 @@ export function PurchaseOrderPage() {
                           <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                             {item.poDate || item.indentDate}
                           </td>
+                          <HistoryTatTd
+                            plannedDate={item.requiredByDate || item.indentDate}
+                            actualDate={item.poDate || item.stageDetails?.['PO']?.completedAt || item.updatedAt}
+                          />
                           <td className="py-1.5 px-3 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               <button

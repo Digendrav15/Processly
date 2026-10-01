@@ -22,6 +22,7 @@ import {
   calculatePlannedDate
 } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function OrderProcessingPage() {
   const navigate = useNavigate();
@@ -249,11 +250,11 @@ export function OrderProcessingPage() {
                 <tr>
                   <th className="py-2 px-3">Order Number</th>
                   <th className="py-2 px-3">Customer Name</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3">Batch / Card No</th>
                   <th className="py-2 px-3 text-center">Req. Qty</th>
                   <th className="py-2 px-3 text-center">Processed Qty</th>
                   <th className="py-2 px-3 text-center">Processing Status</th>
-                  <th className="py-2 px-3 text-center">Completion Time</th>
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -271,6 +272,17 @@ export function OrderProcessingPage() {
                         {o.orderNumber}
                       </td>
                       <td className="py-1.5 px-3 font-bold text-slate-900 dark:text-white">{o.customerName}</td>
+
+                      {/* Planned or History TAT columns */}
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.actualCompletionDateTime || o.stockCheckDate || o.updatedAt}
+                        />
+                      )}
+
                       <td className="py-1.5 px-3 font-mono text-slate-600 dark:text-slate-400 font-semibold">
                         {o.batchNo || `BATCH-${o.orderNumber}`}
                       </td>

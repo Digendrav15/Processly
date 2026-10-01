@@ -7,6 +7,7 @@ import {
   Eye,
   CheckCircle2,
   Clock,
+  History,
   Building,
   User,
   Mail,
@@ -26,10 +27,19 @@ import {
   completeJoining,
   addActivityLog
 } from '../../services/hrStorageService';
+import {
+  PlannedTh,
+  PlannedTd,
+  HistoryTatTh,
+  HistoryTatTd
+} from '../../components/common/TatColumns';
 
 export function HRJoiningPage() {
   const { data: joinings, setItem: setJoinings } = useHRStorage(HR_KEYS.JOININGS, []);
   const { data: employees } = useHRStorage(HR_KEYS.EMPLOYEES, []);
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState('pending');
 
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,9 +71,15 @@ export function HRJoiningPage() {
     bankDetails: true
   });
 
+  const pendingJoinings = joinings.filter(j => j.status !== 'Joined');
+  const historyJoinings = joinings.filter(j => j.status === 'Joined');
+
   // Filtered list
   const filteredJoinings = useMemo(() => {
     return joinings.filter(item => {
+      if (activeTab === 'pending' && item.status === 'Joined') return false;
+      if (activeTab === 'history' && item.status !== 'Joined') return false;
+
       const matchesSearch =
         (item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.employeeId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -75,7 +91,7 @@ export function HRJoiningPage() {
 
       return matchesSearch && matchesStatus && matchesDept;
     });
-  }, [joinings, searchTerm, statusFilter, departmentFilter]);
+  }, [joinings, activeTab, searchTerm, statusFilter, departmentFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -167,6 +183,32 @@ export function HRJoiningPage() {
             <p className="text-[11px] text-slate-400 mt-0.5">Pre-joining verification, background checks & active employee roster enrollment</p>
           </div>
         </div>
+        {/* Tab Switcher */}
+        <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'pending'
+                ? 'bg-cyan-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending ({pendingJoinings.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'history'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>History ({historyJoinings.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* Compact Filters */}
@@ -218,6 +260,7 @@ export function HRJoiningPage() {
                 <th className="py-2 px-3">Candidate & Role</th>
                 <th className="py-2 px-3">Department & Manager</th>
                 <th className="py-2 px-3">Target Joining Date</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3">KYC & Documents</th>
                 <th className="py-2 px-3">Joining Status</th>
                 <th className="py-2 px-3 text-right">Actions</th>
@@ -226,7 +269,7 @@ export function HRJoiningPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredJoinings.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 8 : 10} className="py-12 text-center text-slate-400">
                     <UserPlus className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                     <p className="font-semibold">No joining candidates match filters</p>
                   </td>
@@ -271,6 +314,15 @@ export function HRJoiningPage() {
                         <span>{joinItem.joiningDate}</span>
                       </div>
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={joinItem.joiningDate || joinItem.plannedDate || '2026-10-02'} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={joinItem.joiningDate || joinItem.plannedDate || '2026-10-02'}
+                        actualDate={joinItem.actualJoiningDate || joinItem.actualDate || joinItem.joiningDate || '2026-10-02'}
+                      />
+                    )}
 
                     {/* Documents */}
                     <td className="py-2 px-3">

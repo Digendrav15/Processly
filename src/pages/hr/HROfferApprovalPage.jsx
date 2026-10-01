@@ -18,7 +18,9 @@ import {
   ShieldCheck,
   Award,
   Send,
-  Download
+  Download,
+  Clock,
+  History
 } from 'lucide-react';
 import { useHRStorage } from '../../hooks/useHRStorage';
 import {
@@ -27,10 +29,19 @@ import {
   approveSalaryOffer,
   addActivityLog
 } from '../../services/hrStorageService';
+import {
+  PlannedTh,
+  PlannedTd,
+  HistoryTatTh,
+  HistoryTatTd
+} from '../../components/common/TatColumns';
 
 export function HROfferApprovalPage() {
   const { data: offers, setItem: setOffers } = useHRStorage(HR_KEYS.OFFERS, []);
   const { data: candidates } = useHRStorage(HR_KEYS.CANDIDATES, []);
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState('pending');
 
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,9 +68,15 @@ export function HROfferApprovalPage() {
     joiningDate: new Date(Date.now() + 86400000 * 15).toISOString().split('T')[0]
   });
 
+  const pendingOffers = offers.filter(o => o.status === 'Pending Approval');
+  const historyOffers = offers.filter(o => o.status !== 'Pending Approval');
+
   // Filtered offers
   const filteredOffers = useMemo(() => {
     return offers.filter(item => {
+      if (activeTab === 'pending' && item.status !== 'Pending Approval') return false;
+      if (activeTab === 'history' && item.status === 'Pending Approval') return false;
+
       const matchesSearch =
         (item.candidateName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.offerId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -71,7 +88,7 @@ export function HROfferApprovalPage() {
 
       return matchesSearch && matchesStatus && matchesDept;
     });
-  }, [offers, searchTerm, statusFilter, departmentFilter]);
+  }, [offers, activeTab, searchTerm, statusFilter, departmentFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -185,13 +202,42 @@ export function HROfferApprovalPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Create Salary Offer</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingOffers.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyOffers.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Create Salary Offer</span>
+          </button>
+        </div>
       </div>
 
       {/* Compact Filters */}
@@ -246,6 +292,7 @@ export function HROfferApprovalPage() {
                 <th className="py-2 px-3">Monthly Gross</th>
                 <th className="py-2 px-3">Net Take-Home</th>
                 <th className="py-2 px-3">Expected Joining</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3">Status</th>
                 <th className="py-2 px-3 text-right">Actions</th>
               </tr>
@@ -253,7 +300,7 @@ export function HROfferApprovalPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredOffers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 9 : 11} className="py-12 text-center text-slate-400">
                     <DollarSign className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                     <p className="font-semibold">No offers match the current filters</p>
                   </td>
@@ -300,6 +347,15 @@ export function HROfferApprovalPage() {
                     <td className="py-2 px-3 font-medium text-slate-700 dark:text-slate-300">
                       {off.joiningDate || 'TBD'}
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={off.offerDate || off.plannedDate || '2026-10-02'} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={off.offerDate || off.plannedDate || '2026-10-02'}
+                        actualDate={off.approvalDate || off.actualDate || off.offerDate || '2026-10-02'}
+                      />
+                    )}
 
                     {/* Status */}
                     <td className="py-2 px-3">

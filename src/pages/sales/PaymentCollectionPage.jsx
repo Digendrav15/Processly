@@ -18,6 +18,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function PaymentCollectionPage() {
   const navigate = useNavigate();
@@ -245,6 +246,7 @@ export function PaymentCollectionPage() {
                   <th className="py-2 px-3 text-right">Balance Due (₹)</th>
                   <th className="py-2 px-3 text-center">Status</th>
                   <th className="py-2 px-3 text-center">Payment Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -284,6 +286,14 @@ export function PaymentCollectionPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {o.finalPaymentDate || o.paymentDate || '-'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.finalPaymentDate || o.paymentDate || o.stageDetails?.['Payment Collection']?.completedAt || o.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

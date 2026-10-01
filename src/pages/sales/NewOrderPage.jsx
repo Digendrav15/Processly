@@ -12,7 +12,9 @@ import {
   CheckCircle2,
   Calendar,
   User,
-  ArrowRight
+  ArrowRight,
+  Clock,
+  History
 } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import {
@@ -26,6 +28,7 @@ import {
   getCurrentUser
 } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function NewOrderPage() {
   const navigate = useNavigate();
@@ -37,7 +40,7 @@ export function NewOrderPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Table Filters & Search
+  const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -238,8 +241,13 @@ export function NewOrderPage() {
     alert(`Order ${newOrder.orderNumber} created successfully and added to New Orders list!`);
   };
 
+  // Pending & History splits
+  const pendingOrders = orders.filter((o) => o.currentStage !== 'Order Closed' && o.status !== 'Closed');
+  const historyOrders = orders.filter((o) => o.currentStage === 'Order Closed' || o.status === 'Closed');
+  const baseOrders = activeTab === 'pending' ? pendingOrders : historyOrders;
+
   // Filtered Orders for Table
-  const filteredOrders = orders.filter((o) => {
+  const filteredOrders = baseOrders.filter((o) => {
     const matchesSearch =
       (o.orderNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (o.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -253,7 +261,7 @@ export function NewOrderPage() {
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header with Top Right Button */}
+      {/* Header with Top Right Button and Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
         <div>
           <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs uppercase tracking-wider border border-emerald-500/30">
@@ -263,13 +271,42 @@ export function NewOrderPage() {
           <p className="text-xs text-slate-400 mt-1">Manage, search, and log new customer sales orders.</p>
         </div>
 
-        <button
-          onClick={handleOpenModal}
-          className="flex items-center justify-center space-x-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 transition-all cursor-pointer shrink-0"
-        >
-          <PlusCircle className="w-5 h-5" />
-          <span>+ New Order</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700 flex space-x-1 text-xs font-bold">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingOrders.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyOrders.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={handleOpenModal}
+            className="flex items-center justify-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 transition-all cursor-pointer shrink-0"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>+ New Order</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters & Search Bar */}
@@ -329,7 +366,7 @@ export function NewOrderPage() {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
         <div className="p-4 border-b flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/40">
           <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
-            Created Orders List ({filteredOrders.length})
+            {activeTab === 'pending' ? 'Pending Active Orders' : 'Closed Orders History'} ({filteredOrders.length})
           </h3>
           <span className="text-xs text-slate-400 font-semibold">Total Orders: {orders.length}</span>
         </div>
@@ -353,6 +390,7 @@ export function NewOrderPage() {
                   <th className="p-3.5 text-right">Grand Total (₹)</th>
                   <th className="p-3.5">Current Stage</th>
                   <th className="p-3.5">Salesperson</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="p-3.5 text-center">Action</th>
                 </tr>
               </thead>
@@ -396,6 +434,14 @@ export function NewOrderPage() {
                     <td className="p-3.5 text-slate-500 font-medium">
                       {o.salesPerson || 'N/A'}
                     </td>
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                        actualDate={o.closingDateTime || o.stageDetails?.['Order Closed']?.completedAt || o.updatedAt}
+                      />
+                    )}
                     <td className="p-3.5 text-center">
                       <button
                         onClick={() => navigate('/sales/verification')}

@@ -12,7 +12,9 @@ import {
   Briefcase,
   AlertCircle,
   ArrowRight,
-  UserCheck
+  UserCheck,
+  Clock,
+  History
 } from 'lucide-react';
 import { useHRStorage } from '../../hooks/useHRStorage';
 import {
@@ -22,12 +24,14 @@ import {
   generateEnquiryId,
   addActivityLog
 } from '../../services/hrStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function HRIndentApprovalPage() {
   const navigate = useNavigate();
   const indents = useHRStorage(HR_KEYS.INDENTS, []);
   const enquiries = useHRStorage(HR_KEYS.JOB_ENQUIRIES, []);
 
+  const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndent, setSelectedIndent] = useState(null);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
@@ -109,7 +113,12 @@ export function HRIndentApprovalPage() {
     }
   };
 
+  const pendingApprovals = indents.filter(i => i.status === 'Pending Approval');
+  const historyApprovals = indents.filter(i => i.status !== 'Pending Approval');
+
   const filteredIndents = indents.filter(i => {
+    if (activeTab === 'pending' && i.status !== 'Pending Approval') return false;
+    if (activeTab === 'history' && i.status === 'Pending Approval') return false;
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       const match =
@@ -139,6 +148,33 @@ export function HRIndentApprovalPage() {
             Review proposed positions, budget justification, and headcounts. Approved indents immediately unlock the <strong>Job Enquiry & Candidate Sourcing</strong> stage.
           </p>
         </div>
+
+        {/* Tab Switcher */}
+        <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'pending'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending ({pendingApprovals.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              activeTab === 'history'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>History ({historyApprovals.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -154,7 +190,8 @@ export function HRIndentApprovalPage() {
           />
         </div>
         <span className="text-xs text-slate-400">
-          Pending Review: <strong className="text-amber-600 font-bold">{indents.filter(i => i.status === 'Pending Approval').length}</strong>
+          {activeTab === 'pending' ? 'Pending Review: ' : 'Completed: '}
+          <strong className="text-amber-600 font-bold">{filteredIndents.length}</strong>
         </span>
       </div>
 
@@ -172,45 +209,61 @@ export function HRIndentApprovalPage() {
                 <th className="py-3 px-4">Priority</th>
                 <th className="py-3 px-4">Requested By</th>
                 <th className="py-3 px-4">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredIndents.map((indent) => (
-                <tr key={indent.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3.5 px-4 font-extrabold text-blue-600 dark:text-blue-400">
-                    {indent.indentNumber}
+              {filteredIndents.length === 0 ? (
+                <tr>
+                  <td colSpan={activeTab === 'pending' ? 10 : 12} className="py-12 text-center text-slate-400 text-xs">
+                    No {activeTab} indent approvals found.
                   </td>
-                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
-                    {indent.requirementDate}
-                  </td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-100">
-                    {indent.department}
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                    {indent.designation}
-                  </td>
-                  <td className="py-3.5 px-4 text-center font-black">
-                    {indent.numberOfPositions}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-amber-200 bg-amber-50 text-amber-700">
-                      {indent.priority}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
-                    {indent.requestedBy}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                      indent.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                      indent.status === 'Rejected' ? 'bg-rose-100 text-rose-700 border-rose-200' :
-                      'bg-amber-100 text-amber-700 border-amber-200'
-                    }`}>
-                      {indent.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
+                </tr>
+              ) : (
+                filteredIndents.map((indent) => (
+                  <tr key={indent.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3.5 px-4 font-extrabold text-blue-600 dark:text-blue-400">
+                      {indent.indentNumber}
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
+                      {indent.requirementDate}
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-100">
+                      {indent.department}
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                      {indent.designation}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-black">
+                      {indent.numberOfPositions}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-amber-200 bg-amber-50 text-amber-700">
+                        {indent.priority}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
+                      {indent.requestedBy}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                        indent.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                        indent.status === 'Rejected' ? 'bg-rose-100 text-rose-700 border-rose-200' :
+                        'bg-amber-100 text-amber-700 border-amber-200'
+                      }`}>
+                        {indent.status}
+                      </span>
+                    </td>
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={indent.requiredJoiningDate || indent.requirementDate} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={indent.requiredJoiningDate || indent.requirementDate}
+                        actualDate={indent.approvalDate || indent.updatedAt?.split('T')[0] || indent.requirementDate}
+                      />
+                    )}
+                    <td className="py-3.5 px-4 text-center">
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         title="View Indent"
@@ -242,7 +295,7 @@ export function HRIndentApprovalPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

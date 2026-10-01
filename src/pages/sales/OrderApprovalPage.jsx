@@ -16,6 +16,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function OrderApprovalPage() {
   const navigate = useNavigate();
@@ -213,6 +214,7 @@ export function OrderApprovalPage() {
                   <th className="py-2 px-3">Order Number</th>
                   <th className="py-2 px-3">Customer Name</th>
                   <th className="py-2 px-3">Order Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3">Priority</th>
                   <th className="py-2 px-3 text-center">Total Items</th>
                   <th className="py-2 px-3 text-center">Total Quantity</th>
@@ -234,6 +236,17 @@ export function OrderApprovalPage() {
                         {o.customerName}
                       </td>
                       <td className="py-1.5 px-3 text-slate-500 font-medium">{o.orderDate}</td>
+
+                      {/* Planned or History TAT columns */}
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.plannedCompletionDate || o.expectedDeliveryDate || o.orderDate}
+                          actualDate={o.approvalDate || o.updatedAt}
+                        />
+                      )}
+
                       <td className="py-1.5 px-3">
                         <span
                           className={`px-2 py-0.5 rounded-full font-extrabold text-[10px] ${

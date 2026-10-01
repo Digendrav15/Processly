@@ -26,6 +26,8 @@ import {
   generateNegotiationId
 } from '../../services/leadToOrderStorageService';
 import { getCurrentUser } from '../../services/otdStorageService';
+import { calculateDelayInfo } from '../../services/tatCalculationService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd, DelayBadge } from '../../components/common/TatColumns';
 
 const NEGOTIATION_STATUSES = ['Negotiation', 'Accepted', 'Rejected', 'Hold'];
 
@@ -40,7 +42,8 @@ export function NegotiationPage() {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Filters
+  // Tabs & Filters
+  const [activeTab, setActiveTab] = useState('pending');
   const [selectedLeadIdFilter, setSelectedLeadIdFilter] = useState(searchParams.get('leadId') || 'ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -173,8 +176,14 @@ export function NegotiationPage() {
     }
   };
 
+  // Split into Pending and History
+  const pendingNegotiations = negotiations.filter(n => n.status !== 'Accepted' && n.status !== 'Rejected');
+  const historyNegotiations = negotiations.filter(n => n.status === 'Accepted' || n.status === 'Rejected');
+
   // Filter list
   const filteredNegotiations = negotiations.filter(n => {
+    if (activeTab === 'pending' && (n.status === 'Accepted' || n.status === 'Rejected')) return false;
+    if (activeTab === 'history' && n.status !== 'Accepted' && n.status !== 'Rejected') return false;
     if (selectedLeadIdFilter !== 'ALL' && n.leadId !== selectedLeadIdFilter) return false;
     if (statusFilter !== 'ALL' && n.status !== statusFilter) return false;
     if (searchTerm.trim()) {
@@ -220,13 +229,43 @@ export function NegotiationPage() {
             Maintain complete negotiation history. Record client counter-offers, concessions, and delivery terms. When customer accepts the final price, the deal transitions straight to Approval!
           </p>
         </div>
-        <button
-          onClick={() => handleOpenAddModal()}
-          className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm shadow-purple-600/30 transition-all cursor-pointer transform active:scale-95 shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Record Negotiation</span>
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingNegotiations.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyNegotiations.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={() => handleOpenAddModal()}
+            className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm shadow-purple-600/30 transition-all cursor-pointer transform active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Record Negotiation</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -273,110 +312,103 @@ export function NegotiationPage() {
         </div>
       </div>
 
-      {/* Negotiation History Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredNegotiations.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-slate-400 text-xs bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-            No negotiation logs found. Click "+ Record Negotiation" to log customer price discussions.
-          </div>
-        ) : (
-          filteredNegotiations.map((neg) => {
-            const leadLogs = negotiations.filter(n => n.leadId === neg.leadId);
-
-            return (
-              <div
-                key={neg.id || neg.negotiationId}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-              >
-                <div className="space-y-3">
-                  {/* Top Bar */}
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-purple-600 dark:text-purple-400">
-                      {neg.negotiationId} • {neg.leadId}
-                    </span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(neg.status)}`}>
-                      {neg.status}
-                    </span>
-                  </div>
-
-                  {/* Customer & Quote */}
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                      {neg.customerName || 'Valued Customer'}
-                    </h3>
-                    <p className="text-[11px] text-slate-400">
-                      Quote Ref: <strong className="text-indigo-600 dark:text-indigo-400">{neg.quotationNo || 'Direct'}</strong> • Date: {neg.negotiationDate}
-                    </p>
-                  </div>
-
-                  {/* Pricing Comparison Grid */}
-                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800 text-xs space-y-2">
-                    <div className="grid grid-cols-3 gap-2 text-center pb-2 border-b border-slate-200 dark:border-slate-700/60">
-                      <div>
-                        <span className="block text-[10px] text-slate-400 uppercase">Offered</span>
-                        <strong className="text-slate-700 dark:text-slate-300 font-extrabold">
-                          ₹ {Number(neg.companyOfferedPrice || 0).toLocaleString('en-IN')}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className="block text-[10px] text-slate-400 uppercase">Expected</span>
-                        <strong className="text-rose-600 dark:text-rose-400 font-extrabold">
-                          ₹ {Number(neg.customerExpectedPrice || 0).toLocaleString('en-IN')}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Revised</span>
-                        <strong className="text-emerald-700 dark:text-emerald-300 font-black">
-                          ₹ {Number(neg.revisedPrice || 0).toLocaleString('en-IN')}
-                        </strong>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Discount Concession: <strong>{neg.discount || 0}%</strong></span>
-                      <span>By: <strong className="text-slate-700 dark:text-slate-300">{neg.negotiatedBy}</strong></span>
-                    </div>
-                  </div>
-
-                  {/* Discussion Text */}
-                  <div className="text-xs space-y-1">
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Discussion Notes:</span>
-                    <p className="text-slate-700 dark:text-slate-300 line-clamp-2">
-                      {neg.discussion}
-                    </p>
-                    {neg.paymentTerms && (
-                      <p className="text-[10px] text-slate-500">
-                        Terms: <strong>{neg.paymentTerms}</strong>
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Footer Actions */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                  <button
-                    onClick={() => setHistoryLeadId(neg.leadId)}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    <History className="w-3 h-3" />
-                    <span>{leadLogs.length} Rounds</span>
-                  </button>
-
-                  <div className="flex items-center gap-1.5">
-                    {/* If accepted, navigate to Approval */}
-                    <button
-                      onClick={() => navigate(`/lead-to-orders/approval?leadId=${neg.leadId}&quotationNo=${neg.quotationNo}`)}
-                      className="px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-[10px] rounded-lg shadow-xs flex items-center gap-1 cursor-pointer"
-                    >
-                      <FileCheck className="w-3 h-3" />
-                      <span>Proceed to Approval</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
+      {/* Negotiation Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto max-h-[calc(100vh-220px)] overflow-y-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="text-[11px] uppercase tracking-wider text-slate-400 bg-slate-50 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 shadow-xs">
+              <tr>
+                <th className="py-2 px-3">Negotiation ID</th>
+                <th className="py-2 px-3">Lead ID</th>
+                <th className="py-2 px-3">Quotation No</th>
+                <th className="py-2 px-3">Customer</th>
+                <th className="py-2 px-3 text-right">Offered Price</th>
+                <th className="py-2 px-3 text-right">Expected Price</th>
+                <th className="py-2 px-3 text-right">Revised Price</th>
+                <th className="py-2 px-3 text-center">Discount</th>
+                <th className="py-2 px-3">Status</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
+                <th className="py-2 px-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredNegotiations.length === 0 ? (
+                <tr>
+                  <td colSpan={11} className="py-12 text-center text-slate-400 text-xs">
+                    No {activeTab} negotiation logs found. Click "+ Record Negotiation" to log customer discussions.
+                  </td>
+                </tr>
+              ) : (
+                filteredNegotiations.map((neg) => {
+                  const leadLogs = negotiations.filter(n => n.leadId === neg.leadId);
+                  return (
+                    <tr key={neg.id || neg.negotiationId} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-1.5 px-3 font-bold text-purple-600 dark:text-purple-400">
+                        {neg.negotiationId}
+                      </td>
+                      <td className="py-1.5 px-3 font-extrabold text-indigo-600 dark:text-indigo-400">
+                        {neg.leadId}
+                      </td>
+                      <td className="py-1.5 px-3 font-medium text-slate-600 dark:text-slate-300">
+                        {neg.quotationNo || 'Direct'}
+                      </td>
+                      <td className="py-1.5 px-3 font-bold text-slate-800 dark:text-slate-100">
+                        {neg.customerName || 'Valued Customer'}
+                      </td>
+                      <td className="py-1.5 px-3 text-right font-medium text-slate-600 dark:text-slate-300">
+                        ₹ {Number(neg.companyOfferedPrice || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-1.5 px-3 text-right font-bold text-rose-600 dark:text-rose-400">
+                        ₹ {Number(neg.customerExpectedPrice || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-1.5 px-3 text-right font-black text-emerald-600 dark:text-emerald-400">
+                        ₹ {Number(neg.revisedPrice || 0).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-1.5 px-3 text-center font-bold text-amber-600 dark:text-amber-400">
+                        {neg.discount || 0}%
+                      </td>
+                      <td className="py-1.5 px-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(neg.status)}`}>
+                          {neg.status}
+                        </span>
+                      </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={neg.nextFollowUpDate || neg.negotiationDate || todayStr} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={neg.nextFollowUpDate || neg.negotiationDate || todayStr}
+                          actualDate={neg.negotiationDate || todayStr}
+                        />
+                      )}
+                      <td className="py-1.5 px-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => setHistoryLeadId(neg.leadId)}
+                            title="View Negotiation Rounds"
+                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <History className="w-3 h-3" />
+                            <span>{leadLogs.length}</span>
+                          </button>
+                          {activeTab === 'pending' && (
+                            <button
+                              onClick={() => navigate(`/lead-to-orders/approval?leadId=${neg.leadId}&quotationNo=${neg.quotationNo}`)}
+                              title="Proceed to Approval"
+                              className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <FileCheck className="w-3 h-3" />
+                              <span>Approve</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ========================================================================= */}

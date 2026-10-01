@@ -49,10 +49,12 @@ export function Sidebar() {
       'master-system': false,
       'petty-expenses': false,
       'doc-subscription': false,
-      whatsapp: false
+      whatsapp: false,
+      'mis-summary': false
     };
     const path = window.location.pathname;
-    if (path.startsWith('/hr')) initial.hr = true;
+    if (path.startsWith('/mis-summary')) initial['mis-summary'] = true;
+    else if (path.startsWith('/hr')) initial.hr = true;
     else if (path.startsWith('/petty-expenses')) initial['petty-expenses'] = true;
     else if (path.startsWith('/doc-subscription')) initial['doc-subscription'] = true;
     else if (path.startsWith('/whatsapp')) initial.whatsapp = true;
@@ -61,6 +63,8 @@ export function Sidebar() {
     else if (path.startsWith('/lead-to-orders')) initial['lead-to-orders'] = true;
     else if (path.startsWith('/master-system')) initial['master-system'] = true;
     else if (
+      path.startsWith('/checklist') ||
+      path.startsWith('/delegation') ||
       path.startsWith('/my-tasks') ||
       path.startsWith('/task-assignment') ||
       path.startsWith('/notifications') ||
@@ -262,7 +266,7 @@ export function Sidebar() {
     }
   };
 
-  const isMainDashboardActive = location.pathname === '/dashboard';
+  const isMainDashboardActive = location.pathname === '/dashboard' || location.pathname === '/admin/dashboard';
 
   return (
     <aside
@@ -278,7 +282,7 @@ export function Sidebar() {
             </div>
             <div className="min-w-0">
               <h1 className="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight leading-tight truncate">
-                Multi Systems App
+                Processly
               </h1>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 Enterprise OS
@@ -313,6 +317,7 @@ export function Sidebar() {
         {/* 1. Main Dashboard Link (Role-aware: Admin Dashboard only for Admin) */}
         <NavLink
           to="/dashboard"
+          end
           className={({ isActive }) =>
             `w-full flex items-center justify-between p-2.5 rounded-xl transition-all cursor-pointer group ${isCollapsed ? 'justify-center px-2' : ''
             } ${isActive
@@ -437,21 +442,30 @@ export function Sidebar() {
                             {subItem.section}
                           </div>
                         )}
-                        <NavLink
-                          to={subItem.path}
-                          onClick={() => switchSystem(sys.id, false)}
-                          className={({ isActive }) =>
-                            `flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-xs transition-all group ${isActive
-                              ? sysTheme.activeSub
-                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                            }`
-                          }
-                        >
-                          <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-80 group-hover:opacity-100" />
-                          <span className="truncate tracking-tight font-medium text-[11.5px]">
-                            {subItem.label}
-                          </span>
-                        </NavLink>
+                        {(() => {
+                          const currentFullPath = location.pathname + location.search;
+                          const isSubActive = subItem.path.includes('?')
+                            ? subItem.path === currentFullPath ||
+                              (subItem.path.endsWith('?tab=all') && location.pathname === subItem.path.split('?')[0] && !location.search) ||
+                              (subItem.path.endsWith('?view=users') && location.pathname === subItem.path.split('?')[0] && !location.search)
+                            : location.pathname === subItem.path && (!location.search || subItem.path === '/mis-summary');
+
+                          return (
+                            <NavLink
+                              to={subItem.path}
+                              onClick={() => switchSystem(sys.id, false)}
+                              className={`flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-xs transition-all group ${isSubActive
+                                ? sysTheme.activeSub
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                              }`}
+                            >
+                              <SubIcon className="w-3.5 h-3.5 shrink-0 opacity-80 group-hover:opacity-100" />
+                              <span className="truncate tracking-tight font-medium text-[11.5px]">
+                                {subItem.label}
+                              </span>
+                            </NavLink>
+                          );
+                        })()}
                       </React.Fragment>
                     );
                   })}

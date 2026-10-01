@@ -26,6 +26,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function PurchaseIndentPage() {
   const navigate = useNavigate();
@@ -290,6 +291,7 @@ export function PurchaseIndentPage() {
                   <th className="py-2 px-3 text-center">Priority</th>
                   <th className="py-2 px-3 text-right">Est. Value (₹)</th>
                   <th className="py-2 px-3 text-center">Status</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -332,6 +334,14 @@ export function PurchaseIndentPage() {
                           {item.status || item.currentStage}
                         </span>
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.stageDetails?.['Purchase Indent']?.completedAt || item.updatedAt || item.createdAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

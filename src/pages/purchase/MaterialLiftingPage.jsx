@@ -22,6 +22,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function MaterialLiftingPage() {
   const navigate = useNavigate();
@@ -228,6 +229,7 @@ export function MaterialLiftingPage() {
                   <th className="py-2 px-3">LR / Bilty #</th>
                   <th className="py-2 px-3 text-center">Dispatch Date</th>
                   <th className="py-2 px-3 text-center">Status</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -254,6 +256,14 @@ export function MaterialLiftingPage() {
                           {st}
                         </span>
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.dispatchDate || item.stageDetails?.['Material Lifting / Dispatch']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

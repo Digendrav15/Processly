@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { taskService } from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
 import { DEPARTMENTS, FREQUENCIES, TASK_PRIORITY } from '../../config/constants';
@@ -6,7 +6,8 @@ import { INITIAL_USERS } from '../../services/mockData';
 import { Modal } from '../../components/common/Modal';
 import { StatusBadge, PriorityBadge } from '../../components/common/StatusBadge';
 import { formatDate } from '../../lib/utils';
-import { Plus, Edit2, Trash2, Search, Users, Check, ChevronDown, X, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Users, Check, ChevronDown, X, AlertCircle, Clock, History as HistoryIcon } from 'lucide-react';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function TaskAssignmentPage() {
   const { user } = useAuth();
@@ -30,6 +31,7 @@ export function TaskAssignmentPage() {
 
   // Doer Dropdown Popover State
   const [showDoerDropdown, setShowDoerDropdown] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'history'
 
   // Table Filters
   const [filters, setFilters] = useState({
@@ -186,6 +188,10 @@ export function TaskAssignmentPage() {
     }
   };
 
+  const pendingTasks = useMemo(() => tasks.filter((t) => t.status !== 'Completed'), [tasks]);
+  const historyTasks = useMemo(() => tasks.filter((t) => t.status === 'Completed'), [tasks]);
+  const currentList = activeTab === 'pending' ? pendingTasks : historyTasks;
+
   return (
     <div className="space-y-2.5">
       {/* Top Header & + New Task Button */}
@@ -199,13 +205,41 @@ export function TaskAssignmentPage() {
           </span>
         </div>
 
-        <button
-          onClick={handleOpenCreateModal}
-          className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New Task</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Status Switcher Tabs: Pending vs History */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingTasks.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <HistoryIcon className="w-3.5 h-3.5" />
+              <span>History ({historyTasks.length})</span>
+            </button>
+          </div>
+
+          <button
+            onClick={handleOpenCreateModal}
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Task</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -271,8 +305,8 @@ export function TaskAssignmentPage() {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-xs text-slate-400">Loading assigned tasks...</div>
-        ) : tasks.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">No assigned tasks found.</div>
+        ) : currentList.length === 0 ? (
+          <div className="p-8 text-center text-xs text-slate-400">No {activeTab} tasks found.</div>
         ) : (
           <div className="overflow-x-auto max-h-[calc(100vh-210px)] overflow-y-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
@@ -285,13 +319,13 @@ export function TaskAssignmentPage() {
                   <th className="px-3 py-2">Assign From</th>
                   <th className="px-3 py-2">Doer's Name</th>
                   <th className="px-3 py-2">Frequency</th>
-                  <th className="px-3 py-2">End Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="px-3 py-2">Attachment</th>
                   <th className="px-3 py-2">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
-                {tasks.map((t) => (
+                {currentList.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-3 py-1.5 font-semibold">
                       <div className="flex items-center space-x-1">
@@ -324,7 +358,17 @@ export function TaskAssignmentPage() {
                         {t.frequency || (t.type === 'delegation' ? 'One Time' : 'Daily')}
                       </span>
                     </td>
-                    <td className="px-3 py-1.5 text-slate-600 dark:text-slate-300 text-[11px]">{formatDate(t.due_date)}</td>
+
+                    {/* Planned or History TAT columns */}
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={t.due_date} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={t.due_date}
+                        actualDate={t.completion_date || t.updated_at}
+                      />
+                    )}
+
                     <td className="px-3 py-1.5">
                       {t.required_attachment ? (
                         <span className="text-[9px] font-extrabold text-rose-600 bg-rose-50 dark:bg-rose-950 px-1.5 py-0.5 rounded">

@@ -19,6 +19,7 @@ import {
   PURCHASE_STORAGE_KEYS,
   advancePurchaseStage
 } from '../../services/purchaseStorageService';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function PurchasePaymentPage() {
   const indents = usePurchaseStorage(PURCHASE_STORAGE_KEYS.INDENTS, []);
@@ -227,6 +228,7 @@ export function PurchasePaymentPage() {
                   <th className="py-2 px-3 text-right">Amount Paid (₹)</th>
                   <th className="py-2 px-3 text-center">Payment Status</th>
                   <th className="py-2 px-3 text-center">Payment Date</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -267,6 +269,14 @@ export function PurchasePaymentPage() {
                       <td className="py-1.5 px-3 text-center text-slate-500 font-medium">
                         {item.paymentDate || '-'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={item.requiredByDate || item.indentDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={item.requiredByDate || item.indentDate}
+                          actualDate={item.paymentDate || item.stageDetails?.['Payment']?.completedAt || item.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Database, Download, Upload, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { exportAllData, importAllData, clearAllOTDData, logAuditAction } from '../../services/otdStorageService';
+import { cleanAllModulesDummyData } from '../../services/dataCleanupService';
 
 export function OTDDataManagementPage() {
   const [feedback, setFeedback] = useState(null);
@@ -43,10 +44,11 @@ export function OTDDataManagementPage() {
 
   // Clear All Data
   const handleClearAll = () => {
+    cleanAllModulesDummyData();
     clearAllOTDData();
     logAuditAction('Data Reset', 'Data Management', 'ALL', {});
     setShowClearModal(false);
-    setFeedback({ type: 'success', message: 'All local application data has been completely cleared. System is now empty.' });
+    setFeedback({ type: 'success', message: 'All module dummy data has been completely cleared. Desktop local storage is clean and ready for Supabase.' });
   };
 
   return (

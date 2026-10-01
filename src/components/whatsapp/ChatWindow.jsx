@@ -220,7 +220,7 @@ export default function ChatWindow({
         {/* Date / Security Notice Pill */}
         <div className="flex justify-center my-2">
           <span className="px-3 py-1 rounded-lg text-[10px] font-semibold bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs text-slate-500 shadow-2xs border border-slate-200/60 dark:border-slate-700/60">
-            Messages are end-to-end connected with Multi Systems ERP
+            Messages are end-to-end connected with Processly
           </span>
         </div>
 

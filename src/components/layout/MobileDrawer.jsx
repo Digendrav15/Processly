@@ -43,7 +43,7 @@ export function MobileDrawer({ isOpen, onClose }) {
               <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-xs">
                 <Building2 className="w-4 h-4" />
               </div>
-              <span className="font-bold text-slate-900 dark:text-white text-sm">Multi Systems App</span>
+              <span className="font-bold text-slate-900 dark:text-white text-sm">Processly</span>
             </div>
             <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
               <X className="w-5 h-5" />
@@ -54,6 +54,7 @@ export function MobileDrawer({ isOpen, onClose }) {
           <div className="mb-3">
             <NavLink
               to="/dashboard"
+              end
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center space-x-2.5 p-2.5 rounded-xl text-xs font-bold transition-all ${
@@ -112,6 +113,13 @@ export function MobileDrawer({ isOpen, onClose }) {
                     <div className="pl-4 pr-1 py-1 space-y-1 mt-1 border-l-2 border-slate-200 dark:border-slate-800 ml-3">
                       {navItems.map((subItem) => {
                         const SubIcon = subItem.icon;
+                        const currentFullPath = location.pathname + location.search;
+                        const isSubActive = subItem.path.includes('?')
+                          ? subItem.path === currentFullPath ||
+                            (subItem.path.endsWith('?tab=all') && location.pathname === subItem.path.split('?')[0] && !location.search) ||
+                            (subItem.path.endsWith('?view=users') && location.pathname === subItem.path.split('?')[0] && !location.search)
+                          : location.pathname === subItem.path && (!location.search || subItem.path === '/mis-summary');
+
                         return (
                           <NavLink
                             key={subItem.path}
@@ -120,13 +128,11 @@ export function MobileDrawer({ isOpen, onClose }) {
                               switchSystem(sys.id, false);
                               onClose();
                             }}
-                            className={({ isActive }) =>
-                              `flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs transition-all ${
-                                isActive
-                                  ? 'bg-indigo-50 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 font-bold border-l-2 border-indigo-500'
-                                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-                              }`
-                            }
+                            className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-xs transition-all ${
+                              isSubActive
+                                ? 'bg-indigo-50 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 font-bold border-l-2 border-indigo-500'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
                           >
                             <SubIcon className="w-3.5 h-3.5 opacity-80" />
                             <span className="truncate">{subItem.label}</span>

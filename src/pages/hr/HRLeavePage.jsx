@@ -5,6 +5,7 @@ import {
   Filter,
   Plus,
   Clock,
+  History,
   Calendar,
   UserCheck,
   UserX,
@@ -20,10 +21,19 @@ import {
   HR_KEYS,
   addActivityLog
 } from '../../services/hrStorageService';
+import {
+  PlannedTh,
+  PlannedTd,
+  HistoryTatTh,
+  HistoryTatTd
+} from '../../components/common/TatColumns';
 
 export function HRLeavePage() {
   const { data: leaves, setItem: setLeaves } = useHRStorage(HR_KEYS.LEAVES, []);
   const { data: employees } = useHRStorage(HR_KEYS.EMPLOYEES, []);
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState('pending');
 
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,9 +58,15 @@ export function HRLeavePage() {
     reason: 'Personal engagement'
   });
 
+  const pendingLeaves = leaves.filter(l => l.status === 'Pending');
+  const historyLeaves = leaves.filter(l => l.status !== 'Pending');
+
   // Filtered leaves
   const filteredLeaves = useMemo(() => {
     return leaves.filter(item => {
+      if (activeTab === 'pending' && item.status !== 'Pending') return false;
+      if (activeTab === 'history' && item.status === 'Pending') return false;
+
       const matchesSearch =
         (item.employeeName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (item.employeeId?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -61,7 +77,7 @@ export function HRLeavePage() {
 
       return matchesSearch && matchesType && matchesStatus;
     });
-  }, [leaves, searchTerm, leaveTypeFilter, statusFilter]);
+  }, [leaves, activeTab, searchTerm, leaveTypeFilter, statusFilter]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -160,13 +176,31 @@ export function HRLeavePage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Quick Stats Badges */}
-          <div className="hidden lg:flex items-center gap-2 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 text-[11px]">
-            <span className="text-slate-300">Total: <strong className="text-white">{stats.total}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span className="text-amber-400">Pending: <strong>{stats.pending}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span className="text-emerald-400">Approved: <strong>{stats.approved}</strong></span>
+          {/* Tab Switcher */}
+          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'pending'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Pending ({pendingLeaves.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History ({historyLeaves.length})</span>
+            </button>
           </div>
 
           <button
@@ -225,6 +259,7 @@ export function HRLeavePage() {
                 <th className="py-2 px-3">Leave Type</th>
                 <th className="py-2 px-3">Duration & Dates</th>
                 <th className="py-2 px-3">Total Days</th>
+                {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                 <th className="py-2 px-3">Reason</th>
                 <th className="py-2 px-3">Status</th>
                 <th className="py-2 px-3 text-right">Actions</th>
@@ -233,7 +268,7 @@ export function HRLeavePage() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {filteredLeaves.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                  <td colSpan={activeTab === 'pending' ? 8 : 10} className="p-8 text-center text-slate-400">
                     <p className="font-semibold">No leave applications match filters</p>
                   </td>
                 </tr>
@@ -267,6 +302,15 @@ export function HRLeavePage() {
                     <td className="py-1.5 px-3 font-bold text-slate-900 dark:text-white text-[11px]">
                       {lv.totalDays} Day{lv.totalDays > 1 ? 's' : ''}
                     </td>
+
+                    {activeTab === 'pending' ? (
+                      <PlannedTd plannedDate={lv.fromDate || '2026-10-02'} />
+                    ) : (
+                      <HistoryTatTd
+                        plannedDate={lv.fromDate || '2026-10-02'}
+                        actualDate={lv.approvedDate || lv.actualDate || lv.toDate || '2026-10-02'}
+                      />
+                    )}
 
                     {/* Reason */}
                     <td className="py-1.5 px-3 text-slate-600 dark:text-slate-400 truncate max-w-xs text-[11px]">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, setData, generateId, logAuditAction } from '../../services/otdStorageService';
 

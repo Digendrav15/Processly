@@ -10,6 +10,7 @@ import {
   Eye,
   CheckCircle2,
   Clock,
+  History,
   Building,
   User,
   AlertCircle,
@@ -31,9 +32,18 @@ import {
   settleFnF,
   addActivityLog
 } from '../../services/hrStorageService';
+import {
+  PlannedTh,
+  PlannedTd,
+  HistoryTatTh,
+  HistoryTatTd
+} from '../../components/common/TatColumns';
 
 export function HRExitManagementPage() {
   const location = useLocation();
+
+  // Sub Tab for Pending vs History
+  const [subTab, setSubTab] = useState('pending');
 
   // Determine active tab from URL path or fallback
   const getInitialTab = () => {
@@ -187,32 +197,66 @@ export function HRExitManagementPage() {
     }
   };
 
+  const activeCounts = useMemo(() => {
+    if (activeTab === 'resignation') {
+      return {
+        pending: resignations.filter(r => r.status !== 'Approved' && r.status !== 'Completed').length,
+        history: resignations.filter(r => r.status === 'Approved' || r.status === 'Completed').length
+      };
+    } else if (activeTab === 'clearance') {
+      return {
+        pending: clearances.filter(c => c.status !== 'Cleared').length,
+        history: clearances.filter(c => c.status === 'Cleared').length
+      };
+    } else {
+      return {
+        pending: fnfList.filter(f => f.status !== 'Paid' && f.status !== 'Settled').length,
+        history: fnfList.filter(f => f.status === 'Paid' || f.status === 'Settled').length
+      };
+    }
+  }, [activeTab, resignations, clearances, fnfList]);
+
   // Filtered Resignations
   const filteredResignations = useMemo(() => {
-    return resignations.filter(r =>
-      r.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.resignationId?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [resignations, searchTerm]);
+    return resignations.filter(r => {
+      const isPending = r.status !== 'Approved' && r.status !== 'Completed';
+      if (subTab === 'pending' && !isPending) return false;
+      if (subTab === 'history' && isPending) return false;
+      return (
+        r.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.resignationId?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [resignations, subTab, searchTerm]);
 
   // Filtered Clearances
   const filteredClearances = useMemo(() => {
-    return clearances.filter(c =>
-      c.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.department?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [clearances, searchTerm]);
+    return clearances.filter(c => {
+      const isPending = c.status !== 'Cleared';
+      if (subTab === 'pending' && !isPending) return false;
+      if (subTab === 'history' && isPending) return false;
+      return (
+        c.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.department?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [clearances, subTab, searchTerm]);
 
   // Filtered FNF
   const filteredFnf = useMemo(() => {
-    return fnfList.filter(f =>
-      f.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.id?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [fnfList, searchTerm]);
+    return fnfList.filter(f => {
+      const isPending = f.status !== 'Paid' && f.status !== 'Settled';
+      if (subTab === 'pending' && !isPending) return false;
+      if (subTab === 'history' && isPending) return false;
+      return (
+        f.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.id?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [fnfList, subTab, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -287,8 +331,8 @@ export function HRExitManagementPage() {
         </Link>
       </div>
 
-      {/* Search Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+      {/* Search Bar & Sub-Tab Switcher */}
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -298,6 +342,32 @@ export function HRExitManagementPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-800 dark:text-white"
           />
+        </div>
+
+        <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+          <button
+            onClick={() => setSubTab('pending')}
+            className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              subTab === 'pending'
+                ? 'bg-cyan-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending ({activeCounts.pending})</span>
+          </button>
+
+          <button
+            onClick={() => setSubTab('history')}
+            className={`px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              subTab === 'history'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>History ({activeCounts.history})</span>
+          </button>
         </div>
       </div>
 
@@ -321,6 +391,7 @@ export function HRExitManagementPage() {
                   <th className="py-3 px-4">Employee Details</th>
                   <th className="py-3 px-4">Resignation Date</th>
                   <th className="py-3 px-4">Last Working Date</th>
+                  {subTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-3 px-4">Reason for Leaving</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
@@ -329,7 +400,7 @@ export function HRExitManagementPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {filteredResignations.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={subTab === 'pending' ? 8 : 10} className="py-12 text-center text-slate-400">
                       <LogOut className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                       <p className="font-semibold">No resignation records found</p>
                     </td>
@@ -357,6 +428,14 @@ export function HRExitManagementPage() {
                       <td className="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">
                         {res.lastWorkingDate}
                       </td>
+                      {subTab === 'pending' ? (
+                        <PlannedTd plannedDate={res.resignationDate || '2026-10-02'} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={res.resignationDate || '2026-10-02'}
+                          actualDate={res.approvedDate || res.actualDate || res.lastWorkingDate || '2026-10-02'}
+                        />
+                      )}
                       <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
                         {res.reason}
                       </td>
@@ -421,6 +500,7 @@ export function HRExitManagementPage() {
                   <th className="py-3 px-4">Department / Authority</th>
                   <th className="py-3 px-4">Clearance Items</th>
                   <th className="py-3 px-4">Responsible Person</th>
+                  {subTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-3 px-4">Clearance Status</th>
                   <th className="py-3 px-4 text-right">Action</th>
                 </tr>
@@ -428,7 +508,7 @@ export function HRExitManagementPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {filteredClearances.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <td colSpan={subTab === 'pending' ? 7 : 9} className="py-12 text-center text-slate-400">
                       <ShieldCheck className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                       <p className="font-semibold">No pending department clearances</p>
                     </td>
@@ -456,6 +536,14 @@ export function HRExitManagementPage() {
                       <td className="py-3.5 px-4 font-medium text-slate-700 dark:text-slate-300">
                         {clr.responsiblePerson}
                       </td>
+                      {subTab === 'pending' ? (
+                        <PlannedTd plannedDate={clr.plannedDate || '2026-10-02'} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={clr.plannedDate || '2026-10-02'}
+                          actualDate={clr.clearedDate || clr.actualDate || '2026-10-02'}
+                        />
+                      )}
                       <td className="py-3.5 px-4">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
@@ -508,6 +596,7 @@ export function HRExitManagementPage() {
                   <th className="py-3 px-4">Voucher ID</th>
                   <th className="py-3 px-4">Employee</th>
                   <th className="py-3 px-4">Last Working Day</th>
+                  {subTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-3 px-4">Salary Payable</th>
                   <th className="py-3 px-4">Leave Encashment</th>
                   <th className="py-3 px-4">Gratuity</th>
@@ -519,7 +608,7 @@ export function HRExitManagementPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {filteredFnf.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <td colSpan={subTab === 'pending' ? 10 : 12} className="py-12 text-center text-slate-400">
                       <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
                       <p className="font-semibold">No Full & Final vouchers</p>
                     </td>
@@ -544,6 +633,14 @@ export function HRExitManagementPage() {
                       <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
                         {fnf.lastWorkingDate}
                       </td>
+                      {subTab === 'pending' ? (
+                        <PlannedTd plannedDate={fnf.lastWorkingDate || '2026-10-02'} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={fnf.lastWorkingDate || '2026-10-02'}
+                          actualDate={fnf.settledDate || fnf.actualDate || '2026-10-02'}
+                        />
+                      )}
                       <td className="py-3.5 px-4 font-mono text-slate-700 dark:text-slate-300">
                         ₹ {Number(fnf.salaryPayable || 0).toLocaleString('en-IN')}
                       </td>

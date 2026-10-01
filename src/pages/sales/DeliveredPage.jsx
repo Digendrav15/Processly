@@ -18,6 +18,7 @@ import {
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, advanceOrderStage } from '../../services/otdStorageService';
 import { useNavigate } from 'react-router-dom';
+import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function DeliveredPage() {
   const navigate = useNavigate();
@@ -254,6 +255,7 @@ export function DeliveredPage() {
                   <th className="py-2 px-3 text-center">Delivery Status</th>
                   <th className="py-2 px-3 text-center">Delivered On</th>
                   <th className="py-2 px-3 text-center">Customer Rating</th>
+                  {activeTab === 'pending' ? <PlannedTh /> : <HistoryTatTh />}
                   <th className="py-2 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -289,6 +291,14 @@ export function DeliveredPage() {
                       <td className="py-1.5 px-3 text-center font-bold text-amber-500">
                         {o.customerRating || '5 Stars'}
                       </td>
+                      {activeTab === 'pending' ? (
+                        <PlannedTd plannedDate={o.expectedDeliveryDate || o.plannedCompletionDate || o.orderDate} />
+                      ) : (
+                        <HistoryTatTd
+                          plannedDate={o.expectedDeliveryDate || o.plannedCompletionDate || o.orderDate}
+                          actualDate={o.actualDeliveryDateTime || o.deliveryDate || o.stageDetails?.['Delivered']?.completedAt || o.updatedAt}
+                        />
+                      )}
                       <td className="py-1.5 px-3 text-center">
                         {activeTab === 'pending' ? (
                           <button

@@ -69,6 +69,15 @@ export function SystemProvider({ children }) {
 
     // Find matching system for current path
     const matchingSystem = systemsList.find((sys) => {
+      if (sys.id === 'checklist' && (
+        currentPath.startsWith('/checklist') ||
+        currentPath.startsWith('/delegation') ||
+        currentPath.startsWith('/my-tasks') ||
+        currentPath.startsWith('/task-assignment') ||
+        currentPath.startsWith('/notifications') ||
+        currentPath.startsWith('/calendar') ||
+        currentPath.startsWith('/holidays')
+      )) return true;
       if (sys.id === 'hr' && currentPath.startsWith('/hr')) return true;
       if (sys.id === 'petty-expenses' && currentPath.startsWith('/petty-expenses')) return true;
       if (sys.id === 'doc-subscription' && currentPath.startsWith('/doc-subscription')) return true;

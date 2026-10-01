@@ -39,6 +39,7 @@ import {
   UserX,
   LogOut,
   Award,
+  BarChart3,
   Wallet,
   ArrowDownLeft,
   ArrowUpRight,
@@ -49,29 +50,32 @@ import {
   MessageSquare,
   Bookmark,
   Radio,
-  Settings
+  Settings,
+  ListTodo
 } from 'lucide-react';
 
 export const SYSTEMS_CONFIG = [
   {
     id: 'checklist',
-    name: 'Checklist & Tasks',
-    shortName: 'Checklist',
-    badge: 'Core & Tasks',
-    description: 'Task assignment, recurring checklists & daily operations',
+    name: 'Checklist & Delegation',
+    shortName: 'Checklist & Delegation',
+    badge: 'Operations & SOPs',
+    description: 'Task delegation, recurring checklists & daily operations',
     icon: CheckSquare,
     color: 'indigo',
     gradient: 'from-indigo-600 to-purple-600',
     bgLight: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
     border: 'border-indigo-200 dark:border-indigo-800',
-    defaultPath: '/dashboard',
+    defaultPath: '/checklist/dashboard',
     navItems: [
-      { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Task', path: '/my-tasks', icon: CheckSquare },
+      { label: 'Checklist Dashboard', path: '/checklist/dashboard', icon: LayoutDashboard },
+      { label: 'My Tasks', path: '/my-tasks', icon: CheckSquare },
       { label: 'Task Assignment', path: '/task-assignment', icon: ClipboardList, requiresSelfAssignOrManager: true },
-      { label: 'Notification', path: '/notifications', icon: Bell },
+      { label: 'Checklist Templates', path: '/checklist/list', icon: ListTodo, requiresSelfAssignOrManager: true },
+      { label: 'Delegations', path: '/delegation/list', icon: UserCheck, requiresSelfAssignOrManager: true },
+      { label: 'Notifications', path: '/notifications', icon: Bell },
       { label: 'Calendar', path: '/calendar', icon: Calendar },
-      { label: 'Holiday', path: '/holidays', icon: PartyPopper },
+      { label: 'Holidays', path: '/holidays', icon: PartyPopper },
       { label: 'Masters', path: '/masters', icon: Sliders, adminOnly: true },
     ]
   },
@@ -296,6 +300,24 @@ export const SYSTEMS_CONFIG = [
       { label: 'WhatsApp Inbox', path: '/whatsapp/inbox', icon: MessageSquare, section: 'Live Chats' },
       { label: 'Broadcast & Templates', path: '/whatsapp/templates', icon: Bookmark, section: 'Messaging' },
       { label: 'API & Webhooks', path: '/whatsapp/settings', icon: Settings, section: 'Configuration' },
+    ]
+  },
+  {
+    id: 'mis-summary',
+    name: 'MIS Summery',
+    shortName: 'MIS Summery',
+    badge: 'Scoring & TAT',
+    description: 'Executive MIS Summary, User Performance Scoring & Planned vs Actual TAT Analytics',
+    icon: Award,
+    color: 'indigo',
+    gradient: 'from-blue-600 to-indigo-600',
+    bgLight: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
+    border: 'border-indigo-200 dark:border-indigo-800',
+    defaultPath: '/mis-summary',
+    navItems: [
+      { label: 'MIS Summery & Scoring', path: '/mis-summary', icon: Award, section: 'Executive' },
+      { label: 'User Performance Report', path: '/mis-summary?view=users', icon: BarChart3, section: 'Executive' },
+      { label: 'Task Delay Audit', path: '/mis-summary?view=tasks', icon: Clock, section: 'Executive' },
     ]
   }
 ];
