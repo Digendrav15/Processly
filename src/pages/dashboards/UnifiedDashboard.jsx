@@ -147,124 +147,105 @@ export function UnifiedDashboard() {
   });
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* 1. Header with System Badge & Quick Action Buttons */}
-      <div className="bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-indigo-900/5 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-slate-900/40 p-6 rounded-3xl border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs backdrop-blur-sm">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="flex items-center space-x-2.5">
-              <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-indigo-600 text-white shadow-xs">
-                <CheckSquare className="w-3.5 h-3.5" />
-                <span>Checklist & Delegation System</span>
-              </span>
-              <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100/80 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-                Operational Module
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Checklist & Delegation Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
-              Track recurring daily SOP checklists, one-time task delegations, employee completion rates, and overdue items in one unified operational command center.
-            </p>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider border border-indigo-200 dark:border-indigo-800/80">
+            Checklist & Delegation
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Operational Dashboard
+          </h1>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
+          {(isAdmin || isManager) && (
+            <>
+              <Link
+                to="/checklist/create"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Checklist</span>
+              </Link>
+
+              <Link
+                to="/delegation/create"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-xs transition-all"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Delegate</span>
+              </Link>
+            </>
+          )}
+
+          <Link
+            to="/my-tasks"
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
+          >
+            <CheckSquare className="w-3.5 h-3.5 text-emerald-500" />
+            <span>My Tasks</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Operational Highlights Banner */}
+      <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="flex items-center space-x-2 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
+            <ListTodo className="w-4 h-4" />
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {(isAdmin || isManager) && (
-              <>
-                <Link
-                  to="/checklist/create"
-                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 transition-all transform active:scale-95"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Create Checklist</span>
-                </Link>
-
-                <Link
-                  to="/delegation/create"
-                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/25 transition-all transform active:scale-95"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Delegate Task</span>
-                </Link>
-
-                <Link
-                  to="/checklist/list"
-                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
-                >
-                  <ListTodo className="w-4 h-4 text-indigo-500" />
-                  <span>Templates ({checklistsCount})</span>
-                </Link>
-              </>
-            )}
-
-            <Link
-              to="/my-tasks"
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
-            >
-              <CheckSquare className="w-4 h-4 text-emerald-500" />
-              <span>My Tasks</span>
-            </Link>
+          <div className="min-w-0">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+              Recurring Checklists
+            </span>
+            <span className="font-extrabold text-slate-900 dark:text-white truncate block">
+              {countChecklists} Active • {checklistCompleted} Done
+            </span>
           </div>
         </div>
 
-        {/* Operational Highlights Pill Banner */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-indigo-200/60 dark:border-indigo-900/60">
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
-              <ListTodo className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
-                Recurring Checklists
-              </span>
-              <span className="font-extrabold text-slate-900 dark:text-white truncate block">
-                {countChecklists} Active • {checklistCompleted} Done
-              </span>
-            </div>
+        <div className="flex items-center space-x-2 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
+            <UserCheck className="w-4 h-4" />
           </div>
-
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
-              <UserCheck className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
-                Delegated Tasks
-              </span>
-              <span className="font-extrabold text-slate-900 dark:text-white truncate block">
-                {countDelegations} Tasks • {delegationCompleted} Done
-              </span>
-            </div>
+          <div className="min-w-0">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+              Delegated Tasks
+            </span>
+            <span className="font-extrabold text-slate-900 dark:text-white truncate block">
+              {countDelegations} Tasks • {delegationCompleted} Done
+            </span>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
-                Completion Rate
-              </span>
-              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 truncate block">
-                {completionRate}% Completed
-              </span>
-            </div>
+        <div className="flex items-center space-x-2 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
+            <ShieldCheck className="w-4 h-4" />
           </div>
+          <div className="min-w-0">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+              Completion Rate
+            </span>
+            <span className="font-extrabold text-emerald-600 dark:text-emerald-400 truncate block">
+              {completionRate}% Completed
+            </span>
+          </div>
+        </div>
 
-          <div className="flex items-center space-x-2 text-xs">
-            <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
-                High Priority Pending
-              </span>
-              <span className="font-extrabold text-amber-600 dark:text-amber-400 truncate block">
-                {highPriorityPending} Urgent
-              </span>
-            </div>
+        <div className="flex items-center space-x-2 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
+            <AlertTriangle className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
+              High Priority Pending
+            </span>
+            <span className="font-extrabold text-amber-600 dark:text-amber-400 truncate block">
+              {highPriorityPending} Urgent
+            </span>
           </div>
         </div>
       </div>

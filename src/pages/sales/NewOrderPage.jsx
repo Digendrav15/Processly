@@ -260,26 +260,25 @@ export function NewOrderPage() {
   });
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header with Top Right Button and Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs uppercase tracking-wider border border-emerald-500/30">
-            Order To Delivery
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/80">
+            OTD • Stage 0
           </span>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">New Orders</h1>
-          <p className="text-xs text-slate-400 mt-1">Manage, search, and log new customer sales orders.</p>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">New Orders</h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Tab Switcher */}
-          <div className="bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700 flex space-x-1 text-xs font-bold">
+          <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/80 flex space-x-1 text-xs font-bold">
             <button
               onClick={() => setActiveTab('pending')}
-              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md flex items-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'pending'
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -288,10 +287,10 @@ export function NewOrderPage() {
 
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md flex items-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               <History className="w-3.5 h-3.5" />
@@ -301,9 +300,9 @@ export function NewOrderPage() {
 
           <button
             onClick={handleOpenModal}
-            className="flex items-center justify-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 transition-all cursor-pointer shrink-0"
+            className="flex items-center justify-center space-x-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer shrink-0"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="w-3.5 h-3.5" />
             <span>+ New Order</span>
           </button>
         </div>

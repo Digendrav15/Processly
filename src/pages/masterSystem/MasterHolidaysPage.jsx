@@ -59,29 +59,21 @@ export function MasterHolidaysPage() {
 
   return (
     <div className="space-y-2.5">
-      {/* Compact Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/30">
-            <Calendar className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 font-black text-[9px] uppercase tracking-wider border border-rose-500/30">
-                Master System
-              </span>
-              <h1 className="text-base font-extrabold tracking-tight">Holidays Master</h1>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Configure public and company holidays for official calendars</p>
-          </div>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-extrabold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800/80">
+            Master System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Holidays Master</h1>
         </div>
 
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center space-x-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
+          className="flex items-center space-x-1 px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Add Holiday</span>
+          <span>+ Add Holiday</span>
         </button>
       </div>
 

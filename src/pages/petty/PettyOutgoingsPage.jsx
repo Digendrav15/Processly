@@ -94,32 +94,22 @@ export function PettyOutgoingsPage() {
   }, [transactions]);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-rose-900 via-pink-950 to-slate-900 border border-rose-800/40 rounded-3xl p-6 text-white shadow-xl">
-        <div className="flex items-center space-x-4">
-          <div className="w-13 h-13 rounded-2xl bg-rose-600 flex items-center justify-center text-white shadow-lg shadow-rose-600/30">
-            <ArrowUpRight className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black tracking-tight">Expenses & Outgoings (Out)</h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-extrabold uppercase border border-rose-500/30">
-                Disbursements & Vouchers
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Track daily office expenses, tea/pantry, stationery, repairs, travel reimbursements & cleared cheques
-            </p>
-          </div>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-extrabold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800/80">
+            Petty System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Expenses & Outgoings (Out)</h1>
         </div>
 
         <button
           onClick={() => setShowExpenseModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
         >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Record Expense Payment</span>
+          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+          <span>+ Record Expense</span>
         </button>
       </div>
 

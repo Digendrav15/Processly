@@ -90,32 +90,22 @@ export function PettyReceivedPage() {
   }, [transactions]);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 border border-emerald-800/40 rounded-3xl p-6 text-white shadow-xl">
-        <div className="flex items-center space-x-4">
-          <div className="w-13 h-13 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30">
-            <ArrowDownLeft className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black tracking-tight">Amount Received (Inflow)</h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase border border-emerald-500/30">
-                Receipts & Cash-In
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Record Imprest replenishment, cash received, client direct payments & cleared cheques inflow
-            </p>
-          </div>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/80">
+            Petty System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Amount Received (Inflow)</h1>
         </div>
 
         <button
           onClick={() => setShowReceiptModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
         >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Record Amount Received</span>
+          <Plus className="w-3.5 h-3.5 stroke-[3]" />
+          <span>+ Record Received</span>
         </button>
       </div>
 

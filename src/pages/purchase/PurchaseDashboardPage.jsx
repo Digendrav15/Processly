@@ -16,21 +16,18 @@ export function PurchaseDashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-slate-900 to-amber-950 p-6 rounded-3xl text-white shadow-xl border border-amber-900/30">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-extrabold text-xs tracking-wider uppercase border border-amber-500/30">
-              Purchase System Module
-            </span>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Procurement & Supplier Management</h1>
-          <p className="text-xs text-slate-300 mt-1">Manage purchase requisitions, LPOs, material inventory stock & vendor ratings.</p>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wider border border-amber-200 dark:border-amber-800/80">
+            Purchase System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Procurement & Supplier Management</h1>
         </div>
-        <button className="flex items-center space-x-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-600/30 transition-all">
-          <Plus className="w-4 h-4" />
-          <span>New Purchase Requisition</span>
+        <button className="flex items-center space-x-1.5 px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all self-start sm:self-auto cursor-pointer">
+          <Plus className="w-3.5 h-3.5" />
+          <span>+ New Requisition</span>
         </button>
       </div>
 

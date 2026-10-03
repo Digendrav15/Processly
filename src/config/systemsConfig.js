@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Users2,
   Boxes,
+  ArrowLeftRight,
   FileCheck,
   Clock,
   Database,
@@ -318,6 +319,24 @@ export const SYSTEMS_CONFIG = [
       { label: 'MIS Summery & Scoring', path: '/mis-summary', icon: Award, section: 'Executive' },
       { label: 'User Performance Report', path: '/mis-summary?view=users', icon: BarChart3, section: 'Executive' },
       { label: 'Task Delay Audit', path: '/mis-summary?view=tasks', icon: Clock, section: 'Executive' },
+    ]
+  },
+  {
+    id: 'inventory',
+    name: 'Inventory System',
+    shortName: 'Inventory',
+    badge: 'Stock & Warehouse',
+    description: 'Real-time stock ledger, multi-warehouse tracking, inward/outward flow & reorder alerts',
+    icon: Boxes,
+    color: 'orange',
+    gradient: 'from-orange-500 to-amber-600',
+    bgLight: 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400',
+    border: 'border-orange-200 dark:border-orange-800',
+    defaultPath: '/inventory/dashboard',
+    navItems: [
+      { label: 'Dashboard', path: '/inventory/dashboard', icon: LayoutDashboard },
+      { label: 'In / Out', path: '/inventory/in-out', icon: ArrowLeftRight },
+      { label: 'Indent', path: '/inventory/indent', icon: ShoppingCart },
     ]
   }
 ];

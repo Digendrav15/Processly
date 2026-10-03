@@ -82,6 +82,12 @@ export function SystemSelector({ variant = 'default', isCollapsed = false }) {
           badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
           activeBg: 'bg-gradient-to-r from-rose-600/30 to-pink-600/20 border-rose-500/50 text-rose-200'
         };
+      case 'inventory':
+        return {
+          glow: 'from-orange-500 to-amber-600',
+          badgeBg: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+          activeBg: 'bg-gradient-to-r from-orange-600/30 to-amber-600/20 border-orange-500/50 text-orange-200'
+        };
       default:
         return {
           glow: 'from-indigo-500 to-purple-600',

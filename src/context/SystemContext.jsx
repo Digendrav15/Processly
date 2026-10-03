@@ -86,6 +86,7 @@ export function SystemProvider({ children }) {
       if (sys.id === 'purchase' && currentPath.startsWith('/purchase')) return true;
       if (sys.id === 'lead-to-orders' && currentPath.startsWith('/lead-to-orders')) return true;
       if (sys.id === 'master-system' && currentPath.startsWith('/master-system')) return true;
+      if (sys.id === 'inventory' && currentPath.startsWith('/inventory')) return true;
       return sys.navItems.some((item) => item.path === currentPath);
     });
 

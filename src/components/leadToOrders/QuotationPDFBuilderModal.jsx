@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -18,7 +18,16 @@ import {
   MapPin,
   Calendar,
   Layers,
-  Check
+  Check,
+  ArrowLeft,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Eye
 } from 'lucide-react';
 import { DEFAULT_COMPANY_DETAILS } from '../../services/otdStorageService';
 
@@ -68,15 +77,46 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
   if (!isOpen || !quotation) return null;
 
   const pdfContainerRef = useRef(null);
+  const viewportRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
   const [activeTheme, setActiveTheme] = useState('indigo'); // 'indigo', 'emerald', 'slate'
   const [showBankDetails, setShowBankDetails] = useState(true);
   const [showTerms, setShowTerms] = useState(true);
   const [showDigitalStamp, setShowDigitalStamp] = useState(true);
 
+  // Mobile UX States
+  const [showMobileControls, setShowMobileControls] = useState(false);
+  const [zoomMode, setZoomMode] = useState('fit'); // 'fit' or '100'
+  const [fitScale, setFitScale] = useState(0.45);
+  const [canvasHeight, setCanvasHeight] = useState(1150);
+
+  // Auto-calculate scale on window resize or modal open
+  useEffect(() => {
+    const updateScale = () => {
+      if (viewportRef.current) {
+        const containerWidth = viewportRef.current.clientWidth - 24;
+        if (containerWidth > 0) {
+          const s = Math.min(1, Math.max(0.32, containerWidth / 800));
+          setFitScale(s);
+        }
+      }
+      if (pdfContainerRef.current) {
+        setCanvasHeight(pdfContainerRef.current.offsetHeight || 1150);
+      }
+    };
+
+    updateScale();
+    const timer = setTimeout(updateScale, 100);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateScale);
+    };
+  }, [isOpen, showBankDetails, showTerms, showDigitalStamp, activeTheme]);
+
   // Company details
   const company = {
-    name: DEFAULT_COMPANY_DETAILS.companyName || 'Acme Corporate Enterprise Ltd',
+    name: DEFAULT_COMPANY_DETAILS.companyName || 'Processly',
     tagline: 'Leading Industrial Automation & Supply Solutions',
     gstin: DEFAULT_COMPANY_DETAILS.gstin || '07AAACA1234F1Z8',
     pan: DEFAULT_COMPANY_DETAILS.pan || 'AAACA1234F',
@@ -135,13 +175,19 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
     if (!pdfContainerRef.current) return;
     setIsExporting(true);
 
+    const prevMode = zoomMode;
+    setZoomMode('100');
+    // Allow DOM to render unscaled for crisp capture
+    await new Promise((r) => setTimeout(r, 80));
+
     try {
       const element = pdfContainerRef.current;
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        windowWidth: 1200
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -173,15 +219,178 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
       console.error('Error generating PDF:', err);
       alert('Could not generate PDF. Please try Native Print.');
     } finally {
+      setZoomMode(prevMode);
       setIsExporting(false);
     }
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Quotation #${quotation.quotationNo}`,
+          text: `Commercial Proposal for ${quotation.customer || quotation.customerName || 'Client'} - Total ₹${Number(quotation.grandTotal || 0).toLocaleString('en-IN')}`,
+          url: window.location.href
+        });
+      } catch (err) {
+        // Ignored if cancelled
+      }
+    } else {
+      window.print();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-5xl max-h-[94vh] flex flex-col overflow-hidden">
-        {/* Modal Top Control Bar */}
-        <div className="flex flex-wrap items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 gap-3 shrink-0">
+    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col md:items-center md:justify-center p-0 md:p-4 overflow-hidden animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 w-full h-full md:h-auto md:max-h-[94vh] md:max-w-5xl md:rounded-2xl border-0 md:border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden">
+        
+        {/* ======================================================== */}
+        {/* 1. MOBILE HEADER (Compact, Native App Style)             */}
+        {/* ======================================================== */}
+        <div className="flex md:hidden items-center justify-between px-3 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 z-20">
+          <div className="flex items-center space-x-2 min-w-0">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+              title="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h2 className="text-xs font-black text-slate-900 dark:text-white truncate">
+                Quote #{quotation.quotationNo || 'Proposal'}
+              </h2>
+              <p className="text-[10px] text-slate-400 truncate">
+                {quotation.customer || quotation.customerName || 'Commercial Proposal'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {/* Viewport Zoom Toggle (Fit vs 100%) */}
+            <button
+              type="button"
+              onClick={() => setZoomMode((m) => (m === 'fit' ? '100' : 'fit'))}
+              className="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1"
+              title="Toggle View Mode"
+            >
+              {zoomMode === 'fit' ? (
+                <>
+                  <ZoomIn className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>100%</span>
+                </>
+              ) : (
+                <>
+                  <Minimize2 className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Fit</span>
+                </>
+              )}
+            </button>
+
+            {/* Customization Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowMobileControls((prev) => !prev)}
+              className={`p-1.5 rounded-lg text-xs font-bold border flex items-center gap-1 transition-colors ${
+                showMobileControls
+                  ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+              }`}
+              title="Customization Options"
+            >
+              <Sliders className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE COLLAPSIBLE CUSTOMIZATION DRAWER */}
+        {showMobileControls && (
+          <div className="md:hidden bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-3 space-y-2.5 shrink-0 animate-in slide-in-from-top-2 duration-150 shadow-inner">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+              <span>Theme Color</span>
+              <div className="flex items-center bg-slate-200 dark:bg-slate-800 p-0.5 rounded-lg text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTheme('indigo')}
+                  className={`px-2 py-0.5 rounded-md font-extrabold ${
+                    activeTheme === 'indigo'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  Indigo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTheme('emerald')}
+                  className={`px-2 py-0.5 rounded-md font-extrabold ${
+                    activeTheme === 'emerald'
+                      ? 'bg-teal-700 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  Teal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTheme('slate')}
+                  className={`px-2 py-0.5 rounded-md font-extrabold ${
+                    activeTheme === 'slate'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  Slate
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1 border-t border-slate-200/80 dark:border-slate-800/80">
+              <span className="text-[11px] font-bold text-slate-500">Document Sections</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowBankDetails(!showBankDetails)}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                    showBankDetails
+                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 font-extrabold'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent'
+                  }`}
+                >
+                  Bank A/C
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDigitalStamp(!showDigitalStamp)}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                    showDigitalStamp
+                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 font-extrabold'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent'
+                  }`}
+                >
+                  Seal / Stamp
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(!showTerms)}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                    showTerms
+                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 font-extrabold'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-transparent'
+                  }`}
+                >
+                  Terms
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* 2. DESKTOP TOP CONTROL BAR                               */}
+        {/* ======================================================== */}
+        <div className="hidden md:flex flex-wrap items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 gap-3 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black">
               Q
@@ -196,7 +405,7 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
             </div>
           </div>
 
-          {/* Builder Controls */}
+          {/* Desktop Builder Controls */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Theme switcher */}
             <div className="flex items-center bg-slate-200 dark:bg-slate-800 p-1 rounded-xl text-xs">
@@ -268,7 +477,7 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
               onClick={handleDownloadPDF}
               className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer transition-all active:scale-95 disabled:opacity-50"
             >
-              <Download className="w-3.5 h-3.5" />
+              {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
               <span>{isExporting ? 'Generating PDF...' : '1-Click PDF Download'}</span>
             </button>
 
@@ -293,14 +502,56 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
           </div>
         </div>
 
-        {/* Modal Scrollable Canvas Preview */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 dark:bg-slate-950 flex justify-center">
-          {/* A4 Printable Sheet Container (Standard Width 800px) */}
+        {/* ======================================================== */}
+        {/* 3. MODAL SCROLLABLE CANVAS PREVIEW                       */}
+        {/* ======================================================== */}
+        <div
+          ref={viewportRef}
+          className="flex-1 overflow-auto p-2 sm:p-4 md:p-6 bg-slate-100 dark:bg-slate-950 flex flex-col items-center touch-pan-x touch-pan-y"
+        >
+          {/* Subtle mobile helper hint */}
+          <div className="md:hidden flex items-center justify-between w-full max-w-[800px] pb-2 text-[10px] text-slate-400 px-1">
+            <span>Standard A4 Preview</span>
+            <span className="font-semibold text-indigo-500">
+              {zoomMode === 'fit' ? 'Fitted to Screen (Tap 100% to zoom)' : 'Actual Size (Scrollable)'}
+            </span>
+          </div>
+
+          {/* Scaled viewport container for clean mobile rendering */}
           <div
-            ref={pdfContainerRef}
-            className="w-full max-w-[800px] bg-white text-slate-900 p-8 sm:p-10 shadow-xl rounded-xl border border-slate-200 print:shadow-none print:border-none print:p-0 print:max-w-none space-y-6 text-xs font-sans leading-normal"
-            style={{ minHeight: '1050px' }}
+            className="transition-all duration-200"
+            style={
+              zoomMode === 'fit' && fitScale < 1
+                ? {
+                    width: `${Math.round(800 * fitScale)}px`,
+                    height: `${Math.round(canvasHeight * fitScale)}px`,
+                    position: 'relative'
+                  }
+                : {
+                    width: '800px',
+                    minWidth: '800px'
+                  }
+            }
           >
+            <div
+              style={
+                zoomMode === 'fit' && fitScale < 1
+                  ? {
+                      transform: `scale(${fitScale})`,
+                      transformOrigin: 'top left',
+                      width: '800px'
+                    }
+                  : {
+                      width: '800px'
+                    }
+              }
+            >
+              {/* A4 Printable Sheet Container (Standard Width 800px) */}
+              <div
+                ref={pdfContainerRef}
+                className="w-full bg-white text-slate-900 p-6 sm:p-8 md:p-10 shadow-xl rounded-xl border border-slate-200 print:shadow-none print:border-none print:p-0 print:max-w-none space-y-6 text-xs font-sans leading-normal"
+                style={{ minHeight: '1050px' }}
+              >
             {/* 1. Header with Company Letterhead */}
             <div className="flex items-start justify-between border-b-2 border-slate-800 pb-5">
               <div className="space-y-1">
@@ -544,5 +795,53 @@ export function QuotationPDFBuilderModal({ isOpen, onClose, quotation }) {
         </div>
       </div>
     </div>
-  );
+
+      {/* ======================================================== */}
+      {/* 4. MOBILE STICKY BOTTOM ACTION BAR (Native Thumb Friendly) */}
+      {/* ======================================================== */}
+      <div className="flex md:hidden items-center justify-between gap-2 p-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shrink-0 z-20 shadow-lg">
+        {/* Print / Native */}
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all"
+          title="Print"
+        >
+          <Printer className="w-4 h-4" />
+        </button>
+
+        {/* Share */}
+        <button
+          type="button"
+          onClick={handleShare}
+          className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all"
+          title="Share"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
+
+        {/* Primary CTA: Download PDF */}
+        <button
+          type="button"
+          disabled={isExporting}
+          onClick={handleDownloadPDF}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/30 active:scale-98 transition-all disabled:opacity-50"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Generating PDF...</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              <span>Download PDF ({quotation.quotationNo})</span>
+            </>
+          )}
+        </button>
+      </div>
+
+    </div>
+  </div>
+);
 }

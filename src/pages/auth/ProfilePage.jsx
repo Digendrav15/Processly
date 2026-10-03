@@ -253,17 +253,14 @@ export function ProfilePage() {
   const userAllowedModuleIds = user?.allowedModules || (isAdmin ? SYSTEMS_CONFIG.map((s) => s.id) : ['checklist', 'sales']);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-400 font-extrabold text-xs uppercase tracking-wider border border-indigo-500/30">
-            Account & Self-Service Portal
+    <div className="max-w-6xl mx-auto space-y-4 pb-8">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider border border-indigo-200 dark:border-indigo-800/80">
+            Account Portal
           </span>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">User Profile & Requests</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Manage your personal profile, credentials, accessible module permissions, and submit Leave or Advance requests.
-          </p>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">User Profile & Requests</h1>
         </div>
       </div>
 

@@ -207,30 +207,25 @@ export function LeadReportsPage() {
 
   return (
     <div className="space-y-4 pb-12">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-900 via-teal-950 to-indigo-950 p-5 rounded-3xl text-white shadow-xl border border-teal-800/30">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-extrabold text-[10px] tracking-wider uppercase border border-teal-500/30">
-              Intelligence & Pipeline Audit
-            </span>
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight mt-1 text-white">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 font-extrabold text-[10px] tracking-wider uppercase border border-teal-200 dark:border-teal-800/80">
+            Intelligence & Audit
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
             Lead Reports & Deal Loss Analytics
           </h1>
-          <p className="text-xs text-slate-300 max-w-2xl mt-0.5">
-            Monitor complete end-to-end sales conversion lifecycle, audit won vs lost deals, and analyze competitor pricing drivers.
-          </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center bg-slate-800/80 p-1 rounded-2xl border border-slate-700/80">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setActiveTab('traceability')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'traceability'
-                ? 'bg-gradient-to-r from-teal-600 to-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-teal-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -238,15 +233,15 @@ export function LeadReportsPage() {
           </button>
           <button
             onClick={() => setActiveTab('dealloss')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'dealloss'
-                ? 'bg-rose-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5" />
             <span>Deal Loss Analysis</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-rose-500/30 text-rose-200 text-[10px]">
+            <span className="px-1.5 py-0.2 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
               {lossAnalytics.totalLostCount}
             </span>
           </button>

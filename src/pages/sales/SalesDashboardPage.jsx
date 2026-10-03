@@ -9,6 +9,7 @@ export function SalesDashboardPage() {
   const orders = useOTDStorage(STORAGE_KEYS.ORDERS, []);
   const customers = useOTDStorage(STORAGE_KEYS.CUSTOMERS, []);
   const stages = useOTDStorage(STORAGE_KEYS.STAGES, []);
+  const systems = useOTDStorage(STORAGE_KEYS.SYSTEMS, []);
 
   // Compute actual metrics from local data
   const totalOrdersCount = orders.length;
@@ -34,23 +35,20 @@ export function SalesDashboardPage() {
   const recentOrders = orders.slice(0, 5);
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs tracking-wider uppercase border border-emerald-500/30">
-              Order To Delivery
-            </span>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Order To Delivery Dashboard</h1>
-          <p className="text-xs text-slate-400 mt-1">Live metrics powered by local data and TAT status engine.</p>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/80">
+            OTD System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Order To Delivery Dashboard</h1>
         </div>
         <button
           onClick={() => navigate('/sales/orders')}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all"
+          className="flex items-center justify-center space-x-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all self-start sm:self-auto cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>+ Create New Order</span>
         </button>
       </div>
@@ -188,7 +186,7 @@ export function SalesDashboardPage() {
               </div>
               <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                 <span className="text-slate-500">Configured Systems:</span>
-                <span className="font-extrabold text-slate-800 dark:text-slate-200">{useOTDStorage(STORAGE_KEYS.SYSTEMS, []).length}</span>
+                <span className="font-extrabold text-slate-800 dark:text-slate-200">{systems.length}</span>
               </div>
               <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                 <span className="text-slate-500">Configured Stages:</span>

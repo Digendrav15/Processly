@@ -40,19 +40,21 @@ export function LeadPipelinePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-slate-900 to-violet-950 p-6 rounded-3xl text-white shadow-xl border border-violet-900/30">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-violet-500/20 text-violet-400 font-extrabold text-xs tracking-wider uppercase border border-violet-500/30">
-              Lead To Orders System Module
-            </span>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Lead Qualification & Order Pipeline</h1>
-          <p className="text-xs text-slate-300 mt-1">Track prospective leads from first touchpoint to final order conversion.</p>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 font-extrabold text-[10px] tracking-wider uppercase border border-violet-200 dark:border-violet-800/80">
+            Pipeline
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Lead Qualification & Order Pipeline
+          </h1>
         </div>
-        <button className="flex items-center space-x-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 transition-all">
-          <Plus className="w-4 h-4" />
+        <button
+          onClick={() => {}}
+          className="flex items-center space-x-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer self-start sm:self-auto"
+        >
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Lead to Pipeline</span>
         </button>
       </div>

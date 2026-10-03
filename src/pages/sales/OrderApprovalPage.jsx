@@ -121,24 +121,23 @@ export function OrderApprovalPage() {
 
   return (
     <div className="space-y-2.5 pb-6">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
-        <div>
-          <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider border border-indigo-500/30">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider border border-indigo-200 dark:border-indigo-800/80">
             Order To Delivery
           </span>
-          <h1 className="text-base font-extrabold tracking-tight mt-0.5">Order Approval</h1>
-          <p className="text-[11px] text-slate-400">Management approval & review for verified customer orders.</p>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Order Approval</h1>
         </div>
 
         {/* Pending & History Tabs */}
-        <div className="bg-slate-800/80 p-1 rounded-xl border border-slate-700 flex space-x-1.5 text-xs font-bold">
+        <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 flex space-x-1 text-xs font-bold">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all cursor-pointer ${
               activeTab === 'pending'
                 ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -147,10 +146,10 @@ export function OrderApprovalPage() {
 
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all cursor-pointer ${
               activeTab === 'history'
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <History className="w-3.5 h-3.5" />

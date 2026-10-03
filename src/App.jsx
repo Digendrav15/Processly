@@ -113,6 +113,11 @@ import WhatsAppTemplatesPage from './pages/whatsapp/WhatsAppTemplatesPage';
 import WhatsAppSettingsPage from './pages/whatsapp/WhatsAppSettingsPage';
 import { MISSummaryPage } from './pages/misSummary/MISSummaryPage';
 
+// Inventory Management System Pages - 3 Core Pages
+import { InventoryDashboardPage } from './pages/inventory/InventoryDashboardPage';
+import { InventoryInOutPage } from './pages/inventory/InventoryInOutPage';
+import { InventoryIndentPage } from './pages/inventory/InventoryIndentPage';
+
 import { useSystem } from './context/SystemContext';
 import { Outlet } from 'react-router-dom';
 
@@ -326,6 +331,22 @@ export default function App() {
         {/* MIS Summary Module Routes */}
         <Route path="mis-summary" element={<ModuleRoute systemId="mis-summary" />}>
           <Route index element={<MISSummaryPage />} />
+        </Route>
+
+        {/* Inventory System Routes - Exactly 3 Pages */}
+        <Route path="inventory" element={<ModuleRoute systemId="inventory" />}>
+          <Route index element={<Navigate to="/inventory/dashboard" replace />} />
+          <Route path="dashboard" element={<InventoryDashboardPage />} />
+          <Route path="in-out" element={<InventoryInOutPage />} />
+          <Route path="indent" element={<InventoryIndentPage />} />
+
+          {/* Legacy fallback redirects */}
+          <Route path="inward" element={<Navigate to="/inventory/in-out" replace />} />
+          <Route path="outward" element={<Navigate to="/inventory/in-out" replace />} />
+          <Route path="adjustments" element={<Navigate to="/inventory/in-out" replace />} />
+          <Route path="alerts" element={<Navigate to="/inventory/indent" replace />} />
+          <Route path="items" element={<Navigate to="/inventory/dashboard" replace />} />
+          <Route path="reports" element={<Navigate to="/inventory/dashboard" replace />} />
         </Route>
       </Route>
 

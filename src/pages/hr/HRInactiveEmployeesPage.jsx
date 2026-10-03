@@ -75,23 +75,15 @@ export function HRInactiveEmployeesPage() {
 
   return (
     <div className="space-y-2.5">
-      {/* Compact Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/30">
-            <UserX className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 font-black text-[9px] uppercase tracking-wider border border-cyan-500/30">
-                HR FMS • Stage 14
-              </span>
-              <h1 className="text-base font-extrabold tracking-tight">
-                Inactive & Separated Employee Archive
-              </h1>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Historical alumni repository, completed separation records & relieving letter delivery</p>
-          </div>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 font-extrabold text-[10px] uppercase tracking-wider border border-cyan-200 dark:border-cyan-800/80">
+            HR FMS • Stage 14
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Inactive & Separated Employees
+          </h1>
         </div>
       </div>
 

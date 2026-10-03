@@ -145,30 +145,29 @@ export function OrderVerificationPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-xl">
-        <div>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs uppercase tracking-wider border border-emerald-500/30">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/80">
             Order To Delivery
           </span>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-2">Order Verification</h1>
-          <p className="text-xs text-slate-400 mt-1">Review read-only customer order information and execute verification checkpoints.</p>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Order Verification</h1>
         </div>
 
         {/* Pending / History Primary Tabs */}
-        <div className="bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700 flex space-x-2 text-xs font-bold">
+        <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 flex space-x-1 text-xs font-bold">
           <button
             onClick={() => {
               setActiveTab('pending');
               setSelectedOrderId(null);
             }}
-            className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all cursor-pointer ${
               activeTab === 'pending'
-                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Clock className="w-4 h-4" />
+            <Clock className="w-3.5 h-3.5" />
             <span>Pending ({pendingOrders.length})</span>
           </button>
 
@@ -177,13 +176,13 @@ export function OrderVerificationPage() {
               setActiveTab('history');
               setSelectedOrderId(null);
             }}
-            className={`px-4 py-2 rounded-xl flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <History className="w-4 h-4" />
+            <History className="w-3.5 h-3.5" />
             <span>History ({historyOrders.length})</span>
           </button>
         </div>

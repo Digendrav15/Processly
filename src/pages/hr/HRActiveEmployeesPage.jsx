@@ -163,36 +163,35 @@ export function HRActiveEmployeesPage() {
 
   return (
     <div className="space-y-2.5">
-      {/* Compact Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-slate-900 to-slate-800 px-3.5 py-2.5 rounded-xl text-white shadow-md">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/30">
+          <div className="p-1.5 bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 rounded-lg border border-cyan-100 dark:border-cyan-800">
             <Users className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 font-black text-[9px] uppercase tracking-wider border border-cyan-500/30">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[9px] uppercase tracking-wider">
                 HR FMS • Stage 8
               </span>
-              <h1 className="text-base font-extrabold tracking-tight">Active Employee Master Roster</h1>
+              <h1 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Active Employee Master Roster</h1>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Central employee directory, 360° profile view, and employment records</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Quick Stats Badges */}
-          <div className="hidden lg:flex items-center gap-2 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700 text-[11px]">
-            <span className="text-slate-300">Total: <strong className="text-white">{stats.total}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span className="text-cyan-400">Tech: <strong>{stats.techCount}</strong></span>
-            <span className="text-slate-600">|</span>
-            <span className="text-emerald-400">FullTime: <strong>{stats.fullTime}</strong></span>
+          <div className="hidden lg:flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px]">
+            <span className="text-slate-500">Total: <strong className="text-slate-900 dark:text-white">{stats.total}</strong></span>
+            <span className="text-slate-300 dark:text-slate-600">|</span>
+            <span className="text-cyan-600 dark:text-cyan-400">Tech: <strong>{stats.techCount}</strong></span>
+            <span className="text-slate-300 dark:text-slate-600">|</span>
+            <span className="text-emerald-600 dark:text-emerald-400">FullTime: <strong>{stats.fullTime}</strong></span>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Add Employee</span>

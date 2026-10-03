@@ -100,32 +100,24 @@ export function MasterVendorsPage() {
 
   return (
     <div className="space-y-2.5">
-      {/* Compact Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-rose-900 to-slate-900 px-3.5 py-2.5 rounded-xl text-white shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/30">
-            <Users2 className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 font-black text-[9px] uppercase tracking-wider border border-rose-500/30">
-                Master System
-              </span>
-              <h1 className="text-base font-extrabold tracking-tight">Vendors & Logistics Master</h1>
-            </div>
-            <p className="text-[11px] text-rose-200 mt-0.5">Manage Sales Vendors (Customers), Purchase Vendors, and Transporters</p>
-          </div>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 font-extrabold text-[10px] uppercase tracking-wider border border-rose-200 dark:border-rose-800/80">
+            Master System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Vendors & Logistics</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Sub-Tabs */}
-          <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700 text-xs">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/80 text-xs">
             <button
               onClick={() => setSubTab('sales')}
               className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 subTab === 'sales'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>Sales ({salesVendors.length})</span>
@@ -135,7 +127,7 @@ export function MasterVendorsPage() {
               className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 subTab === 'purchase'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>Purchase ({purchaseVendors.length})</span>
@@ -145,7 +137,7 @@ export function MasterVendorsPage() {
               className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 subTab === 'transporter'
                   ? 'bg-rose-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>Transporters ({transporters.length})</span>
@@ -154,7 +146,7 @@ export function MasterVendorsPage() {
 
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center space-x-1 px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
+            className="flex items-center space-x-1 px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>

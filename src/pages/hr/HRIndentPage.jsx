@@ -176,34 +176,26 @@ export function HRIndentPage() {
 
   return (
     <div className="space-y-2.5">
-      {/* Compact Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 px-3.5 py-2.5 rounded-xl text-white shadow-md border border-blue-800/30">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-500/30">
-            <Plus className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-black text-[9px] uppercase tracking-wider border border-blue-500/30">
-                HR FMS • Stage 1
-              </span>
-              <h1 className="text-base font-extrabold tracking-tight text-white">
-                Indent & Manpower Requirements
-              </h1>
-            </div>
-            <p className="text-[11px] text-slate-300 mt-0.5">Raise department hiring requisitions for approval and job sourcing</p>
-          </div>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase tracking-wider border border-blue-200 dark:border-blue-800/80">
+            HR FMS • Stage 1
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Indent & Requirements
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* Tab Switcher */}
-          <div className="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-bold shrink-0">
+          <div className="bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/80 flex space-x-1 text-xs font-bold shrink-0">
             <button
               onClick={() => setActiveTab('pending')}
-              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md flex items-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'pending'
                   ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -212,10 +204,10 @@ export function HRIndentPage() {
 
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-2.5 py-1 rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md flex items-center space-x-1.5 transition-all cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               <History className="w-3.5 h-3.5" />
@@ -225,7 +217,7 @@ export function HRIndentPage() {
 
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer shrink-0"
+            className="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Raise Indent</span>

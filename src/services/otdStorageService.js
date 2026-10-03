@@ -31,8 +31,8 @@ export const STORAGE_KEYS = {
 
 // Default Company Details for Master & PO
 export const DEFAULT_COMPANY_DETAILS = {
-  companyName: 'Acme Corporate Enterprise Ltd',
-  brandName: 'GimBooks',
+  companyName: 'Processly',
+  brandName: 'Processly',
   gstin: '07AAACA1234F1Z8',
   address: 'Plot No. 42, Udyog Vihar Phase IV',
   city: 'Gurugram',

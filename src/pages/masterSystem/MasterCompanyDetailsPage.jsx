@@ -64,37 +64,24 @@ export function MasterCompanyDetailsPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-950 via-slate-900 to-slate-900 p-6 rounded-3xl text-white shadow-xl border border-blue-500/20">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 font-extrabold text-xs uppercase tracking-wider border border-blue-500/30">
-              Master System
-            </span>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs uppercase tracking-wider border border-emerald-500/30">
-              PO Linked Master
-            </span>
-          </div>
-          <h1 className="text-2xl font-black tracking-tight mt-2 flex items-center gap-2">
-            <Building2 className="w-7 h-7 text-blue-400" />
-            Our Company Details
-          </h1>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-            Configure your official company profile. These details (Company Name, GST No., Address, Email ID, Contact Number) automatically populate onto all Purchase Orders (PO) and outgoing documents.
-          </p>
+    <div className="space-y-2.5 pb-6">
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-extrabold text-[10px] uppercase tracking-wider border border-blue-200 dark:border-blue-800/80">
+            Master System
+          </span>
+          <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">Our Company Details</h1>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleResetDefaults}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-700 cursor-pointer shadow-sm"
-          >
-            <RotateCcw className="w-4 h-4 text-slate-400" />
-            <span>Reset Defaults</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleResetDefaults}
+          className="px-2.5 py-1 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200 dark:border-slate-700 cursor-pointer self-start sm:self-auto"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+          <span>Reset Defaults</span>
+        </button>
       </div>
 
       {savedSuccess && (
@@ -136,7 +123,7 @@ export function MasterCompanyDetailsPage() {
                     required
                     value={form.companyName || ''}
                     onChange={(e) => handleChange('companyName', e.target.value)}
-                    placeholder="e.g. Acme Corporate Enterprise Ltd"
+                    placeholder="e.g. Processly Ltd"
                     className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

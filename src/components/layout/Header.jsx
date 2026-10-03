@@ -52,7 +52,7 @@ export function Header({ onOpenMobileMenu }) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="hidden sm:block">
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Acme Corporate Enterprise</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Processly</p>
             <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <span>{isMainDashboard ? dashboardTitle : currentSystem.name}</span>
               <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium px-2 py-0.5 rounded-full">

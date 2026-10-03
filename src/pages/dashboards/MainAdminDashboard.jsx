@@ -13,12 +13,6 @@ import { StageKanbanReports } from '../../components/dashboard/StageKanbanReport
 
 export function MainAdminDashboard() {
   const { isAdmin } = useAuth();
-
-  // If not Admin, redirect away immediately
-  if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   const [loading, setLoading] = useState(true);
 
   // System Data States
@@ -125,6 +119,10 @@ export function MainAdminDashboard() {
       window.removeEventListener('whatsapp_storage_update', handleUpdate);
     };
   }, []);
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="pb-12">

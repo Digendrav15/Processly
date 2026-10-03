@@ -5,15 +5,15 @@ import { useOTDStorage } from '../../hooks/useOTDStorage';
 
 export function OrderStageModal({ order, isOpen, onClose, onSuccess }) {
   const transporters = useOTDStorage(STORAGE_KEYS.TRANSPORTERS, []);
+  const [remarks, setRemarks] = useState('');
+  const [stageFormData, setStageFormData] = useState({});
+  const [errorMsg, setErrorMsg] = useState('');
+
   if (!isOpen || !order) return null;
 
   const currentStage = order.currentStage || 'New Order';
   const systemName = order.systemName || 'Order To Delivery';
   const tatConfig = getTATConfigForStage(systemName, currentStage);
-
-  const [remarks, setRemarks] = useState('');
-  const [stageFormData, setStageFormData] = useState({});
-  const [errorMsg, setErrorMsg] = useState('');
 
   // Auto calculate planned date for custom stage inputs if start date changes
   const autoPlannedDate = tatConfig

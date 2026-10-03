@@ -18,7 +18,8 @@ import {
   ExternalLink,
   ChevronRight,
   PhoneCall,
-  MessageSquare
+  MessageSquare,
+  Target
 } from 'lucide-react';
 import { useLeadStorage } from '../../hooks/useLeadStorage';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
@@ -124,30 +125,32 @@ export function LeadDashboardPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-slate-900 via-violet-950 to-indigo-950 p-6 rounded-3xl text-white shadow-xl border border-violet-800/30">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded-full bg-violet-500/20 text-violet-300 font-extrabold text-[11px] tracking-wider uppercase border border-violet-500/30">
-              Lead To Order FMS Pipeline
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-slate-300 bg-white/10 px-2 py-0.5 rounded-full">
-              <Calendar className="w-3 h-3" /> Today: {todayStr}
-            </span>
+      {/* Clean Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 rounded-lg border border-violet-100 dark:border-violet-800">
+            <Target className="w-4 h-4" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-white">
-            Commercial Lead Pipeline & Conversion
-          </h1>
-          <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-            Complete qualification funnel: Lead Creation → Verification → Follow-up → Quotation → Negotiation → Approval. Approved leads automatically bridge into Order to Delivery.
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.5 rounded bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 font-extrabold text-[10px] tracking-wider uppercase border border-violet-200 dark:border-violet-800/80">
+                Lead To Order FMS
+              </span>
+              <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Commercial Lead Pipeline & Conversion
+              </h1>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
+          <span className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-medium">
+            <Calendar className="w-3 h-3" /> {todayStr}
+          </span>
           <button
             onClick={() => navigate('/lead-to-orders/leads?action=create')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/30 transition-all cursor-pointer transform active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs rounded-lg shadow-xs transition-all cursor-pointer transform active:scale-95"
           >
-            <UserPlus className="w-4 h-4" />
+            <UserPlus className="w-3.5 h-3.5" />
             <span>+ Create New Lead</span>
           </button>
         </div>
