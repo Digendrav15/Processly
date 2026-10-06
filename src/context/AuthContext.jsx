@@ -115,16 +115,54 @@ export function AuthProvider({ children }) {
   };
 
   const userRole = (user?.role || (user?.userGroup === 'Admin' ? 'ADMIN' : 'EMPLOYEE')).toUpperCase();
+<<<<<<< HEAD
   const isAdmin = userRole === 'ADMIN' || user?.userGroup === 'Admin';
   const isManager = userRole === 'MANAGER' || (user?.userGroup && user.userGroup.toLowerCase().includes('manager'));
 
+=======
+  const isAdmin = userRole === 'SUPER_ADMIN' || userRole === 'ADMIN' || user?.userGroup === 'Admin';
+  const isManager = userRole === 'MANAGER' || (user?.userGroup && user.userGroup.toLowerCase().includes('manager'));
+
+  // Normalize allowed systems from Supabase public.users
+  const allowedModules = React.useMemo(() => {
+    if (isAdmin) {
+      return [
+        'checklist',
+        'sales',
+        'master-system',
+        'purchase',
+        'lead-to-orders',
+        'hr',
+        'petty-expenses',
+        'doc-subscription',
+        'whatsapp',
+        'inventory',
+        'mis-summary'
+      ];
+    }
+    const raw = user?.allowed_systems || user?.allowedModules || ['tasks'];
+    return raw.map((id) => {
+      if (id === 'tasks') return 'checklist';
+      if (id === 'petty_expenses') return 'petty-expenses';
+      if (id === 'lead_to_orders') return 'lead-to-orders';
+      if (id === 'doc_subscription') return 'doc-subscription';
+      if (id === 'mis_summary') return 'mis-summary';
+      return id;
+    });
+  }, [user, isAdmin]);
+
+>>>>>>> daf8de7 ( .gitignore update)
   const value = {
     user,
     role: userRole,
     isAdmin,
     isManager,
     isEmployee: !isAdmin && !isManager,
+<<<<<<< HEAD
     allowedModules: user?.allowedModules || (isAdmin ? ['checklist', 'sales', 'master-system', 'purchase', 'lead-to-orders', 'hr', 'petty-expenses', 'doc-subscription', 'whatsapp'] : ['checklist']),
+=======
+    allowedModules,
+>>>>>>> daf8de7 ( .gitignore update)
     loading,
     login,
     signup,

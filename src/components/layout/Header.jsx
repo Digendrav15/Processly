@@ -4,9 +4,16 @@ import { useNotifications } from '../../context/NotificationContext';
 import { useSystem } from '../../context/SystemContext';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
+<<<<<<< HEAD
 import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Users as UsersIcon, Search } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { INITIAL_USERS } from '../../services/mockData';
+=======
+import { formatRelativeTime } from '../../services/notificationService';
+import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Search, Building2, IdCard, Plus } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ComposeNotificationModal } from '../notifications/ComposeNotificationModal';
+>>>>>>> daf8de7 ( .gitignore update)
 
 export function Header({ onOpenMobileMenu }) {
   const { user, isAdmin, isManager, logout, switchUser } = useAuth();
@@ -15,6 +22,10 @@ export function Header({ onOpenMobileMenu }) {
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+<<<<<<< HEAD
+=======
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
+>>>>>>> daf8de7 ( .gitignore update)
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,6 +53,10 @@ export function Header({ onOpenMobileMenu }) {
   return (
     <>
       <GlobalSearchModal isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
+<<<<<<< HEAD
+=======
+      <ComposeNotificationModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
+>>>>>>> daf8de7 ( .gitignore update)
       <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         {/* Left Mobile Menu Toggle + Title */}
         <div className="flex items-center space-x-3">
@@ -107,6 +122,7 @@ export function Header({ onOpenMobileMenu }) {
           {showNotifPopover && (
             <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+<<<<<<< HEAD
                 <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifications</h4>
                 {unreadCount > 0 && (
                   <button
@@ -117,6 +133,40 @@ export function Header({ onOpenMobileMenu }) {
                     <span>Mark all read</span>
                   </button>
                 )}
+=======
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifications</h4>
+                  {unreadCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {(isAdmin || isManager) && (
+                    <button
+                      onClick={() => {
+                        setShowNotifPopover(false);
+                        setIsComposeOpen(true);
+                      }}
+                      className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors shadow-2xs"
+                      title="Create targeted notification with @ mention"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>New</span>
+                    </button>
+                  )}
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold"
+                    >
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Mark read</span>
+                    </button>
+                  )}
+                </div>
+>>>>>>> daf8de7 ( .gitignore update)
               </div>
               <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {notifications.length === 0 ? (
@@ -129,6 +179,7 @@ export function Header({ onOpenMobileMenu }) {
                         markAsRead(n.id);
                         setShowNotifPopover(false);
                         if (n.link_url) navigate(n.link_url);
+<<<<<<< HEAD
                       }}
                       className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${!n.is_read ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''
                         }`}
@@ -138,6 +189,31 @@ export function Header({ onOpenMobileMenu }) {
                       <span className="text-[10px] text-slate-400 mt-1 block">
                         {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
+=======
+                        else navigate('/notifications');
+                      }}
+                      className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${
+                        !n.is_read ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{n.title}</p>
+                        {!n.is_read && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0"></span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+                      <div className="flex items-center justify-between gap-2 mt-1.5">
+                        {(n.sender_email || n.email) && (
+                          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono truncate max-w-[170px]">
+                            {n.sender_email || n.email}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-slate-400 ml-auto">
+                          {formatRelativeTime(n.created_at)}
+                        </span>
+                      </div>
+>>>>>>> daf8de7 ( .gitignore update)
                     </div>
                   ))
                 )}
@@ -159,6 +235,7 @@ export function Header({ onOpenMobileMenu }) {
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
+<<<<<<< HEAD
             className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <img
@@ -169,10 +246,40 @@ export function Header({ onOpenMobileMenu }) {
             <div className="hidden md:block text-left">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">{user?.full_name}</p>
               <p className="text-[10px] text-slate-400 font-medium">{user?.designation || user?.role}</p>
+=======
+            className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={user?.full_name || 'User'}
+                className="w-8 h-8 rounded-lg object-cover ring-2 ring-indigo-500/30"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold flex items-center justify-center text-xs shadow-xs ring-2 ring-indigo-500/30">
+                {user?.full_name
+                  ? user.full_name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : 'U'}
+              </div>
+            )}
+            <div className="hidden md:block text-left">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                {user?.full_name || 'User Profile'}
+              </p>
+              <p className="text-[10px] text-slate-400 font-medium">
+                {user?.designation || user?.department || user?.role || 'Employee'}
+              </p>
+>>>>>>> daf8de7 ( .gitignore update)
             </div>
           </button>
 
           {showProfileMenu && (
+<<<<<<< HEAD
             <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
               <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
                 <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
@@ -183,6 +290,72 @@ export function Header({ onOpenMobileMenu }) {
                   </span>
                   <span className="text-[10px] text-slate-400 font-medium">
                     {user?.allowedModules ? `${user.allowedModules.length} Modules` : 'All Modules'}
+=======
+            <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
+              <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
+                <div className="flex items-center gap-3">
+                  {user?.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.full_name}
+                      className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-500/30"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-extrabold flex items-center justify-center text-sm shadow-md shrink-0">
+                      {user?.full_name
+                        ? user.full_name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .slice(0, 2)
+                            .toUpperCase()
+                        : 'U'}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {user?.full_name || 'Authenticated User'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {user?.email}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        {user?.role || 'User'}
+                      </span>
+                      {user?.employee_id && (
+                        <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                          {user.employee_id}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Department & Designation Details */}
+              <div className="px-4 py-2.5 text-xs border-b border-slate-100 dark:border-slate-800 space-y-1.5 text-slate-600 dark:text-slate-300">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Department:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {user?.department || 'Operations'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Designation:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {user?.designation || 'Associate'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Systems Access:</span>
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                    {user?.allowed_systems
+                      ? `${user.allowed_systems.length} Systems`
+                      : user?.allowedModules
+                      ? `${user.allowedModules.length} Systems`
+                      : 'Full Access'}
+>>>>>>> daf8de7 ( .gitignore update)
                   </span>
                 </div>
               </div>
@@ -196,6 +369,7 @@ export function Header({ onOpenMobileMenu }) {
                 <span>My Profile & Requests</span>
               </Link>
 
+<<<<<<< HEAD
               {/* Quick Switch User & Test Module Access */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="px-4 py-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -236,6 +410,12 @@ export function Header({ onOpenMobileMenu }) {
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+=======
+              <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+>>>>>>> daf8de7 ( .gitignore update)
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>

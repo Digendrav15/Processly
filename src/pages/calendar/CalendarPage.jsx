@@ -14,8 +14,16 @@ import {
   addMonths,
   subMonths
 } from 'date-fns';
+<<<<<<< HEAD
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { getStatusBadgeStyle } from '../../lib/utils';
+=======
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, PartyPopper } from 'lucide-react';
+import { getStatusBadgeStyle } from '../../lib/utils';
+import { useOTDStorage } from '../../hooks/useOTDStorage';
+import { STORAGE_KEYS } from '../../services/otdStorageService';
+import { holidayService } from '../../services/holidayService';
+>>>>>>> daf8de7 ( .gitignore update)
 
 export function CalendarPage() {
   const { user } = useAuth();
@@ -24,6 +32,10 @@ export function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [viewMode, setViewMode] = useState('Month'); // Month, Week, Day
+<<<<<<< HEAD
+=======
+  const holidays = useOTDStorage(STORAGE_KEYS.HOLIDAYS, holidayService.getHolidaysSync());
+>>>>>>> daf8de7 ( .gitignore update)
 
   useEffect(() => {
     loadTasks();
@@ -116,13 +128,25 @@ export function CalendarPage() {
             const dayTasks = tasks.filter((t) => isSameDay(new Date(t.due_date), day));
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isToday = isSameDay(day, new Date());
+<<<<<<< HEAD
+=======
+            const dayFormatted = format(day, 'yyyy-MM-dd');
+            const dayHoliday = holidays.find((h) => {
+              const hDate = (h.date || '').split('T')[0];
+              return hDate === dayFormatted && h.status !== 'Inactive';
+            });
+>>>>>>> daf8de7 ( .gitignore update)
 
             return (
               <div
                 key={day.toString()}
                 className={`p-2 min-h-[100px] transition-colors ${
                   !isCurrentMonth ? 'bg-slate-50/50 dark:bg-slate-950/40 text-slate-400' : 'bg-white dark:bg-slate-900'
+<<<<<<< HEAD
                 }`}
+=======
+                } ${dayHoliday ? 'bg-rose-50/30 dark:bg-rose-950/20' : ''}`}
+>>>>>>> daf8de7 ( .gitignore update)
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span
@@ -139,6 +163,19 @@ export function CalendarPage() {
                   )}
                 </div>
 
+<<<<<<< HEAD
+=======
+                {dayHoliday && (
+                  <div
+                    className="mb-1.5 px-1.5 py-0.5 rounded-md bg-rose-100/80 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 text-[10px] font-extrabold flex items-center gap-1 shadow-2xs truncate"
+                    title={`${dayHoliday.name} (${dayHoliday.type})`}
+                  >
+                    <PartyPopper className="w-3 h-3 text-rose-500 shrink-0" />
+                    <span className="truncate">{dayHoliday.name}</span>
+                  </div>
+                )}
+
+>>>>>>> daf8de7 ( .gitignore update)
                 <div className="space-y-1">
                   {dayTasks.slice(0, 3).map((t) => (
                     <div

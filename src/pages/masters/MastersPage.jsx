@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
+=======
+import { useLocation } from 'react-router-dom';
+>>>>>>> daf8de7 ( .gitignore update)
 import { masterService } from '../../services/masterService';
 import { userService } from '../../services/userService';
 import { DEPARTMENTS } from '../../config/constants';
 import { Modal } from '../../components/common/Modal';
+<<<<<<< HEAD
 import { Plus, Edit2, Trash2, Users, Building2, Award, AlertCircle } from 'lucide-react';
 
 export function MastersPage() {
@@ -10,6 +15,21 @@ export function MastersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Users'); // Users, Departments, Designations
+=======
+import { Plus, Edit2, Trash2, Users, Building2, Award, AlertCircle, Camera, Upload, Loader2, Check, Calendar } from 'lucide-react';
+import { storageService, PROFILE_BUCKET } from '../../services/storageService';
+import { WorkingDayCalendarMaster } from '../../components/masters/WorkingDayCalendarMaster';
+
+export function MastersPage() {
+  const location = useLocation();
+  const [masters, setMasters] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'Users';
+  }); // Users, Departments, Designations, WorkingDayCalendar
+>>>>>>> daf8de7 ( .gitignore update)
 
   // Modals & Edit States
   // 1. User Modal State
@@ -22,6 +42,12 @@ export function MastersPage() {
   const [departmentId, setDepartmentId] = useState('dept-ops');
   const [designation, setDesignation] = useState('Operations Associate');
   const [selfAssignEnabled, setSelfAssignEnabled] = useState(true);
+<<<<<<< HEAD
+=======
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+>>>>>>> daf8de7 ( .gitignore update)
 
   // 2. Department Modal & Inputs
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
@@ -54,6 +80,10 @@ export function MastersPage() {
 
   // --- USER HANDLERS ---
   const handleOpenUserModal = (userObj = null) => {
+<<<<<<< HEAD
+=======
+    setAvatarError('');
+>>>>>>> daf8de7 ( .gitignore update)
     if (userObj) {
       setEditingUser(userObj);
       setFullName(userObj.full_name);
@@ -63,6 +93,10 @@ export function MastersPage() {
       setDepartmentId(userObj.department_id || 'dept-ops');
       setDesignation(userObj.designation || 'Operations Associate');
       setSelfAssignEnabled(userObj.self_assign_enabled !== false);
+<<<<<<< HEAD
+=======
+      setAvatarUrl(userObj.avatar_url || '');
+>>>>>>> daf8de7 ( .gitignore update)
     } else {
       setEditingUser(null);
       setFullName('');
@@ -72,10 +106,39 @@ export function MastersPage() {
       setDepartmentId('dept-ops');
       setDesignation('Operations Associate');
       setSelfAssignEnabled(true);
+<<<<<<< HEAD
+=======
+      setAvatarUrl('');
+>>>>>>> daf8de7 ( .gitignore update)
     }
     setIsUserModalOpen(true);
   };
 
+<<<<<<< HEAD
+=======
+  const handleUserAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    setAvatarUploading(true);
+    setAvatarError('');
+    try {
+      // Upload to bucket 'Profile_Images'
+      const { publicUrl } = await storageService.uploadProfileImage(
+        file,
+        editingUser?.id || editingUser?.employee_id || 'user'
+      );
+      setAvatarUrl(publicUrl);
+    } catch (err) {
+      console.error('Failed to upload user image to Profile_Images:', err);
+      setAvatarError(err.message || 'Failed to upload user profile image to bucket.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+>>>>>>> daf8de7 ( .gitignore update)
   const handleSaveUser = async (e) => {
     e.preventDefault();
     try {
@@ -92,6 +155,10 @@ export function MastersPage() {
           department_name: deptName,
           designation,
           self_assign_enabled: selfAssignEnabled,
+<<<<<<< HEAD
+=======
+          avatar_url: avatarUrl,
+>>>>>>> daf8de7 ( .gitignore update)
         });
       } else {
         await userService.createUser({
@@ -103,6 +170,10 @@ export function MastersPage() {
           department_name: deptName,
           designation,
           self_assign_enabled: selfAssignEnabled,
+<<<<<<< HEAD
+=======
+          avatar_url: avatarUrl,
+>>>>>>> daf8de7 ( .gitignore update)
         });
       }
 
@@ -302,6 +373,21 @@ export function MastersPage() {
           <Award className="w-4 h-4" />
           <span>Designations</span>
         </button>
+<<<<<<< HEAD
+=======
+
+        <button
+          onClick={() => setActiveTab('WorkingDayCalendar')}
+          className={`flex items-center space-x-2 px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all ${
+            activeTab === 'WorkingDayCalendar'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Working Day Calendar</span>
+        </button>
+>>>>>>> daf8de7 ( .gitignore update)
       </div>
 
       {/* 1. USERS TAB TABLE WITH EDIT & DELETE */}
@@ -497,6 +583,14 @@ export function MastersPage() {
         </div>
       )}
 
+<<<<<<< HEAD
+=======
+      {/* 4. WORKING DAY CALENDAR TAB */}
+      {activeTab === 'WorkingDayCalendar' && (
+        <WorkingDayCalendarMaster />
+      )}
+
+>>>>>>> daf8de7 ( .gitignore update)
       {/* User Edit / Create Modal */}
       <Modal
         isOpen={isUserModalOpen}
@@ -505,6 +599,73 @@ export function MastersPage() {
         maxWidth="max-w-lg"
       >
         <form onSubmit={handleSaveUser} className="space-y-4">
+<<<<<<< HEAD
+=======
+          {/* Avatar Upload to Profile_Images Bucket */}
+          <div className="flex items-center space-x-4 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="relative w-14 h-14 shrink-0">
+              <img
+                src={avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                alt="Profile"
+                className={`w-14 h-14 rounded-xl object-cover ring-2 ring-indigo-500/20 shadow-xs ${avatarUploading ? 'opacity-30' : ''}`}
+              />
+              {avatarUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl">
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-0.5">
+                Profile Photo
+              </label>
+              <div className="flex items-center space-x-1.5 text-[10px] text-slate-500 mb-2">
+                <span>Uploads to bucket:</span>
+                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded">
+                  {PROFILE_BUCKET}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <label className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-xs transition-colors">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{avatarUploading ? 'Uploading...' : 'Upload to Bucket'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={avatarUploading}
+                    onChange={handleUserAvatarUpload}
+                    className="hidden"
+                  />
+                </label>
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setAvatarUrl('')}
+                    className="text-[11px] text-slate-400 hover:text-rose-500 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {avatarError && (
+            <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-start space-x-2 border border-rose-200 dark:border-rose-800">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="text-[11px]">
+                <p className="font-bold">{avatarError}</p>
+                {avatarError.includes('RLS') && (
+                  <p className="mt-0.5 text-slate-500">
+                    Supabase Storage RLS policy needs to be enabled for bucket '{PROFILE_BUCKET}'.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+>>>>>>> daf8de7 ( .gitignore update)
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
             <input

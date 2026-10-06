@@ -16,10 +16,18 @@ export function SystemProvider({ children }) {
 
   // Strict Module Permission Filtering
   const systemsList = useMemo(() => {
+<<<<<<< HEAD
     // 1. Admin role always has access to all configured systems
     const isAdmin =
       user?.userGroup === 'Admin' ||
       user?.role === 'ADMIN' ||
+=======
+    const roleUpper = (user?.role || '').toUpperCase();
+    const isAdmin =
+      roleUpper === 'SUPER_ADMIN' ||
+      roleUpper === 'ADMIN' ||
+      user?.userGroup === 'Admin' ||
+>>>>>>> daf8de7 ( .gitignore update)
       (typeof user?.userGroup === 'string' && user.userGroup.toLowerCase() === 'admin');
 
     if (isAdmin) {

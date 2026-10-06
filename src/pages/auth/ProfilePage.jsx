@@ -25,8 +25,22 @@ import {
   FileText,
   CreditCard,
   Layers,
+<<<<<<< HEAD
   Sparkles
 } from 'lucide-react';
+=======
+  Sparkles,
+  Loader2,
+  PartyPopper,
+  CalendarDays,
+  Search,
+  Filter
+} from 'lucide-react';
+import { storageService, PROFILE_BUCKET } from '../../services/storageService';
+import { useOTDStorage } from '../../hooks/useOTDStorage';
+import { STORAGE_KEYS } from '../../services/otdStorageService';
+import { holidayService } from '../../services/holidayService';
+>>>>>>> daf8de7 ( .gitignore update)
 
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
@@ -44,12 +58,45 @@ export function ProfilePage() {
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [mobile, setMobile] = useState(user?.mobile || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '');
+<<<<<<< HEAD
   const [savedMessage, setSavedMessage] = useState('');
   const fileInputRef = useRef(null);
 
   // Active Tab for Portal Forms: 'leave' | 'advance'
   const [activeFormTab, setActiveFormTab] = useState('leave');
 
+=======
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+  const [savedMessage, setSavedMessage] = useState('');
+  const fileInputRef = useRef(null);
+
+  // Active Tab for Portal Forms: 'leave' | 'advance' | 'holidays'
+  const [activeFormTab, setActiveFormTab] = useState('leave');
+
+  // Company Holidays configured by Admin
+  const holidays = useOTDStorage(STORAGE_KEYS.HOLIDAYS, holidayService.getHolidaysSync());
+  const [holidaySearch, setHolidaySearch] = useState('');
+  const [holidayTypeFilter, setHolidayTypeFilter] = useState('ALL');
+
+  // Helper for holiday countdown
+  const getDaysRemaining = (dateStr) => {
+    if (!dateStr) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
+    const diffTime = target - today;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const sortedHolidays = [...holidays].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const nextHoliday = sortedHolidays.find((h) => {
+    const d = getDaysRemaining(h.date);
+    return d !== null && d >= 0;
+  });
+
+>>>>>>> daf8de7 ( .gitignore update)
   // Password Update States
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState(user?.password || '••••••••');
@@ -115,6 +162,7 @@ export function ProfilePage() {
     }
   };
 
+<<<<<<< HEAD
   const handleAvatarFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -123,14 +171,50 @@ export function ProfilePage() {
         setAvatarUrl(reader.result);
       };
       reader.readAsDataURL(file);
+=======
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so same file can be selected again if needed
+    e.target.value = '';
+
+    setAvatarUploading(true);
+    setAvatarError('');
+    setSavedMessage('');
+
+    try {
+      // 1. Upload to Supabase 'Profile_Images' bucket and update user profile in DB
+      const { publicUrl } = await storageService.updateUserAvatar(user?.id, file, true);
+      setAvatarUrl(publicUrl);
+      setSavedMessage(`Profile image uploaded to "${PROFILE_BUCKET}" bucket & saved!`);
+      setTimeout(() => setSavedMessage(''), 4000);
+    } catch (err) {
+      console.error('Failed to upload avatar to Profile_Images:', err);
+      // Fallback: If RLS blocked, show a detailed message
+      setAvatarError(err.message || 'Failed to upload image to Profile_Images bucket.');
+    } finally {
+      setAvatarUploading(false);
+>>>>>>> daf8de7 ( .gitignore update)
     }
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+<<<<<<< HEAD
     await updateProfile({ full_name: fullName, mobile, avatar_url: avatarUrl });
     setSavedMessage('Profile & picture updated successfully!');
     setTimeout(() => setSavedMessage(''), 3000);
+=======
+    setAvatarError('');
+    try {
+      await updateProfile({ full_name: fullName, mobile, avatar_url: avatarUrl });
+      setSavedMessage('Profile details saved successfully!');
+      setTimeout(() => setSavedMessage(''), 3000);
+    } catch (err) {
+      setAvatarError(err.message || 'Failed to save profile changes');
+    }
+>>>>>>> daf8de7 ( .gitignore update)
   };
 
   const handleUpdatePassword = async (e) => {
@@ -275,6 +359,7 @@ export function ProfilePage() {
                 <img
                   src={avatarUrl || user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
                   alt={user?.full_name}
+<<<<<<< HEAD
                   className="w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md transition-all group-hover:opacity-90"
                 />
                 <button
@@ -282,6 +367,22 @@ export function ProfilePage() {
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg transition-transform hover:scale-110 cursor-pointer"
                   title="Change Profile Picture"
+=======
+                  className={`w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md transition-all group-hover:opacity-90 ${avatarUploading ? 'opacity-40 animate-pulse' : ''}`}
+                />
+                {avatarUploading && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-2xl text-white">
+                    <Loader2 className="w-6 h-6 animate-spin text-white mb-1" />
+                    <span className="text-[9px] font-bold">Uploading...</span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  disabled={avatarUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl shadow-lg transition-transform hover:scale-110 cursor-pointer"
+                  title={`Change Profile Picture (Saves to ${PROFILE_BUCKET} bucket)`}
+>>>>>>> daf8de7 ( .gitignore update)
                 >
                   <Camera className="w-4 h-4" />
                 </button>
@@ -294,6 +395,15 @@ export function ProfilePage() {
                 />
               </div>
 
+<<<<<<< HEAD
+=======
+              {/* Bucket info indicator */}
+              <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-500 font-medium">
+                <span>Storage Bucket:</span>
+                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{PROFILE_BUCKET}</span>
+              </div>
+
+>>>>>>> daf8de7 ( .gitignore update)
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-white">{user?.full_name}</h2>
                 <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{user?.designation || user?.role}</p>
@@ -322,6 +432,23 @@ export function ProfilePage() {
               </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            {avatarError && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-start space-x-2 border border-rose-200 dark:border-rose-800">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                <div className="space-y-1">
+                  <p className="font-bold">{avatarError}</p>
+                  {avatarError.includes('RLS') && (
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400">
+                      Run the Storage RLS policy in Supabase SQL Editor to allow public uploads to bucket '{PROFILE_BUCKET}'.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+>>>>>>> daf8de7 ( .gitignore update)
             {savedMessage && (
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -498,6 +625,7 @@ export function ProfilePage() {
               })}
             </div>
           </div>
+<<<<<<< HEAD
         </div>
 
         {/* RIGHT COLUMN: FORMS (LEAVE KA FORM & ADVANCE KA FORM) */}
@@ -507,6 +635,63 @@ export function ProfilePage() {
             <button
               onClick={() => setActiveFormTab('leave')}
               className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
+=======
+
+          {/* UPCOMING COMPANY HOLIDAY QUICK WIDGET */}
+          <div className="bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-transparent border border-rose-200 dark:border-rose-900/60 p-5 rounded-2xl shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400">
+                <PartyPopper className="w-4 h-4" />
+                <h3 className="font-extrabold text-xs uppercase tracking-wider">Next Official Holiday</h3>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                Gazetted
+              </span>
+            </div>
+
+            {nextHoliday ? (
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                      {nextHoliday.name}
+                    </p>
+                    <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-0.5">
+                      {new Date(nextHoliday.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-extrabold px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
+                    {(() => {
+                      const days = getDaysRemaining(nextHoliday.date);
+                      if (days === 0) return 'Today 🎉';
+                      if (days === 1) return 'Tomorrow';
+                      return `In ${days} days`;
+                    })()}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveFormTab('holidays')}
+                  className="w-full mt-1 py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/80 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>View All Holidays ({holidays.length})</span>
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">No upcoming holidays scheduled by Admin.</p>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: FORMS (LEAVE KA FORM & ADVANCE KA FORM & COMPANY HOLIDAYS) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Navigation Tabs for Forms */}
+          <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap gap-2 border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => setActiveFormTab('leave')}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
+>>>>>>> daf8de7 ( .gitignore update)
                   ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
@@ -517,13 +702,32 @@ export function ProfilePage() {
 
             <button
               onClick={() => setActiveFormTab('advance')}
+<<<<<<< HEAD
               className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
+=======
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
+>>>>>>> daf8de7 ( .gitignore update)
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
             >
               <DollarSign className="w-4 h-4" />
+<<<<<<< HEAD
               <span>Advance Request </span>
+=======
+              <span>Advance Request</span>
+            </button>
+
+            <button
+              onClick={() => setActiveFormTab('holidays')}
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'holidays'
+                  ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+            >
+              <PartyPopper className="w-4 h-4 text-rose-500" />
+              <span>Official Holidays ({holidays.length})</span>
+>>>>>>> daf8de7 ( .gitignore update)
             </button>
           </div>
 
@@ -912,6 +1116,254 @@ export function ProfilePage() {
               </div>
             </div>
           )}
+<<<<<<< HEAD
+=======
+
+          {/* TAB 3: COMPANY & GAZETTED HOLIDAYS TAB */}
+          {activeFormTab === 'holidays' && (
+            <div className="space-y-6">
+              {/* Header Card */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 shadow-xs">
+                      <PartyPopper className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-black text-slate-900 dark:text-white">
+                          Official Company Holidays Calendar
+                        </h3>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Live Admin Gazette
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Gazetted and corporate holidays published by company administration. These dates are non-working days for team task delegation.
+                      </p>
+                    </div>
+                  </div>
+
+                  {nextHoliday && (
+                    <div className="px-4 py-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/80 rounded-2xl shrink-0">
+                      <p className="text-[10px] uppercase font-bold tracking-wider text-rose-600 dark:text-rose-400">
+                        Upcoming Next
+                      </p>
+                      <p className="text-xs font-black text-slate-900 dark:text-white mt-0.5">
+                        {nextHoliday.name}
+                      </p>
+                      <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                        {new Date(nextHoliday.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {' • '}
+                        <strong className="text-rose-600 dark:text-rose-400">
+                          {(() => {
+                            const d = getDaysRemaining(nextHoliday.date);
+                            if (d === 0) return 'Today!';
+                            if (d === 1) return 'Tomorrow';
+                            return `In ${d} days`;
+                          })()}
+                        </strong>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Metrics Summary Strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Total Announced</p>
+                    <p className="text-lg font-black text-slate-900 dark:text-white mt-0.5">{holidays.length}</p>
+                  </div>
+                  <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">Upcoming</p>
+                    <p className="text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5">
+                      {holidays.filter((h) => {
+                        const d = getDaysRemaining(h.date);
+                        return d !== null && d >= 0;
+                      }).length}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 col-span-2 sm:col-span-1">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Past in Cycle</p>
+                    <p className="text-lg font-black text-slate-600 dark:text-slate-400 mt-0.5">
+                      {holidays.filter((h) => {
+                        const d = getDaysRemaining(h.date);
+                        return d !== null && d < 0;
+                      }).length}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Search & Filter Controls */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                  <div className="relative flex-1 w-full">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input
+                      type="text"
+                      placeholder="Search holiday name or month..."
+                      value={holidaySearch}
+                      onChange={(e) => setHolidaySearch(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                    {['ALL', 'Public Holiday', 'Company Holiday', 'Restricted Holiday'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setHolidayTypeFilter(type)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                          holidayTypeFilter === type
+                            ? 'bg-rose-600 text-white shadow-xs'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {type === 'ALL' ? 'All Types' : type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Holidays Cards List */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Gazetted Holidays Schedule
+                  </h4>
+                  <span className="text-xs text-slate-400 font-mono">
+                    Showing {sortedHolidays.filter((h) => {
+                      if (holidayTypeFilter !== 'ALL' && h.type !== holidayTypeFilter) return false;
+                      if (holidaySearch && !h.name?.toLowerCase().includes(holidaySearch.toLowerCase()) && !h.date?.includes(holidaySearch)) return false;
+                      return true;
+                    }).length} Holidays
+                  </span>
+                </div>
+
+                {(() => {
+                  const filtered = sortedHolidays.filter((h) => {
+                    if (holidayTypeFilter !== 'ALL' && h.type !== holidayTypeFilter) return false;
+                    if (holidaySearch && !h.name?.toLowerCase().includes(holidaySearch.toLowerCase()) && !h.date?.includes(holidaySearch)) return false;
+                    return true;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="py-12 text-center space-y-2">
+                        <PartyPopper className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                          {holidaySearch || holidayTypeFilter !== 'ALL'
+                            ? 'No holidays match your filter criteria'
+                            : 'No company holidays configured yet'}
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          When the company administrator adds official holidays in Master System, they will automatically be displayed here.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {filtered.map((hol) => {
+                        const daysLeft = getDaysRemaining(hol.date);
+                        const isUpcoming = daysLeft !== null && daysLeft >= 0;
+                        const isToday = daysLeft === 0;
+                        const dateObj = new Date(hol.date);
+
+                        return (
+                          <div
+                            key={hol.id}
+                            className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                              isToday
+                                ? 'bg-emerald-50/70 border-emerald-300 dark:bg-emerald-950/40 dark:border-emerald-800 shadow-md ring-1 ring-emerald-400'
+                                : isUpcoming
+                                ? 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-900/60 shadow-xs'
+                                : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-60'
+                            }`}
+                          >
+                            <div className="flex items-start sm:items-center space-x-3.5">
+                              {/* Date Calendar Box */}
+                              <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 border font-mono ${
+                                isToday
+                                  ? 'bg-emerald-500 text-white border-emerald-600'
+                                  : isUpcoming
+                                  ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/60'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                              }`}>
+                                <span className="text-[10px] font-bold uppercase tracking-wider">
+                                  {dateObj.toLocaleDateString('en-US', { month: 'short' })}
+                                </span>
+                                <span className="text-lg font-black leading-none mt-0.5">
+                                  {dateObj.getDate()}
+                                </span>
+                                <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                                  {dateObj.toLocaleDateString('en-US', { weekday: 'short' })}
+                                </span>
+                              </div>
+
+                              {/* Holiday Name and Details */}
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h5 className="font-black text-sm text-slate-900 dark:text-white">
+                                    {hol.name}
+                                  </h5>
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                                    hol.type === 'Public Holiday'
+                                      ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900'
+                                      : hol.type === 'Company Holiday'
+                                      ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900'
+                                      : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900'
+                                  }`}>
+                                    {hol.type || 'Public Holiday'}
+                                  </span>
+                                </div>
+
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  {hol.description || (hol.type === 'Public Holiday' ? 'National Gazetted Holiday' : 'Official Corporate Holiday')}
+                                  {' • '}
+                                  <span className="font-mono text-[11px] font-medium">{hol.date}</span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Status & Relative Countdown */}
+                            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                              {isToday ? (
+                                <span className="px-3 py-1 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-xs animate-bounce">
+                                  Today 🎉
+                                </span>
+                              ) : daysLeft === 1 ? (
+                                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-amber-500 text-white shadow-xs">
+                                  Tomorrow
+                                </span>
+                              ) : isUpcoming ? (
+                                <span className="px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 font-mono">
+                                  In {daysLeft} days
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                  Passed
+                                </span>
+                              )}
+
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                                Official
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+>>>>>>> daf8de7 ( .gitignore update)
         </div>
       </div>
     </div>

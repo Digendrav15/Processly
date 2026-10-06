@@ -228,7 +228,257 @@ export function searchEntities(keyword) {
   return hasAny ? results : null;
 }
 
+<<<<<<< HEAD
 // Generate intelligent contextual response
+=======
+// N8N Webhook Configuration for Processly Agent
+export const N8N_CONFIG = {
+  getWebhookUrl() {
+    return (
+      import.meta.env.VITE_N8N_WEBHOOK_URL ||
+      'https://digendrav15.app.n8n.cloud/webhook-test/chat_bot_processly'
+    );
+  },
+  getProdWebhookUrl() {
+    const url = this.getWebhookUrl();
+    return url.replace('/webhook-test/', '/webhook/');
+  }
+};
+
+/**
+ * Normalizes N8N AI Agent response into the standard { text, quick_actions } format.
+ * Target N8N format: [ { "output": "{\"text\": \"...\", \"quick_actions\": [...]}" } ]
+ */
+export function parseN8NResponse(data) {
+  if (!data) return { text: '', quick_actions: [] };
+
+  let rawOutput = null;
+
+  // 1. Array check: [ { output: "..." } ]
+  if (Array.isArray(data) && data.length > 0) {
+    rawOutput = data[0]?.output !== undefined ? data[0].output : data[0];
+  } else if (typeof data === 'object' && data !== null) {
+    rawOutput = data.output !== undefined ? data.output : data;
+  } else {
+    rawOutput = data;
+  }
+
+  // 2. Parse the string if it's stringified JSON
+  let parsed = null;
+  if (typeof rawOutput === 'string') {
+    try {
+      parsed = JSON.parse(rawOutput);
+    } catch {
+      // Output is plain string (not JSON)
+      return {
+        text: rawOutput.trim(),
+        quick_actions: []
+      };
+    }
+  } else if (typeof rawOutput === 'object' && rawOutput !== null) {
+    parsed = rawOutput;
+  }
+
+  // 3. Extract text and quick_actions from parsed JSON
+  if (parsed && typeof parsed === 'object') {
+    const text = parsed.text || parsed.message || parsed.output || '';
+    const quick_actions = Array.isArray(parsed.quick_actions)
+      ? parsed.quick_actions
+      : Array.isArray(parsed.actions)
+      ? parsed.actions
+      : [];
+
+    return {
+      text: String(text).trim(),
+      quick_actions
+    };
+  }
+
+  return {
+    text: String(rawOutput || '').trim(),
+    quick_actions: []
+  };
+}
+
+/**
+ * Check if a string is a valid UUID
+ */
+export function isValidUUID(str) {
+  if (typeof str !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
+/**
+ * Agar user ki pehle se koi active conversation nahi hai,
+ * toh browser ke built-in crypto.randomUUID() method se valid UUID generate karein.
+ */
+export function getOrCreateConversationId() {
+  const STORAGE_KEY = 'processly_active_conversation_id';
+  try {
+    const existing = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+    if (existing && isValidUUID(existing)) {
+      return existing;
+    }
+  } catch (e) {
+    // Storage access fallback
+  }
+
+  // Browser's built-in method: crypto.randomUUID()
+  let newUuid;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    newUuid = crypto.randomUUID();
+  } else if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    newUuid = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+      (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+    );
+  } else {
+    newUuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY, newUuid);
+    sessionStorage.setItem(STORAGE_KEY, newUuid);
+  } catch (e) {
+    // Ignore storage write error
+  }
+
+  return newUuid;
+}
+
+/**
+ * Nayi conversation start karne ke liye fresh valid UUID generate karein
+ */
+export function resetConversationId() {
+  const STORAGE_KEY = 'processly_active_conversation_id';
+  let newUuid;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    newUuid = crypto.randomUUID();
+  } else {
+    newUuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY, newUuid);
+    sessionStorage.setItem(STORAGE_KEY, newUuid);
+  } catch (e) {
+    // Ignore
+  }
+
+  return newUuid;
+}
+
+/**
+ * Call N8N Webhook with live query and ERP snapshot context
+ */
+export async function callN8NAgent(userQuery, context = {}) {
+  const primaryUrl = N8N_CONFIG.getWebhookUrl();
+  const prodUrl = N8N_CONFIG.getProdWebhookUrl();
+
+  // If user doesn't already have an active conversation, generate valid UUID via browser's built-in crypto.randomUUID()
+  const activeConversationId =
+    context.conversationId ||
+    context.sessionId ||
+    getOrCreateConversationId();
+
+  const payload = {
+    message: userQuery,
+    chatInput: userQuery,
+    query: userQuery,
+    user_input: userQuery,
+    sessionId: activeConversationId,
+    conversationId: activeConversationId,
+    conversation_id: activeConversationId,
+    context: {
+      conversationId: activeConversationId,
+      currentPath: context.currentPath || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+      user: context.currentUser
+        ? {
+            id: context.currentUser.id,
+            name: context.currentUser.name,
+            role: context.currentUser.role,
+            email: context.currentUser.email
+          }
+        : null,
+      systemSnapshot: getSystemSnapshot(context.currentUser)
+    }
+  };
+
+  const urlsToTry = [primaryUrl];
+  if (primaryUrl.includes('/webhook-test/')) {
+    urlsToTry.push(prodUrl);
+  }
+
+  let lastError = null;
+
+  for (const url of urlsToTry) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const parsed = parseN8NResponse(data);
+        return {
+          text: parsed.text || 'Koi text response prapt nahi hua.',
+          quick_actions: parsed.quick_actions || [],
+          source: 'n8n'
+        };
+      } else {
+        const errorText = await response.text();
+        let errMsg = errorText;
+        try {
+          const errObj = JSON.parse(errorText);
+          if (errObj.message) errMsg = `${errObj.message} ${errObj.hint ? '— ' + errObj.hint : ''}`;
+        } catch {
+          // ignore
+        }
+        lastError = `HTTP ${response.status}: ${errMsg}`;
+      }
+    } catch (err) {
+      lastError = err.message || 'Network request failed';
+    }
+  }
+
+  // NO HARDCODED FALLBACK: Return actual error so user is aware of n8n webhook status
+  return {
+    text: `⚠️ **n8n Agent Connection Issue:**\n\n${lastError || 'Webhook server se connect nahi ho saka.'}\n\n*Webhook URL:* \`${primaryUrl}\`\n\n*(Agar aap n8n test URL use kar rahe hain, to n8n canvas me 'Execute workflow' button click karein ya workflow ko 'Active' karein.)*`,
+    quick_actions: ["Purchase & GRN Status", "Sales Orders Pipeline", "My Pending Tasks", "Full System Summary"],
+    source: 'error'
+  };
+}
+
+/**
+ * Unified Processly Agent query function:
+ * Direct connection to N8N AI Agent webhook (Hardcoded replies removed).
+ */
+export async function queryProcesslyAgent(userQuery, context = {}) {
+  // Pure N8N call - no hardcoded local mock replies
+  return await callN8NAgent(userQuery, context);
+}
+
+// Generate intelligent contextual response (Processly Agent Local Intelligence)
+>>>>>>> daf8de7 ( .gitignore update)
 export function generateAgentResponse(userQuery, context = {}) {
   const { _currentPath = '/', currentUser = null } = context;
   const q = (userQuery || '').trim().toLowerCase();
@@ -275,6 +525,10 @@ export function generateAgentResponse(userQuery, context = {}) {
       if (item.triggers.some((t) => q.includes(t))) {
         return {
           text: `Sure! Main aapko **${item.name}** par lekar chal raha hoon. Aap neeche diye button par click kar sakte hain ya auto-redirect le sakte hain:`,
+<<<<<<< HEAD
+=======
+          quick_actions: [],
+>>>>>>> daf8de7 ( .gitignore update)
           actions: [{ label: `Go to ${item.name}`, path: item.path, primary: true }],
           navigateTo: item.path
         };
@@ -283,6 +537,10 @@ export function generateAgentResponse(userQuery, context = {}) {
   }
 
   // Check ID search (IND-XXXX, PO-XXXX, ORD-XXXX, LD-XXXX, GRN-XXXX)
+<<<<<<< HEAD
+=======
+  // Guideline 2: If user provides an exact ID, return answer in text and quick_actions = []
+>>>>>>> daf8de7 ( .gitignore update)
   const idRegex = /(ind-\d+|po-\d+|grn-\d+|ord-\d+|ld-\d+|flw-\d+|qt-\d+)/i;
   const idMatch = q.match(idRegex);
   if (idMatch) {
@@ -313,7 +571,15 @@ export function generateAgentResponse(userQuery, context = {}) {
         actions.push({ label: 'View in Leads', path: '/lead-to-orders/leads' });
       }
 
+<<<<<<< HEAD
       return { text: detailsText, actions };
+=======
+      return {
+        text: detailsText.trim(),
+        quick_actions: [],
+        actions
+      };
+>>>>>>> daf8de7 ( .gitignore update)
     }
   }
 
@@ -347,7 +613,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Purchase & GRN Status',
+        'Sales Orders Pipeline',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open GRN Page', path: '/purchase/grn' },
         { label: 'Purchase QC', path: '/purchase/qc' },
@@ -383,7 +659,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Purchase & GRN Status',
+        'Sales Orders Pipeline',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Inventory Dashboard', path: '/inventory/dashboard' },
         { label: 'Stock Items / SKU', path: '/inventory/items' },
@@ -416,7 +702,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Sales Orders Pipeline',
+        'Purchase & GRN Status',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'View Sales Orders', path: '/sales/orders' },
         { label: 'Ready for Dispatch', path: '/sales/ready-dispatch' },
@@ -449,7 +745,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Sales Orders Pipeline',
+        'Purchase & GRN Status',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open Leads Management', path: '/lead-to-orders/leads' },
         { label: 'View Quotations', path: '/lead-to-orders/quotation' },
@@ -481,7 +787,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'My Pending Tasks',
+        'Sales Orders Pipeline',
+        'Purchase & GRN Status',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open My Tasks', path: '/my-tasks' },
         { label: 'Task Assignment', path: '/task-assignment' },
@@ -505,7 +821,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     text += `Aap WhatsApp Inbox me jaakar customer chat manage aur direct templates send kar sakte hain.`;
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'My Pending Tasks',
+        'Sales Orders Pipeline',
+        'Purchase & GRN Status',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open WhatsApp Inbox', path: '/whatsapp/inbox' },
         { label: 'Message Templates', path: '/whatsapp/templates' }
@@ -533,7 +859,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     text += `Aap kisi bhi module ke baare me detail me pooch sakte hain ya direct navigate kar sakte hain!`;
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Purchase & GRN Status',
+        'Sales Orders Pipeline',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'MIS Summary', path: '/mis-summary' },
         { label: 'Sales Dashboard', path: '/sales/dashboard' },
@@ -553,18 +889,36 @@ export function generateAgentResponse(userQuery, context = {}) {
     q.includes('kya kar sakte ho')
   ) {
     const userName = currentUser?.name ? `, ${currentUser.name.split(' ')[0]}` : '';
+<<<<<<< HEAD
     const text = `👋 **Namaste${userName}! Main aapka ERP AI Chat Agent hoon.**\n\nMain aapke pure Enterprise Multi System App ka live data monitor karta hoon aur in cheezon me madad kar sakta hoon:\n\n` +
       `• **📦 Purchase System:** Indent count, Pending PO, QC status, aur GRN updates.\n` +
       `• **🚀 Sales (OTD):** Order lifecycle stages, Dispatch status, delayed orders.\n` +
       `• **🎯 Lead to Orders:** Active leads, pending quotations, conversions.\n` +
       `• **📋 Tasks & Delegations:** My tasks, overdue alerts, team assignments.\n` +
+=======
+    const text = `👋 **Namaste${userName}! Main aapka Processly Agent hoon.**\n\nMain aapke pure Enterprise Multi System App ka live data monitor karta hoon aur in cheezon me madad kar sakta hoon:\n\n` +
+      `• **📦 Purchase & Supply Chain:** Indent count, Pending PO, QC status, aur GRN updates.\n` +
+      `• **🚀 Sales Pipeline (OTD):** Order lifecycle stages, Dispatch status, delayed orders.\n` +
+      `• **🎯 Lead to Orders:** Active leads, pending quotations, conversions.\n` +
+      `• **📋 Tasks & Approvals:** My tasks, overdue alerts, team assignments.\n` +
+>>>>>>> daf8de7 ( .gitignore update)
       `• **💬 WhatsApp Inbox:** Customer unread chats aur communications.\n` +
       `• **🔍 Instant Search:** Kisi bhi ID jaise \`IND-0101\`, \`ORD-1002\`, \`LD-1001\` ka live status.\n` +
       `• **🧭 Fast Navigation:** Kisi bhi page par 1 click me redirect karna.\n\n` +
       `*Aap mujhse Hindi, Hinglish ya English me kuch bhi pooch sakte hain!*`;
 
     return {
+<<<<<<< HEAD
       text,
+=======
+      text: text.trim(),
+      quick_actions: [
+        'Purchase & GRN Status',
+        'Sales Orders Pipeline',
+        'My Pending Tasks',
+        'Full System Summary'
+      ],
+>>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Check GRN Status', path: '/purchase/grn' },
         { label: 'View My Tasks', path: '/my-tasks' },
@@ -572,6 +926,7 @@ export function generateAgentResponse(userQuery, context = {}) {
       ]
     };
   }
+<<<<<<< HEAD
 
   // Fallback with smart recommendation
   return {
@@ -584,3 +939,7 @@ export function generateAgentResponse(userQuery, context = {}) {
     ]
   };
 }
+=======
+}
+
+>>>>>>> daf8de7 ( .gitignore update)

@@ -2,6 +2,10 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { INITIAL_TASKS, INITIAL_CHECKLISTS, INITIAL_HISTORY, INITIAL_USERS } from './mockData';
 import { notificationService } from './notificationService';
 import { holidayService } from './holidayService';
+<<<<<<< HEAD
+=======
+import { workingCalendarService } from './workingCalendarService';
+>>>>>>> daf8de7 ( .gitignore update)
 
 const LOCAL_TASKS_KEY = 'corporate_system_tasks';
 const LOCAL_CHECKLISTS_KEY = 'corporate_system_checklists';
@@ -125,9 +129,19 @@ export const taskService = {
 
     saveStoredTasks(tasks);
 
+<<<<<<< HEAD
     // Suppress or flag tasks on Holidays
     if (filters.hideHolidays) {
       tasks = tasks.filter((t) => !holidayService.isHolidayDate(t.due_date));
+=======
+    // Suppress or flag tasks on Holidays & Week Offs
+    if (filters.hideHolidays || filters.hideWeekOffs) {
+      tasks = tasks.filter(
+        (t) =>
+          !holidayService.isHolidayDate(t.due_date) &&
+          !workingCalendarService.isWeekOffDate(t.due_date)
+      );
+>>>>>>> daf8de7 ( .gitignore update)
     }
 
     // Filter by User Scope
@@ -247,6 +261,25 @@ export const taskService = {
       const departmentUUID = isValidUUID(formData.department_id) ? formData.department_id : null;
       const checklistUUID = isValidUUID(formData.checklist_id) ? formData.checklist_id : null;
 
+<<<<<<< HEAD
+=======
+      // Validate Planned Date with Working Day Calendar Engine
+      const rawDueDate = formData.due_date ? new Date(formData.due_date).toISOString() : new Date(Date.now() + 86400000).toISOString();
+      const dateValidation = workingCalendarService.validatePlannedDate(rawDueDate);
+
+      if (dateValidation.isMissing) {
+        workingCalendarService.triggerWorkingDateMissingPopup(dateValidation.info);
+        throw new Error(
+          `Working Date Missing: Planned date ${dateValidation.info.date} (${dateValidation.info.dayDDD}, ${dateValidation.info.weekNo}) exceeds Working Day Calendar boundary (${dateValidation.info.endDate}).`
+        );
+      }
+
+      // Rollover from Week Off (e.g. Sunday) to Next Working Day (Monday)
+      const finalDueDate = dateValidation.wasAdjusted
+        ? new Date(dateValidation.adjustedDate).toISOString()
+        : rawDueDate;
+
+>>>>>>> daf8de7 ( .gitignore update)
       const baseTaskData = {
         task_code: taskCode,
         type: taskType,
@@ -262,8 +295,13 @@ export const taskService = {
         priority: formData.priority || 'Medium',
         frequency: formData.frequency || (isOneTime ? 'One Time' : 'Daily'),
         start_date: formData.start_date || new Date().toISOString().split('T')[0],
+<<<<<<< HEAD
         due_date: new Date(formData.due_date || Date.now() + 86400000).toISOString(),
         original_due_date: new Date(formData.due_date || Date.now() + 86400000).toISOString(),
+=======
+        due_date: finalDueDate,
+        original_due_date: finalDueDate,
+>>>>>>> daf8de7 ( .gitignore update)
         status: 'Pending',
         required_attachment: Boolean(formData.required_attachment),
         reminder_enabled: Boolean(formData.reminder_enabled ?? true),
@@ -483,6 +521,23 @@ export const taskService = {
   },
 
   async updateTask(taskId, updateData, currentUser) {
+<<<<<<< HEAD
+=======
+    if (updateData.due_date) {
+      const rawDueDate = new Date(updateData.due_date).toISOString();
+      const dateValidation = workingCalendarService.validatePlannedDate(rawDueDate);
+      if (dateValidation.isMissing) {
+        workingCalendarService.triggerWorkingDateMissingPopup(dateValidation.info);
+        throw new Error(
+          `Working Date Missing: Planned date ${dateValidation.info.date} (${dateValidation.info.dayDDD}, ${dateValidation.info.weekNo}) exceeds Working Day Calendar boundary (${dateValidation.info.endDate}).`
+        );
+      }
+      if (dateValidation.wasAdjusted) {
+        updateData.due_date = new Date(dateValidation.adjustedDate).toISOString();
+      }
+    }
+
+>>>>>>> daf8de7 ( .gitignore update)
     const localTasks = getStoredTasks();
     const index = localTasks.findIndex((t) => t.id === taskId);
     const oldTask = index !== -1 ? localTasks[index] : null;

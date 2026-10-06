@@ -11,6 +11,10 @@ import {
   Clock,
   Server,
   Calendar,
+<<<<<<< HEAD
+=======
+  CalendarDays,
+>>>>>>> daf8de7 ( .gitignore update)
   Plus,
   ArrowRight
 } from 'lucide-react';
@@ -40,6 +44,10 @@ export function MasterOverviewPage() {
     { title: 'Department Master', count: departments.length, path: '/master-system/departments', icon: Building, color: 'cyan' },
     { title: 'User / Employee Master', count: users.length, path: '/master-system/users', icon: UserCheck, color: 'rose' },
     { title: 'TAT Management', count: tatConfigs.length, path: '/master-system/tat', icon: Clock, color: 'teal' },
+<<<<<<< HEAD
+=======
+    { title: 'Working Day Calendar', count: 'Active Rules', path: '/master-system/working-calendar', icon: CalendarDays, color: 'purple' },
+>>>>>>> daf8de7 ( .gitignore update)
     { title: 'Holidays Master', count: holidays.length, path: '/master-system/holidays', icon: Calendar, color: 'orange' },
   ];
 
