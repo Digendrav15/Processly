@@ -73,6 +73,7 @@ export function SystemProvider({ children }) {
       if (sys.id === 'checklist' && (
         currentPath.startsWith('/checklist') ||
         currentPath.startsWith('/delegation') ||
+        currentPath.startsWith('/tasks') ||
         currentPath.startsWith('/my-tasks') ||
         currentPath.startsWith('/task-assignment') ||
         currentPath.startsWith('/notifications') ||

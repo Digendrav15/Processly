@@ -13,6 +13,9 @@ import { DelegationListPage } from './pages/delegation/DelegationListPage';
 import { CreateDelegationPage } from './pages/delegation/CreateDelegationPage';
 import { MyTasksPage } from './pages/tasks/MyTasksPage';
 import { TaskAssignmentPage } from './pages/tasks/TaskAssignmentPage';
+import { UniqueTasksPage } from './pages/tasks/UniqueTasksPage';
+import { ChecklistTasksPage } from './pages/tasks/ChecklistTasksPage';
+import { DelegationTasksPage } from './pages/tasks/DelegationTasksPage';
 import { LeaveRequestsPage } from './pages/leave/LeaveRequestsPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { HolidaysPage } from './pages/holidays/HolidaysPage';
@@ -197,6 +200,11 @@ export default function App() {
           }
         />
         <Route path="my-tasks" element={<MyTasksPage />} />
+        <Route path="tasks/unique" element={<UniqueTasksPage />} />
+        <Route path="tasks/checklist" element={<ChecklistTasksPage />} />
+        <Route path="tasks/delegation" element={<DelegationTasksPage />} />
+        <Route path="checklist/tasks" element={<Navigate to="/tasks/checklist" replace />} />
+        <Route path="delegation/tasks" element={<Navigate to="/tasks/delegation" replace />} />
         <Route path="leave-requests" element={<LeaveRequestsPage />} />
         <Route path="calendar" element={<CalendarPage />} />
         <Route path="holidays" element={<Navigate to="/master-system/holidays" replace />} />

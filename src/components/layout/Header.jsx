@@ -5,7 +5,7 @@ import { useSystem } from '../../context/SystemContext';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
 import { formatRelativeTime } from '../../services/notificationService';
-import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Search, Building2, IdCard, Plus } from 'lucide-react';
+import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Search, Building2, IdCard, Plus, Calendar } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ComposeNotificationModal } from '../notifications/ComposeNotificationModal';
 
@@ -304,6 +304,15 @@ export function Header({ onOpenMobileMenu }) {
               >
                 <User className="w-4 h-4 text-slate-400" />
                 <span>My Profile & Requests</span>
+              </Link>
+
+              <Link
+                to="/profile?tab=calendar"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+              >
+                <Calendar className="w-4 h-4 text-indigo-500" />
+                <span>My Task Calendar (Date-wise)</span>
               </Link>
 
               <div className="pt-1 border-t border-slate-100 dark:border-slate-800">

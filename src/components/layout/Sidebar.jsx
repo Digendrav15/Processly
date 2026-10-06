@@ -65,6 +65,7 @@ export function Sidebar() {
     else if (
       path.startsWith('/checklist') ||
       path.startsWith('/delegation') ||
+      path.startsWith('/tasks') ||
       path.startsWith('/my-tasks') ||
       path.startsWith('/task-assignment') ||
       path.startsWith('/notifications') ||

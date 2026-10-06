@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { INITIAL_USERS } from '../../services/mockData';
 import { leaveService } from '../../services/leaveService';
 import { SYSTEMS_CONFIG } from '../../config/systemsConfig';
+import { TaskCalendarView } from '../../components/calendar/TaskCalendarView';
 import {
   User,
   Mail,
@@ -58,8 +60,19 @@ export function ProfilePage() {
   const [savedMessage, setSavedMessage] = useState('');
   const fileInputRef = useRef(null);
 
-  // Active Tab for Portal Forms: 'leave' | 'advance' | 'holidays'
-  const [activeFormTab, setActiveFormTab] = useState('leave');
+  // Active Tab for Portal Forms: 'leave' | 'advance' | 'holidays' | 'calendar'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeFormTab, setActiveFormTab] = useState(
+    tabParam && ['leave', 'advance', 'holidays', 'calendar'].includes(tabParam) ? tabParam : 'leave'
+  );
+
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t && ['leave', 'advance', 'holidays', 'calendar'].includes(t)) {
+      setActiveFormTab(t);
+    }
+  }, [searchParams]);
 
   // Company Holidays configured by Admin
   const holidays = useOTDStorage(STORAGE_KEYS.HOLIDAYS, holidayService.getHolidaysSync());
@@ -579,6 +592,33 @@ export function ProfilePage() {
             </div>
           </div>
 
+          {/* INTERACTIVE DATE-WISE TASK CALENDAR QUICK WIDGET */}
+          <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-200 dark:border-indigo-900/60 p-5 rounded-2xl shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400">
+                <Calendar className="w-4 h-4" />
+                <h3 className="font-extrabold text-xs uppercase tracking-wider">Date-Wise Task Calendar</h3>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                Schedule
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              View your daily checklists, unique tasks, and delegated work items arranged by date.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveFormTab('calendar');
+                setSearchParams({ tab: 'calendar' });
+              }}
+              className="w-full mt-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>View Date-Wise Calendar</span>
+            </button>
+          </div>
+
           {/* UPCOMING COMPANY HOLIDAY QUICK WIDGET */}
           <div className="bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-transparent border border-rose-200 dark:border-rose-900/60 p-5 rounded-2xl shadow-xs space-y-3">
             <div className="flex items-center justify-between">
@@ -613,7 +653,10 @@ export function ProfilePage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setActiveFormTab('holidays')}
+                  onClick={() => {
+                    setActiveFormTab('holidays');
+                    setSearchParams({ tab: 'holidays' });
+                  }}
                   className="w-full mt-1 py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/80 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
                 >
                   <Calendar className="w-3.5 h-3.5" />
@@ -626,13 +669,30 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: FORMS (LEAVE KA FORM & ADVANCE KA FORM & COMPANY HOLIDAYS) */}
+        {/* RIGHT COLUMN: FORMS & CALENDAR */}
         <div className="lg:col-span-2 space-y-6">
           {/* Navigation Tabs for Forms */}
-          <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap gap-2 border border-slate-200 dark:border-slate-700">
+          <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-2 border border-slate-200 dark:border-slate-700">
             <button
-              onClick={() => setActiveFormTab('leave')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
+              onClick={() => {
+                setActiveFormTab('calendar');
+                setSearchParams({ tab: 'calendar' });
+              }}
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'calendar'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+            >
+              <Calendar className="w-4 h-4 text-indigo-500" />
+              <span>Date-Wise Task Calendar</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveFormTab('leave');
+                setSearchParams({ tab: 'leave' });
+              }}
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
                   ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
@@ -642,8 +702,11 @@ export function ProfilePage() {
             </button>
 
             <button
-              onClick={() => setActiveFormTab('advance')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
+              onClick={() => {
+                setActiveFormTab('advance');
+                setSearchParams({ tab: 'advance' });
+              }}
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
@@ -653,8 +716,11 @@ export function ProfilePage() {
             </button>
 
             <button
-              onClick={() => setActiveFormTab('holidays')}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'holidays'
+              onClick={() => {
+                setActiveFormTab('holidays');
+                setSearchParams({ tab: 'holidays' });
+              }}
+              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'holidays'
                   ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
@@ -1292,6 +1358,13 @@ export function ProfilePage() {
                   );
                 })()}
               </div>
+            </div>
+          )}
+
+          {/* TAB 4: DATE-WISE TASK CALENDAR */}
+          {activeFormTab === 'calendar' && (
+            <div className="space-y-4">
+              <TaskCalendarView embedded={true} />
             </div>
           )}
         </div>

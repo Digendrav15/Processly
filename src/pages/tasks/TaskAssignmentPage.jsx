@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { taskService } from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
 import { DEPARTMENTS, FREQUENCIES, TASK_PRIORITY } from '../../config/constants';
@@ -6,23 +7,27 @@ import { INITIAL_USERS } from '../../services/mockData';
 import { Modal } from '../../components/common/Modal';
 import { StatusBadge, PriorityBadge } from '../../components/common/StatusBadge';
 import { formatDate } from '../../lib/utils';
-import { Plus, Edit2, Trash2, Search, Users, Check, ChevronDown, X, AlertCircle, Clock, History as HistoryIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Users, Check, ChevronDown, X, AlertCircle, Clock, History as HistoryIcon, Sparkles, ListTodo, UserCheck } from 'lucide-react';
 import { PlannedTh, PlannedTd, HistoryTatTh, HistoryTatTd } from '../../components/common/TatColumns';
 
 export function TaskAssignmentPage() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const urlType = searchParams.get('type'); // 'unique' | 'checklist' | 'delegation'
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  // Form Fields - REQUIREMENT #1: Task Title is REMOVED! Only Description is used.
+  // Form Fields - Task Classification: 'unique' | 'checklist' | 'delegation'
+  const [taskType, setTaskType] = useState(urlType || 'unique');
   const [description, setDescription] = useState('');
   const [departmentId, setDepartmentId] = useState('dept-ops');
   const [assignFrom, setAssignFrom] = useState(user?.id || INITIAL_USERS[0].id);
   const [selectedDoerIds, setSelectedDoerIds] = useState([]);
   const [priority, setPriority] = useState('Medium');
-  const [frequency, setFrequency] = useState('One Time');
+  const [frequency, setFrequency] = useState(urlType === 'checklist' ? 'Daily' : 'One Time');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
   const [requiredAttachment, setRequiredAttachment] = useState(false);
@@ -39,6 +44,7 @@ export function TaskAssignmentPage() {
     department: 'All',
     doerId: 'All',
     frequency: 'All',
+    taskType: urlType || 'All',
   });
 
   useEffect(() => {
@@ -71,14 +77,16 @@ export function TaskAssignmentPage() {
     }
   };
 
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = (forcedType) => {
+    const chosenType = forcedType || urlType || 'unique';
     setEditingTask(null);
+    setTaskType(chosenType);
     setDescription('');
     setDepartmentId('dept-ops');
     setAssignFrom(user?.id || INITIAL_USERS[0].id);
     setSelectedDoerIds([]);
     setPriority('Medium');
-    setFrequency('One Time');
+    setFrequency(chosenType === 'checklist' ? 'Daily' : 'One Time');
     setStartDate(new Date().toISOString().split('T')[0]);
     setDueDate('');
     setRequiredAttachment(false);
@@ -90,6 +98,7 @@ export function TaskAssignmentPage() {
 
   const handleOpenEditModal = (t) => {
     setEditingTask(t);
+    setTaskType(t.type || (t.frequency === 'One Time' ? 'unique' : 'checklist'));
     setDescription(t.description || t.title || '');
     setDepartmentId(t.department_id || 'dept-ops');
     setAssignFrom(t.assigned_by);
@@ -134,6 +143,7 @@ export function TaskAssignmentPage() {
         await taskService.updateTask(
           editingTask.id,
           {
+            type: taskType,
             title: taskTitle,
             description,
             department_id: departmentId,
@@ -155,6 +165,7 @@ export function TaskAssignmentPage() {
 
         await taskService.createTaskAssignment(
           {
+            taskType,
             title: taskTitle,
             description,
             department_id: departmentId,
@@ -243,7 +254,7 @@ export function TaskAssignmentPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         <div className="relative">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
           <input
@@ -253,6 +264,19 @@ export function TaskAssignmentPage() {
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white"
           />
+        </div>
+
+        <div>
+          <select
+            value={filters.taskType}
+            onChange={(e) => setFilters({ ...filters, taskType: e.target.value })}
+            className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:text-white font-bold"
+          >
+            <option value="All">All Types</option>
+            <option value="unique">Unique Task</option>
+            <option value="checklist">Checklist Task</option>
+            <option value="delegation">Delegation Task</option>
+          </select>
         </div>
 
         <div>
@@ -314,6 +338,7 @@ export function TaskAssignmentPage() {
                 <tr className="bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs border-b border-slate-200 dark:border-slate-700 text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   <th className="px-3 py-2 w-20">Action</th>
                   <th className="px-3 py-2">Task Code</th>
+                  <th className="px-3 py-2">Type</th>
                   <th className="px-3 py-2">Task Description</th>
                   <th className="px-3 py-2">Department</th>
                   <th className="px-3 py-2">Assign From</th>
@@ -347,6 +372,23 @@ export function TaskAssignmentPage() {
                     </td>
 
                     <td className="px-3 py-1.5 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">{t.task_code}</td>
+                    <td className="px-3 py-1.5 whitespace-nowrap">
+                      <span
+                        className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          t.type === 'unique' || t.task_code?.startsWith('UNQ-')
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
+                            : t.type === 'checklist' || t.task_code?.startsWith('TSK-')
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                        }`}
+                      >
+                        {t.type === 'unique' || t.task_code?.startsWith('UNQ-')
+                          ? 'Unique'
+                          : t.type === 'checklist' || t.task_code?.startsWith('TSK-')
+                          ? 'Checklist'
+                          : 'Delegation'}
+                      </span>
+                    </td>
                     <td className="px-3 py-1.5 font-bold text-slate-900 dark:text-white max-w-sm truncate text-[11.5px]">
                       {t.description || t.title}
                     </td>
@@ -403,6 +445,59 @@ export function TaskAssignmentPage() {
               <span>{formError}</span>
             </div>
           )}
+
+          {/* Task Classification (Unique vs Checklist vs Delegation) */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Task Classification *
+            </label>
+            <div className="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setTaskType('unique');
+                  setFrequency('One Time');
+                }}
+                className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  taskType === 'unique'
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Unique Task</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTaskType('checklist');
+                  if (frequency === 'One Time') setFrequency('Daily');
+                }}
+                className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  taskType === 'checklist'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <ListTodo className="w-3.5 h-3.5" />
+                <span>Checklist Task</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTaskType('delegation');
+                }}
+                className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  taskType === 'delegation'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>Delegation Task</span>
+              </button>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

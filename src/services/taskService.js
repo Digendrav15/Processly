@@ -169,9 +169,35 @@ export const taskService = {
       tasks = tasks.filter((t) => t.priority === filters.priority);
     }
 
-    // Filter by Task Type (checklist vs delegation)
+    // Filter by Task Type (unique vs checklist vs delegation)
     if (filters.taskType && filters.taskType !== 'All') {
-      tasks = tasks.filter((t) => t.type === filters.taskType);
+      const typeLower = filters.taskType.toLowerCase();
+      if (typeLower === 'unique') {
+        tasks = tasks.filter(
+          (t) =>
+            t.type === 'unique' ||
+            (t.type !== 'checklist' &&
+              (t.task_code?.startsWith('UNQ-') ||
+                (t.frequency === 'One Time' && t.assigned_by === t.assigned_to) ||
+                (!t.type && t.frequency === 'One Time')))
+        );
+      } else if (typeLower === 'checklist') {
+        tasks = tasks.filter(
+          (t) =>
+            t.type === 'checklist' ||
+            t.task_code?.startsWith('TSK-') ||
+            (t.frequency && t.frequency !== 'One Time')
+        );
+      } else if (typeLower === 'delegation') {
+        tasks = tasks.filter(
+          (t) =>
+            t.type === 'delegation' ||
+            t.task_code?.startsWith('DEL-') ||
+            (t.frequency === 'One Time' && t.assigned_by !== t.assigned_to)
+        );
+      } else {
+        tasks = tasks.filter((t) => t.type === filters.taskType);
+      }
     }
 
     // Filter by Frequency
@@ -237,13 +263,16 @@ export const taskService = {
   // Multi-Doer Task Assignment Engine
   async createTaskAssignment(formData, currentUser) {
     const isOneTime = formData.frequency === 'One Time';
-    const taskType = isOneTime ? 'delegation' : 'checklist';
     const doers = formData.doers || []; // array of { id, name }
     const createdTasks = [];
     const localTasks = getStoredTasks();
 
     for (const doer of doers) {
-      const taskCode = isOneTime
+      const isSelf = currentUser && (doer.id === currentUser.id || doer.id === currentUser.employee_id);
+      const taskType = formData.taskType || (isOneTime ? (isSelf ? 'unique' : 'delegation') : 'checklist');
+      const taskCode = taskType === 'unique'
+        ? `UNQ-2026-${Math.floor(100 + Math.random() * 900)}`
+        : taskType === 'delegation'
         ? `DEL-2026-${Math.floor(100 + Math.random() * 900)}`
         : `TSK-CHK-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -522,9 +551,9 @@ export const taskService = {
     const index = localTasks.findIndex((t) => t.id === taskId);
     const oldTask = index !== -1 ? localTasks[index] : null;
 
-    let taskType = oldTask?.type;
-    if (updateData.frequency) {
-      taskType = updateData.frequency === 'One Time' ? 'delegation' : 'checklist';
+    let taskType = updateData.type || oldTask?.type;
+    if (!taskType && updateData.frequency) {
+      taskType = updateData.frequency === 'One Time' ? 'unique' : 'checklist';
     }
 
     const payloadToUpdate = {

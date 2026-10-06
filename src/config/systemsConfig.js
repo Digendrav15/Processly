@@ -53,7 +53,8 @@ import {
   Bookmark,
   Radio,
   Settings,
-  ListTodo
+  ListTodo,
+  Sparkles
 } from 'lucide-react';
 
 export const SYSTEMS_CONFIG = [
@@ -70,13 +71,11 @@ export const SYSTEMS_CONFIG = [
     border: 'border-indigo-200 dark:border-indigo-800',
     defaultPath: '/checklist/dashboard',
     navItems: [
-      { label: 'Checklist Dashboard', path: '/checklist/dashboard', icon: LayoutDashboard },
-      { label: 'My Tasks', path: '/my-tasks', icon: CheckSquare },
-      { label: 'Task Assignment', path: '/task-assignment', icon: ClipboardList, requiresSelfAssignOrManager: true },
-      { label: 'Checklist Templates', path: '/checklist/list', icon: ListTodo, requiresSelfAssignOrManager: true },
-      { label: 'Delegations', path: '/delegation/list', icon: UserCheck, requiresSelfAssignOrManager: true },
-      { label: 'Calendar', path: '/calendar', icon: Calendar },
-      { label: 'Masters', path: '/masters', icon: Sliders, adminOnly: true },
+      { label: 'Dashboard', path: '/checklist/dashboard', icon: LayoutDashboard },
+      { label: 'Task Assign', path: '/task-assignment', icon: ClipboardList, requiresSelfAssignOrManager: true },
+      { label: 'Unique Task', path: '/tasks/unique', icon: Sparkles },
+      { label: 'Checklist Task', path: '/tasks/checklist', icon: ListTodo },
+      { label: 'Delegation Task', path: '/tasks/delegation', icon: UserCheck },
     ]
   },
   {
