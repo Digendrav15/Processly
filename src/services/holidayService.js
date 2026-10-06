@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 const OTD_HOLIDAYS_KEY = 'otd_holidays';
->>>>>>> daf8de7 ( .gitignore update)
 const LOCAL_HOLIDAYS_KEY = 'corporate_system_holidays';
 
 const INITIAL_HOLIDAYS = [
@@ -9,62 +6,37 @@ const INITIAL_HOLIDAYS = [
     id: 'hol-1',
     name: 'Independence Day',
     date: '2026-08-15',
-<<<<<<< HEAD
-    description: 'National Holiday',
-=======
     type: 'Public Holiday',
     status: 'Active',
     description: 'National Gazetted Holiday',
->>>>>>> daf8de7 ( .gitignore update)
   },
   {
     id: 'hol-2',
     name: 'Gandhi Jayanti',
     date: '2026-10-02',
-<<<<<<< HEAD
-    description: 'National Holiday',
-=======
     type: 'Public Holiday',
     status: 'Active',
     description: 'National Gazetted Holiday',
->>>>>>> daf8de7 ( .gitignore update)
   },
   {
     id: 'hol-3',
     name: 'Diwali Festival',
     date: '2026-11-08',
-<<<<<<< HEAD
-    description: 'Corporate Festival Holiday',
-=======
     type: 'Company Holiday',
     status: 'Active',
     description: 'Corporate Festival Celebration Holiday',
->>>>>>> daf8de7 ( .gitignore update)
   },
   {
     id: 'hol-4',
     name: 'Christmas Day',
     date: '2026-12-25',
-<<<<<<< HEAD
-    description: 'Public Holiday',
-=======
     type: 'Public Holiday',
     status: 'Active',
     description: 'Public Winter Holiday',
->>>>>>> daf8de7 ( .gitignore update)
   },
 ];
 
 function getStoredHolidays() {
-<<<<<<< HEAD
-  const stored = localStorage.getItem(LOCAL_HOLIDAYS_KEY);
-  if (!stored) {
-    localStorage.setItem(LOCAL_HOLIDAYS_KEY, JSON.stringify(INITIAL_HOLIDAYS));
-    return INITIAL_HOLIDAYS;
-  }
-  try {
-    return JSON.parse(stored);
-=======
   try {
     const otdStored = localStorage.getItem(OTD_HOLIDAYS_KEY);
     if (otdStored) {
@@ -87,16 +59,12 @@ function getStoredHolidays() {
     localStorage.setItem(OTD_HOLIDAYS_KEY, JSON.stringify(INITIAL_HOLIDAYS));
     localStorage.setItem(LOCAL_HOLIDAYS_KEY, JSON.stringify(INITIAL_HOLIDAYS));
     return INITIAL_HOLIDAYS;
->>>>>>> daf8de7 ( .gitignore update)
   } catch (e) {
     return INITIAL_HOLIDAYS;
   }
 }
 
 function saveHolidays(holidays) {
-<<<<<<< HEAD
-  localStorage.setItem(LOCAL_HOLIDAYS_KEY, JSON.stringify(holidays));
-=======
   try {
     localStorage.setItem(OTD_HOLIDAYS_KEY, JSON.stringify(holidays));
     localStorage.setItem(LOCAL_HOLIDAYS_KEY, JSON.stringify(holidays));
@@ -105,7 +73,6 @@ function saveHolidays(holidays) {
   } catch (e) {
     console.error('Error saving holidays:', e);
   }
->>>>>>> daf8de7 ( .gitignore update)
 }
 
 export const holidayService = {
@@ -113,16 +80,6 @@ export const holidayService = {
     return getStoredHolidays();
   },
 
-<<<<<<< HEAD
-  async addHoliday(holidayData) {
-    const list = getStoredHolidays();
-    const newHol = {
-      id: `hol-${Date.now()}`,
-      name: holidayData.name,
-      date: holidayData.date,
-      description: holidayData.description || '',
-      created_at: new Date().toISOString(),
-=======
   getHolidaysSync() {
     return getStoredHolidays();
   },
@@ -137,7 +94,6 @@ export const holidayService = {
       status: holidayData.status || 'Active',
       description: holidayData.description || '',
       createdAt: new Date().toISOString(),
->>>>>>> daf8de7 ( .gitignore update)
     };
     list.unshift(newHol);
     saveHolidays(list);
@@ -153,10 +109,6 @@ export const holidayService = {
   isHolidayDate(dateStr) {
     if (!dateStr) return false;
     const list = getStoredHolidays();
-<<<<<<< HEAD
-    const formatted = new Date(dateStr).toISOString().split('T')[0];
-    return list.some((h) => h.date === formatted);
-=======
     let formatted = dateStr;
     if (typeof dateStr === 'string' && dateStr.includes('T')) {
       formatted = dateStr.split('T')[0];
@@ -167,6 +119,5 @@ export const holidayService = {
       const hDate = (h.date || '').split('T')[0];
       return hDate === formatted && h.status !== 'Inactive';
     });
->>>>>>> daf8de7 ( .gitignore update)
   },
 };

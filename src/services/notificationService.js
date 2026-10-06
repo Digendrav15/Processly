@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import { INITIAL_NOTIFICATIONS } from './mockData';
-
-const LOCAL_NOTIFS_KEY = 'corporate_system_notifications';
-=======
 import { INITIAL_NOTIFICATIONS } from './mockData.js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 
@@ -185,7 +180,6 @@ export function parseNotification(row, readIds = getStoredReadIds()) {
     raw: row,
   };
 }
->>>>>>> daf8de7 ( .gitignore update)
 
 function getStoredNotifications() {
   const stored = localStorage.getItem(LOCAL_NOTIFS_KEY);
@@ -205,15 +199,6 @@ function saveNotifications(notifs) {
 }
 
 export const notificationService = {
-<<<<<<< HEAD
-  async getNotifications(userId) {
-    const all = getStoredNotifications();
-    if (!userId) return all;
-    return all.filter((n) => n.user_id === userId || !n.user_id);
-  },
-
-  async markAsRead(id) {
-=======
   /**
    * Fetch notifications from Supabase `notifications` table or local storage
    */
@@ -272,7 +257,6 @@ export const notificationService = {
       }
     }
 
->>>>>>> daf8de7 ( .gitignore update)
     const all = getStoredNotifications();
     const index = all.findIndex((n) => n.id === id);
     if (index !== -1) {
@@ -281,57 +265,6 @@ export const notificationService = {
     }
   },
 
-<<<<<<< HEAD
-  async markAllAsRead(userId) {
-    const all = getStoredNotifications();
-    const updated = all.map((n) => (n.user_id === userId ? { ...n, is_read: true } : n));
-    saveNotifications(updated);
-  },
-
-  async sendNotification({ userId, title, message, type, linkUrl }) {
-    const all = getStoredNotifications();
-    const newNotif = {
-      id: `notif-${Date.now()}`,
-      user_id: userId,
-      title,
-      message,
-      type: type || 'general',
-      link_url: linkUrl || '/my-tasks',
-      is_read: false,
-      created_at: new Date().toISOString(),
-    };
-    all.unshift(newNotif);
-    saveNotifications(all);
-    return newNotif;
-  },
-
-  // Event Helper Notifications
-  async notifyTaskAssigned({ doerId, taskTitle, assignedByName }) {
-    return this.sendNotification({
-      userId: doerId,
-      title: '📋 New Task Assigned',
-      message: `${assignedByName} assigned you a new task: "${taskTitle}"`,
-      type: 'task_assigned',
-      linkUrl: '/my-tasks',
-    });
-  },
-
-  async notifyTaskEdited({ doerId, taskTitle, editedByName }) {
-    return this.sendNotification({
-      userId: doerId,
-      title: '✏️ Task Updated',
-      message: `${editedByName} updated task details for "${taskTitle}"`,
-      type: 'task_edited',
-      linkUrl: '/my-tasks',
-    });
-  },
-
-  async notifyTaskDeleted({ doerId, taskTitle, deletedByName }) {
-    return this.sendNotification({
-      userId: doerId,
-      title: '❌ Task Removed',
-      message: `${deletedByName} deleted task "${taskTitle}"`,
-=======
   /**
    * Mark a notification as unread
    */
@@ -626,27 +559,11 @@ export const notificationService = {
       senderEmail: deletedByEmail,
       title: '❌ Task Removed',
       message: `${deletedByName || 'Manager'} deleted task "${taskTitle}"`,
->>>>>>> daf8de7 ( .gitignore update)
       type: 'task_deleted',
       linkUrl: '/my-tasks',
     });
   },
 
-<<<<<<< HEAD
-  async notifyTaskCompleted({ managerId, taskTitle, doerName }) {
-    return this.sendNotification({
-      userId: managerId,
-      title: '✅ Task Completed',
-      message: `${doerName} completed task "${taskTitle}"`,
-      type: 'task_completed',
-      linkUrl: '/task-assignment',
-    });
-  },
-
-  async notifyTaskTransferred({ toUserId, fromUserName, taskCount, reason }) {
-    return this.sendNotification({
-      userId: toUserId,
-=======
   async notifyTaskCompleted({ managerId, managerEmail, taskTitle, doerName, doerEmail }) {
     return this.sendNotification({
       userId: managerId,
@@ -665,15 +582,11 @@ export const notificationService = {
       userId: toUserId,
       email: toUserEmail,
       senderEmail: fromUserEmail,
->>>>>>> daf8de7 ( .gitignore update)
       title: '🔄 Tasks Transferred (Leave Coverage)',
       message: `${taskCount} task(s) transferred to you from ${fromUserName} due to leave (${reason || 'Leave Delegation'})`,
       type: 'task_transferred',
       linkUrl: '/my-tasks',
-<<<<<<< HEAD
-=======
       isEmailSent: true,
->>>>>>> daf8de7 ( .gitignore update)
     });
   },
 
@@ -681,17 +594,11 @@ export const notificationService = {
   async notifyLogin(user) {
     if (!user) return;
     return this.sendNotification({
-<<<<<<< HEAD
-      userId: null, // Broadcast to activity center
-      title: '🟢 User Session Started',
-      message: `User ${user.full_name} (${user.role} - ${user.department_name || 'Operations'}) logged into the system.`,
-=======
       userId: null,
       email: user.email || 'all@processly.com',
       senderEmail: user.email,
       title: '🟢 User Session Started',
       message: `User ${user.full_name || user.name} (${user.role} - ${user.department_name || user.department || 'Operations'}) logged into the system.`,
->>>>>>> daf8de7 ( .gitignore update)
       type: 'user_login',
       linkUrl: '/notifications',
     });
@@ -700,17 +607,11 @@ export const notificationService = {
   async notifyLogout(user) {
     if (!user) return;
     return this.sendNotification({
-<<<<<<< HEAD
-      userId: null, // Broadcast to activity center
-      title: '🔴 User Logged Out',
-      message: `User ${user.full_name} (${user.role}) logged out of the system.`,
-=======
       userId: null,
       email: user.email || 'all@processly.com',
       senderEmail: user.email,
       title: '🔴 User Logged Out',
       message: `User ${user.full_name || user.name} (${user.role}) logged out of the system.`,
->>>>>>> daf8de7 ( .gitignore update)
       type: 'user_logout',
       linkUrl: '/notifications',
     });
@@ -722,19 +623,13 @@ export const notificationService = {
       : '';
     return this.sendNotification({
       userId: null,
-<<<<<<< HEAD
-=======
       email: user.email,
       senderEmail: user.email,
->>>>>>> daf8de7 ( .gitignore update)
       title: '✈️ New Leave Request Submitted',
       message: `${user.full_name} submitted a leave request from ${startDate} to ${endDate}. Reason: "${reason}"${transferMsg}`,
       type: 'leave_requested',
       linkUrl: '/leave-requests',
-<<<<<<< HEAD
-=======
       isEmailSent: true,
->>>>>>> daf8de7 ( .gitignore update)
     });
   },
 
@@ -744,38 +639,26 @@ export const notificationService = {
       : '';
     return this.sendNotification({
       userId: leaveRequest.user_id,
-<<<<<<< HEAD
-=======
       email: leaveRequest.user_email || 'employee@processly.com',
       senderEmail: approvedBy.email,
->>>>>>> daf8de7 ( .gitignore update)
       title: '✅ Leave Approved',
       message: `Admin ${approvedBy.full_name} approved your leave request for ${leaveRequest.start_date} to ${leaveRequest.end_date}${subMsg}`,
       type: 'leave_approved',
       linkUrl: '/leave-requests',
-<<<<<<< HEAD
-=======
       isEmailSent: true,
->>>>>>> daf8de7 ( .gitignore update)
     });
   },
 
   async notifyLeaveRejected({ leaveRequest, rejectedBy, reason }) {
     return this.sendNotification({
       userId: leaveRequest.user_id,
-<<<<<<< HEAD
-=======
       email: leaveRequest.user_email || 'employee@processly.com',
       senderEmail: rejectedBy.email,
->>>>>>> daf8de7 ( .gitignore update)
       title: '❌ Leave Request Declined',
       message: `Admin ${rejectedBy.full_name} declined your leave request (${leaveRequest.start_date} to ${leaveRequest.end_date}). Reason: ${reason || 'N/A'}`,
       type: 'leave_rejected',
       linkUrl: '/leave-requests',
-<<<<<<< HEAD
-=======
       isEmailSent: true,
->>>>>>> daf8de7 ( .gitignore update)
     });
   },
 };

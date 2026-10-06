@@ -4,16 +4,10 @@ import { useNotifications } from '../../context/NotificationContext';
 import { useSystem } from '../../context/SystemContext';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { GlobalSearchModal } from '../common/GlobalSearchModal';
-<<<<<<< HEAD
-import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Users as UsersIcon, Search } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { INITIAL_USERS } from '../../services/mockData';
-=======
 import { formatRelativeTime } from '../../services/notificationService';
 import { Bell, Menu, User, LogOut, CheckCircle, Check, Shield, Search, Building2, IdCard, Plus } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ComposeNotificationModal } from '../notifications/ComposeNotificationModal';
->>>>>>> daf8de7 ( .gitignore update)
 
 export function Header({ onOpenMobileMenu }) {
   const { user, isAdmin, isManager, logout, switchUser } = useAuth();
@@ -22,10 +16,7 @@ export function Header({ onOpenMobileMenu }) {
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
-<<<<<<< HEAD
-=======
   const [isComposeOpen, setIsComposeOpen] = useState(false);
->>>>>>> daf8de7 ( .gitignore update)
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,10 +44,7 @@ export function Header({ onOpenMobileMenu }) {
   return (
     <>
       <GlobalSearchModal isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
-<<<<<<< HEAD
-=======
       <ComposeNotificationModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
->>>>>>> daf8de7 ( .gitignore update)
       <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
         {/* Left Mobile Menu Toggle + Title */}
         <div className="flex items-center space-x-3">
@@ -122,18 +110,6 @@ export function Header({ onOpenMobileMenu }) {
           {showNotifPopover && (
             <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-<<<<<<< HEAD
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifications</h4>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllAsRead}
-                    className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1 font-semibold"
-                  >
-                    <CheckCircle className="w-3 h-3" />
-                    <span>Mark all read</span>
-                  </button>
-                )}
-=======
                 <div className="flex items-center gap-2">
                   <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifications</h4>
                   {unreadCount > 0 && (
@@ -166,7 +142,6 @@ export function Header({ onOpenMobileMenu }) {
                     </button>
                   )}
                 </div>
->>>>>>> daf8de7 ( .gitignore update)
               </div>
               <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {notifications.length === 0 ? (
@@ -179,17 +154,6 @@ export function Header({ onOpenMobileMenu }) {
                         markAsRead(n.id);
                         setShowNotifPopover(false);
                         if (n.link_url) navigate(n.link_url);
-<<<<<<< HEAD
-                      }}
-                      className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${!n.is_read ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''
-                        }`}
-                    >
-                      <p className="text-xs font-bold text-slate-900 dark:text-white">{n.title}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{n.message}</p>
-                      <span className="text-[10px] text-slate-400 mt-1 block">
-                        {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-=======
                         else navigate('/notifications');
                       }}
                       className={`p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors ${
@@ -213,7 +177,6 @@ export function Header({ onOpenMobileMenu }) {
                           {formatRelativeTime(n.created_at)}
                         </span>
                       </div>
->>>>>>> daf8de7 ( .gitignore update)
                     </div>
                   ))
                 )}
@@ -235,18 +198,6 @@ export function Header({ onOpenMobileMenu }) {
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-<<<<<<< HEAD
-            className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <img
-              src={user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-              alt={user?.full_name}
-              className="w-8 h-8 rounded-lg object-cover ring-2 ring-indigo-500/30"
-            />
-            <div className="hidden md:block text-left">
-              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">{user?.full_name}</p>
-              <p className="text-[10px] text-slate-400 font-medium">{user?.designation || user?.role}</p>
-=======
             className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             {user?.avatar_url ? (
@@ -274,23 +225,10 @@ export function Header({ onOpenMobileMenu }) {
               <p className="text-[10px] text-slate-400 font-medium">
                 {user?.designation || user?.department || user?.role || 'Employee'}
               </p>
->>>>>>> daf8de7 ( .gitignore update)
             </div>
           </button>
 
           {showProfileMenu && (
-<<<<<<< HEAD
-            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
-                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                    {user?.role || 'User'}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    {user?.allowedModules ? `${user.allowedModules.length} Modules` : 'All Modules'}
-=======
             <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in-50 duration-150">
               <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
                 <div className="flex items-center gap-3">
@@ -355,7 +293,6 @@ export function Header({ onOpenMobileMenu }) {
                       : user?.allowedModules
                       ? `${user.allowedModules.length} Systems`
                       : 'Full Access'}
->>>>>>> daf8de7 ( .gitignore update)
                   </span>
                 </div>
               </div>
@@ -369,53 +306,10 @@ export function Header({ onOpenMobileMenu }) {
                 <span>My Profile & Requests</span>
               </Link>
 
-<<<<<<< HEAD
-              {/* Quick Switch User & Test Module Access */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <div className="px-4 py-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <UsersIcon className="w-3 h-3 text-indigo-500" /> Switch User (Module Test)
-                  </span>
-                </div>
-                <div className="py-1 max-h-48 overflow-y-auto space-y-0.5">
-                  {INITIAL_USERS.map((u) => {
-                    const isCurrent = (user?.id === u.id || user?.email === u.email);
-                    return (
-                      <button
-                        key={u.id}
-                        onClick={() => {
-                          switchUser(u);
-                          setShowProfileMenu(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-4 py-2 text-left text-xs transition-colors cursor-pointer ${
-                          isCurrent
-                            ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold'
-                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <p className="truncate text-[11px] leading-tight font-bold">{u.full_name}</p>
-                          <span className="text-[10px] text-slate-400 font-normal block truncate">
-                            {u.designation} • {u.allowedModules ? `${u.allowedModules.length} Mod` : 'Full'}
-                          </span>
-                        </div>
-                        {isCurrent && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-=======
               <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
->>>>>>> daf8de7 ( .gitignore update)
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>

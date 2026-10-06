@@ -19,16 +19,11 @@ import {
   GripVertical
 } from 'lucide-react';
 import {
-<<<<<<< HEAD
-  generateAgentResponse,
-  playAgentSound
-=======
   queryProcesslyAgent,
   playAgentSound,
   N8N_CONFIG,
   getOrCreateConversationId,
   resetConversationId
->>>>>>> daf8de7 ( .gitignore update)
 } from '../../services/aiAgentService';
 
 const CHAT_STORAGE_KEY = 'erp_ai_chat_agent_history_v1';
@@ -38,14 +33,6 @@ const INITIAL_GREETING = {
   id: 'init-msg',
   sender: 'agent',
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-<<<<<<< HEAD
-  text: `👋 **Namaste! Main aapka ERP AI Chat Agent hoon.**\n\nMain aapke ERP systems (Purchase, Sales, Leads, Tasks, WhatsApp, HR) ka real-time data monitor karta hoon. Aap mujhse kisi bhi indent, order, ya module ka status pooch sakte hain ya direct page par navigate kar sakte hain!`,
-  actions: [
-    { label: '📊 System Overview', query: 'Show complete ERP summary' },
-    { label: '📦 GRN & Purchase Status', query: 'What is the status of purchase and GRN?' },
-    { label: '🚀 Ready for Dispatch Orders', query: 'Show orders ready for dispatch' },
-    { label: '📋 My Tasks Summary', query: 'Show my pending tasks' }
-=======
   text: `👋 **Namaste! Main aapka "Processly Agent" hoon.**\n\nMain aapke ERP systems (Supply Chain Status, Order Pipelines, Pending Approvals, aur System Summaries) ka real-time data monitor karta hoon. Aap mujhse kisi bhi indent, order ya module ka live status pooch sakte hain!`,
   quick_actions: [
     'Purchase & GRN Status',
@@ -58,7 +45,6 @@ const INITIAL_GREETING = {
     { label: '🚀 Sales Orders Pipeline', query: 'Sales Orders Pipeline' },
     { label: '📋 My Pending Tasks', query: 'My Pending Tasks' },
     { label: '📊 Full System Summary', query: 'Full System Summary' }
->>>>>>> daf8de7 ( .gitignore update)
   ]
 };
 
@@ -88,19 +74,13 @@ export function GlobalChatAgent() {
   const [copiedId, setCopiedId] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-<<<<<<< HEAD
-=======
   // Active Conversation UUID (generated via browser built-in crypto.randomUUID)
   const [conversationId, setConversationId] = useState(() => getOrCreateConversationId());
->>>>>>> daf8de7 ( .gitignore update)
 
   // Draggable position state (saved in localStorage)
   const [btnPos, setBtnPos] = useState(() => {
     try {
       const saved = localStorage.getItem('processly_agent_btn_pos');
-<<<<<<< HEAD
-      if (saved) return JSON.parse(saved);
-=======
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed) {
@@ -120,7 +100,6 @@ export function GlobalChatAgent() {
           return parsed;
         }
       }
->>>>>>> daf8de7 ( .gitignore update)
     } catch (e) {
       // Ignore
     }
@@ -216,11 +195,7 @@ export function GlobalChatAgent() {
     }
   };
 
-<<<<<<< HEAD
-  const handleSendMessage = (textToSend = null) => {
-=======
   const handleSendMessage = async (textToSend = null) => {
->>>>>>> daf8de7 ( .gitignore update)
     const query = (textToSend || inputMessage).trim();
     if (!query) return;
 
@@ -237,20 +212,12 @@ export function GlobalChatAgent() {
     setInputMessage('');
     setIsTyping(true);
 
-<<<<<<< HEAD
-    // Realistic brief agent thinking delay
-    setTimeout(() => {
-      const response = generateAgentResponse(query, {
-        currentPath: location.pathname,
-        currentUser: user
-=======
     try {
       const response = await queryProcesslyAgent(query, {
         currentPath: location.pathname,
         currentUser: user,
         conversationId,
         sessionId: conversationId
->>>>>>> daf8de7 ( .gitignore update)
       });
 
       const agentMsg = {
@@ -258,13 +225,9 @@ export function GlobalChatAgent() {
         sender: 'agent',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         text: response.text,
-<<<<<<< HEAD
-        actions: response.actions || []
-=======
         quick_actions: response.quick_actions || [],
         actions: response.actions || [],
         source: response.source || 'n8n'
->>>>>>> daf8de7 ( .gitignore update)
       };
 
       setMessages((prev) => [...prev, agentMsg]);
@@ -282,9 +245,6 @@ export function GlobalChatAgent() {
           navigate(response.navigateTo);
         }, 1200);
       }
-<<<<<<< HEAD
-    }, 600);
-=======
     } catch (err) {
       console.warn('Agent processing error:', err);
       const agentMsg = {
@@ -302,7 +262,6 @@ export function GlobalChatAgent() {
 
       if (soundEnabled) playAgentSound('reply');
     }
->>>>>>> daf8de7 ( .gitignore update)
   };
 
   const handleKeyDown = (e) => {
@@ -313,13 +272,9 @@ export function GlobalChatAgent() {
   };
 
   const clearChatHistory = () => {
-<<<<<<< HEAD
-    if (window.confirm('Kya aap chat history clear karna chahte hain?')) {
-=======
     if (window.confirm('Kya aap chat history clear karke nayi conversation shuru karna chahte hain?')) {
       const newUuid = resetConversationId();
       setConversationId(newUuid);
->>>>>>> daf8de7 ( .gitignore update)
       setMessages([INITIAL_GREETING]);
       localStorage.removeItem(CHAT_STORAGE_KEY);
     }
@@ -390,10 +345,7 @@ export function GlobalChatAgent() {
   };
 
   // Handle dragging anywhere on the screen
-<<<<<<< HEAD
-=======
   // Handle dragging anywhere on the screen
->>>>>>> daf8de7 ( .gitignore update)
   const handleDragStart = (e) => {
     if (e.type === 'mousedown' && e.button !== 0) return;
 
@@ -401,24 +353,14 @@ export function GlobalChatAgent() {
     const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
 
     const rect = buttonRef.current?.getBoundingClientRect();
-<<<<<<< HEAD
-    const currentX = rect ? rect.left : window.innerWidth - 180;
-    const currentY = rect ? rect.top : window.innerHeight - 80;
-=======
     const currentLeft = rect ? rect.left : window.innerWidth - 60;
     const currentTop = rect ? rect.top : window.innerHeight - 80;
->>>>>>> daf8de7 ( .gitignore update)
 
     dragInfoRef.current = {
       startX: clientX,
       startY: clientY,
-<<<<<<< HEAD
-      initialX: currentX,
-      initialY: currentY,
-=======
       initialLeft: currentLeft,
       initialTop: currentTop,
->>>>>>> daf8de7 ( .gitignore update)
       hasMoved: false
     };
 
@@ -435,15 +377,6 @@ export function GlobalChatAgent() {
         dragInfoRef.current.hasMoved = true;
       }
 
-<<<<<<< HEAD
-      const btnWidth = buttonRef.current?.offsetWidth || 150;
-      const btnHeight = buttonRef.current?.offsetHeight || 44;
-
-      const clampedX = Math.max(12, Math.min(dragInfoRef.current.initialX + deltaX, window.innerWidth - btnWidth - 12));
-      const clampedY = Math.max(12, Math.min(dragInfoRef.current.initialY + deltaY, window.innerHeight - btnHeight - 12));
-
-      setBtnPos({ x: clampedX, y: clampedY });
-=======
       const btnWidth = buttonRef.current?.offsetWidth || 50;
       const btnHeight = buttonRef.current?.offsetHeight || 44;
 
@@ -458,7 +391,6 @@ export function GlobalChatAgent() {
         const clampedX = Math.max(12, Math.min(targetLeft, window.innerWidth - btnWidth - 12));
         setBtnPos({ left: clampedX, top: clampedY, isRight: false });
       }
->>>>>>> daf8de7 ( .gitignore update)
     };
 
     const onEnd = () => {
@@ -471,11 +403,6 @@ export function GlobalChatAgent() {
       if (dragInfoRef.current.hasMoved) {
         const rect = buttonRef.current?.getBoundingClientRect();
         if (rect) {
-<<<<<<< HEAD
-          const finalPos = { x: rect.left, y: rect.top };
-          try {
-            localStorage.setItem('processly_agent_btn_pos', JSON.stringify(finalPos));
-=======
           const isRight = rect.left > window.innerWidth / 2;
           const posToSave = isRight
             ? { right: Math.max(12, window.innerWidth - rect.right), top: rect.top, isRight: true }
@@ -484,7 +411,6 @@ export function GlobalChatAgent() {
           setBtnPos(posToSave);
           try {
             localStorage.setItem('processly_agent_btn_pos', JSON.stringify(posToSave));
->>>>>>> daf8de7 ( .gitignore update)
           } catch (e) {
             // Ignore
           }
@@ -511,13 +437,6 @@ export function GlobalChatAgent() {
     const handleResize = () => {
       setBtnPos((prev) => {
         if (!prev) return null;
-<<<<<<< HEAD
-        const btnWidth = buttonRef.current?.offsetWidth || 150;
-        const btnHeight = buttonRef.current?.offsetHeight || 44;
-        const clampedX = Math.max(12, Math.min(prev.x, window.innerWidth - btnWidth - 12));
-        const clampedY = Math.max(12, Math.min(prev.y, window.innerHeight - btnHeight - 12));
-        return { x: clampedX, y: clampedY };
-=======
         const btnHeight = buttonRef.current?.offsetHeight || 44;
         const clampedY = Math.max(12, Math.min(prev.top ?? prev.y ?? 100, window.innerHeight - btnHeight - 12));
         if (prev.isRight || prev.right !== undefined) {
@@ -526,15 +445,12 @@ export function GlobalChatAgent() {
         const btnWidth = buttonRef.current?.offsetWidth || 50;
         const clampedX = Math.max(12, Math.min(prev.left ?? prev.x ?? 12, window.innerWidth - btnWidth - 12));
         return { ...prev, left: clampedX, top: clampedY };
->>>>>>> daf8de7 ( .gitignore update)
       });
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-<<<<<<< HEAD
-=======
   // Compute fixed position style: If right side, anchor right so hover expands to the LEFT
   const getLauncherStyle = () => {
     if (!btnPos) return undefined;
@@ -566,7 +482,6 @@ export function GlobalChatAgent() {
     };
   };
 
->>>>>>> daf8de7 ( .gitignore update)
   return (
     <>
       {/* Floating Action Button (FAB) - Draggable Ask Agent Pill */}
@@ -575,42 +490,14 @@ export function GlobalChatAgent() {
           ref={buttonRef}
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
-<<<<<<< HEAD
-          style={
-            btnPos
-              ? { left: `${btnPos.x}px`, top: `${btnPos.y}px` }
-              : undefined
-          }
-          className={`fixed z-50 flex items-center select-none ${
-=======
           style={getLauncherStyle()}
           className={`fixed z-50 flex items-center justify-end select-none pointer-events-auto ${
->>>>>>> daf8de7 ( .gitignore update)
             !btnPos ? 'bottom-20 md:bottom-6 right-4 md:right-6' : ''
           }`}
         >
           <button
             id="erp-chat-agent-launcher"
             onClick={handleLauncherClick}
-<<<<<<< HEAD
-            className={`flex items-center p-2.5 hover:px-3.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-full text-xs font-bold text-slate-800 dark:text-slate-100 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 ease-in-out group ${
-              isDragging
-                ? 'cursor-grabbing scale-105 shadow-2xl ring-2 ring-indigo-500/40 opacity-95'
-                : 'cursor-grab hover:scale-[1.03] active:scale-95 shadow-indigo-500/10 hover:shadow-indigo-500/25'
-            }`}
-            title="Ask Agent • Click to open (Drag anywhere)"
-          >
-            {/* Star Icon (Always visible initially) */}
-            <div className="relative flex items-center justify-center pointer-events-none">
-              <Sparkles className="w-5 h-5 text-amber-500 group-hover:rotate-12 transition-transform duration-300" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
-              )}
-            </div>
-
-            {/* Unhides smoothly on hover */}
-            <div className="max-w-0 opacity-0 group-hover:max-w-48 group-hover:opacity-100 group-hover:ml-2 overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap flex items-center gap-2 pointer-events-none">
-=======
             className={`flex items-center p-2 hover:px-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-full text-xs font-bold text-slate-800 dark:text-slate-100 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 ease-out group ${
               isDragging
                 ? 'cursor-grabbing scale-105 shadow-2xl ring-2 ring-indigo-500/40 opacity-95'
@@ -621,7 +508,6 @@ export function GlobalChatAgent() {
             {/* Unhides smoothly on hover - SLIDES OPEN TO THE LEFT */}
             <div className="max-w-0 opacity-0 group-hover:max-w-56 group-hover:opacity-100 group-hover:mr-2 overflow-hidden transition-all duration-300 ease-out whitespace-nowrap flex items-center gap-1.5 pointer-events-none">
               <GripVertical className="w-3.5 h-3.5 text-slate-400 shrink-0" />
->>>>>>> daf8de7 ( .gitignore update)
               <span className="tracking-tight text-xs font-bold text-slate-800 dark:text-slate-100">
                 Ask Agent...
               </span>
@@ -633,9 +519,6 @@ export function GlobalChatAgent() {
                   {unreadCount}
                 </span>
               )}
-<<<<<<< HEAD
-              <GripVertical className="w-3.5 h-3.5 text-slate-400" />
-=======
             </div>
 
             {/* Star Icon (Always visible on the right) */}
@@ -644,7 +527,6 @@ export function GlobalChatAgent() {
               {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
               )}
->>>>>>> daf8de7 ( .gitignore update)
             </div>
           </button>
         </div>
@@ -675,8 +557,6 @@ export function GlobalChatAgent() {
                     Processly Agent
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   </h3>
-<<<<<<< HEAD
-=======
                   <span
                     className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30"
                     title={`N8N Webhook: ${N8N_CONFIG.getWebhookUrl()}`}
@@ -689,7 +569,6 @@ export function GlobalChatAgent() {
                   >
                     UUID: {conversationId ? `${conversationId.slice(0, 8)}...` : ''}
                   </span>
->>>>>>> daf8de7 ( .gitignore update)
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-indigo-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
@@ -763,34 +642,6 @@ export function GlobalChatAgent() {
                       {/* Message Content */}
                       <div>{renderFormattedText(msg.text)}</div>
 
-<<<<<<< HEAD
-                      {/* Interactive Navigation Action Buttons inside Message */}
-                      {msg.actions && msg.actions.length > 0 && (
-                        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/80 flex flex-wrap gap-1.5">
-                          {msg.actions.map((act, actIdx) => (
-                            <button
-                              key={actIdx}
-                              onClick={() => {
-                                if (act.path) {
-                                  navigate(act.path);
-                                  if (window.innerWidth < 768) {
-                                    setIsOpen(false);
-                                  }
-                                } else if (act.query) {
-                                  handleSendMessage(act.query);
-                                }
-                              }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
-                                act.primary
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                  : 'bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80'
-                              }`}
-                            >
-                              <span>{act.label}</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          ))}
-=======
                       {/* Interactive Quick Actions & Navigation Buttons */}
                       {((msg.quick_actions && msg.quick_actions.length > 0) || (msg.actions && msg.actions.length > 0)) && (
                         <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700/80 flex flex-wrap gap-1.5">
@@ -828,7 +679,6 @@ export function GlobalChatAgent() {
                                   <ArrowRight className="w-3.5 h-3.5" />
                                 </button>
                               ))}
->>>>>>> daf8de7 ( .gitignore update)
                         </div>
                       )}
 

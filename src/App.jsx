@@ -18,10 +18,7 @@ import { CalendarPage } from './pages/calendar/CalendarPage';
 import { HolidaysPage } from './pages/holidays/HolidaysPage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { MastersPage } from './pages/masters/MastersPage';
-<<<<<<< HEAD
-=======
 import { WorkingDateMissingModal } from './components/common/WorkingDateMissingModal';
->>>>>>> daf8de7 ( .gitignore update)
 
 import { SalesDashboardPage } from './pages/sales/SalesDashboardPage';
 import { OTDTasksPage } from './pages/sales/OTDTasksPage';
@@ -56,10 +53,7 @@ import { MasterCompanyDetailsPage } from './pages/masterSystem/MasterCompanyDeta
 import { MasterVendorsPage } from './pages/masterSystem/MasterVendorsPage';
 import { MasterDepartmentsPage } from './pages/masterSystem/MasterDepartmentsPage';
 import { MasterHolidaysPage } from './pages/masterSystem/MasterHolidaysPage';
-<<<<<<< HEAD
-=======
 import { MasterWorkingCalendarPage } from './pages/masterSystem/MasterWorkingCalendarPage';
->>>>>>> daf8de7 ( .gitignore update)
 
 // 9 Workflow Stage Pages for Purchase System
 import { PurchaseIndentPage } from './pages/purchase/PurchaseIndentPage';
@@ -160,13 +154,9 @@ function ModuleRoute({ systemId, children }) {
 
 export default function App() {
   return (
-<<<<<<< HEAD
-    <Routes>
-=======
     <>
       <WorkingDateMissingModal />
       <Routes>
->>>>>>> daf8de7 ( .gitignore update)
       <Route path="/login" element={<LoginPage />} />
 
       <Route
@@ -209,11 +199,7 @@ export default function App() {
         <Route path="my-tasks" element={<MyTasksPage />} />
         <Route path="leave-requests" element={<LeaveRequestsPage />} />
         <Route path="calendar" element={<CalendarPage />} />
-<<<<<<< HEAD
-        <Route path="holidays" element={<HolidaysPage />} />
-=======
         <Route path="holidays" element={<Navigate to="/master-system/holidays" replace />} />
->>>>>>> daf8de7 ( .gitignore update)
         <Route
           path="masters"
           element={
@@ -257,10 +243,7 @@ export default function App() {
           <Route path="departments" element={<MasterDepartmentsPage />} />
           <Route path="users" element={<EmployeesPage />} />
           <Route path="tat" element={<OTDTatPage />} />
-<<<<<<< HEAD
-=======
           <Route path="working-calendar" element={<MasterWorkingCalendarPage />} />
->>>>>>> daf8de7 ( .gitignore update)
           <Route path="holidays" element={<MasterHolidaysPage />} />
         </Route>
 
@@ -374,9 +357,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
-<<<<<<< HEAD
-=======
     </>
->>>>>>> daf8de7 ( .gitignore update)
   );
 }

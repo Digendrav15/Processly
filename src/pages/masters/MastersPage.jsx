@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-=======
 import { useLocation } from 'react-router-dom';
->>>>>>> daf8de7 ( .gitignore update)
 import { masterService } from '../../services/masterService';
 import { userService } from '../../services/userService';
 import { DEPARTMENTS } from '../../config/constants';
 import { Modal } from '../../components/common/Modal';
-<<<<<<< HEAD
-import { Plus, Edit2, Trash2, Users, Building2, Award, AlertCircle } from 'lucide-react';
-
-export function MastersPage() {
-  const [masters, setMasters] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('Users'); // Users, Departments, Designations
-=======
 import { Plus, Edit2, Trash2, Users, Building2, Award, AlertCircle, Camera, Upload, Loader2, Check, Calendar } from 'lucide-react';
 import { storageService, PROFILE_BUCKET } from '../../services/storageService';
 import { WorkingDayCalendarMaster } from '../../components/masters/WorkingDayCalendarMaster';
@@ -29,7 +17,6 @@ export function MastersPage() {
     const params = new URLSearchParams(window.location.search);
     return params.get('tab') || 'Users';
   }); // Users, Departments, Designations, WorkingDayCalendar
->>>>>>> daf8de7 ( .gitignore update)
 
   // Modals & Edit States
   // 1. User Modal State
@@ -42,12 +29,9 @@ export function MastersPage() {
   const [departmentId, setDepartmentId] = useState('dept-ops');
   const [designation, setDesignation] = useState('Operations Associate');
   const [selfAssignEnabled, setSelfAssignEnabled] = useState(true);
-<<<<<<< HEAD
-=======
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
->>>>>>> daf8de7 ( .gitignore update)
 
   // 2. Department Modal & Inputs
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
@@ -80,10 +64,7 @@ export function MastersPage() {
 
   // --- USER HANDLERS ---
   const handleOpenUserModal = (userObj = null) => {
-<<<<<<< HEAD
-=======
     setAvatarError('');
->>>>>>> daf8de7 ( .gitignore update)
     if (userObj) {
       setEditingUser(userObj);
       setFullName(userObj.full_name);
@@ -93,10 +74,7 @@ export function MastersPage() {
       setDepartmentId(userObj.department_id || 'dept-ops');
       setDesignation(userObj.designation || 'Operations Associate');
       setSelfAssignEnabled(userObj.self_assign_enabled !== false);
-<<<<<<< HEAD
-=======
       setAvatarUrl(userObj.avatar_url || '');
->>>>>>> daf8de7 ( .gitignore update)
     } else {
       setEditingUser(null);
       setFullName('');
@@ -106,16 +84,11 @@ export function MastersPage() {
       setDepartmentId('dept-ops');
       setDesignation('Operations Associate');
       setSelfAssignEnabled(true);
-<<<<<<< HEAD
-=======
       setAvatarUrl('');
->>>>>>> daf8de7 ( .gitignore update)
     }
     setIsUserModalOpen(true);
   };
 
-<<<<<<< HEAD
-=======
   const handleUserAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -138,7 +111,6 @@ export function MastersPage() {
     }
   };
 
->>>>>>> daf8de7 ( .gitignore update)
   const handleSaveUser = async (e) => {
     e.preventDefault();
     try {
@@ -155,10 +127,7 @@ export function MastersPage() {
           department_name: deptName,
           designation,
           self_assign_enabled: selfAssignEnabled,
-<<<<<<< HEAD
-=======
           avatar_url: avatarUrl,
->>>>>>> daf8de7 ( .gitignore update)
         });
       } else {
         await userService.createUser({
@@ -170,10 +139,7 @@ export function MastersPage() {
           department_name: deptName,
           designation,
           self_assign_enabled: selfAssignEnabled,
-<<<<<<< HEAD
-=======
           avatar_url: avatarUrl,
->>>>>>> daf8de7 ( .gitignore update)
         });
       }
 
@@ -373,8 +339,6 @@ export function MastersPage() {
           <Award className="w-4 h-4" />
           <span>Designations</span>
         </button>
-<<<<<<< HEAD
-=======
 
         <button
           onClick={() => setActiveTab('WorkingDayCalendar')}
@@ -387,7 +351,6 @@ export function MastersPage() {
           <Calendar className="w-4 h-4" />
           <span>Working Day Calendar</span>
         </button>
->>>>>>> daf8de7 ( .gitignore update)
       </div>
 
       {/* 1. USERS TAB TABLE WITH EDIT & DELETE */}
@@ -583,14 +546,11 @@ export function MastersPage() {
         </div>
       )}
 
-<<<<<<< HEAD
-=======
       {/* 4. WORKING DAY CALENDAR TAB */}
       {activeTab === 'WorkingDayCalendar' && (
         <WorkingDayCalendarMaster />
       )}
 
->>>>>>> daf8de7 ( .gitignore update)
       {/* User Edit / Create Modal */}
       <Modal
         isOpen={isUserModalOpen}
@@ -599,8 +559,6 @@ export function MastersPage() {
         maxWidth="max-w-lg"
       >
         <form onSubmit={handleSaveUser} className="space-y-4">
-<<<<<<< HEAD
-=======
           {/* Avatar Upload to Profile_Images Bucket */}
           <div className="flex items-center space-x-4 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
             <div className="relative w-14 h-14 shrink-0">
@@ -665,7 +623,6 @@ export function MastersPage() {
             </div>
           )}
 
->>>>>>> daf8de7 ( .gitignore update)
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
             <input

@@ -25,10 +25,6 @@ import {
   FileText,
   CreditCard,
   Layers,
-<<<<<<< HEAD
-  Sparkles
-} from 'lucide-react';
-=======
   Sparkles,
   Loader2,
   PartyPopper,
@@ -40,7 +36,6 @@ import { storageService, PROFILE_BUCKET } from '../../services/storageService';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS } from '../../services/otdStorageService';
 import { holidayService } from '../../services/holidayService';
->>>>>>> daf8de7 ( .gitignore update)
 
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
@@ -58,14 +53,6 @@ export function ProfilePage() {
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [mobile, setMobile] = useState(user?.mobile || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '');
-<<<<<<< HEAD
-  const [savedMessage, setSavedMessage] = useState('');
-  const fileInputRef = useRef(null);
-
-  // Active Tab for Portal Forms: 'leave' | 'advance'
-  const [activeFormTab, setActiveFormTab] = useState('leave');
-
-=======
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [savedMessage, setSavedMessage] = useState('');
@@ -96,7 +83,6 @@ export function ProfilePage() {
     return d !== null && d >= 0;
   });
 
->>>>>>> daf8de7 ( .gitignore update)
   // Password Update States
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState(user?.password || '••••••••');
@@ -162,16 +148,6 @@ export function ProfilePage() {
     }
   };
 
-<<<<<<< HEAD
-  const handleAvatarFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-=======
   const handleAvatarFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -195,17 +171,11 @@ export function ProfilePage() {
       setAvatarError(err.message || 'Failed to upload image to Profile_Images bucket.');
     } finally {
       setAvatarUploading(false);
->>>>>>> daf8de7 ( .gitignore update)
     }
   };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-    await updateProfile({ full_name: fullName, mobile, avatar_url: avatarUrl });
-    setSavedMessage('Profile & picture updated successfully!');
-    setTimeout(() => setSavedMessage(''), 3000);
-=======
     setAvatarError('');
     try {
       await updateProfile({ full_name: fullName, mobile, avatar_url: avatarUrl });
@@ -214,7 +184,6 @@ export function ProfilePage() {
     } catch (err) {
       setAvatarError(err.message || 'Failed to save profile changes');
     }
->>>>>>> daf8de7 ( .gitignore update)
   };
 
   const handleUpdatePassword = async (e) => {
@@ -359,15 +328,6 @@ export function ProfilePage() {
                 <img
                   src={avatarUrl || user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
                   alt={user?.full_name}
-<<<<<<< HEAD
-                  className="w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md transition-all group-hover:opacity-90"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg transition-transform hover:scale-110 cursor-pointer"
-                  title="Change Profile Picture"
-=======
                   className={`w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md transition-all group-hover:opacity-90 ${avatarUploading ? 'opacity-40 animate-pulse' : ''}`}
                 />
                 {avatarUploading && (
@@ -382,7 +342,6 @@ export function ProfilePage() {
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute -bottom-1 -right-1 p-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl shadow-lg transition-transform hover:scale-110 cursor-pointer"
                   title={`Change Profile Picture (Saves to ${PROFILE_BUCKET} bucket)`}
->>>>>>> daf8de7 ( .gitignore update)
                 >
                   <Camera className="w-4 h-4" />
                 </button>
@@ -395,15 +354,12 @@ export function ProfilePage() {
                 />
               </div>
 
-<<<<<<< HEAD
-=======
               {/* Bucket info indicator */}
               <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-500 font-medium">
                 <span>Storage Bucket:</span>
                 <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{PROFILE_BUCKET}</span>
               </div>
 
->>>>>>> daf8de7 ( .gitignore update)
               <div>
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-white">{user?.full_name}</h2>
                 <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">{user?.designation || user?.role}</p>
@@ -432,8 +388,6 @@ export function ProfilePage() {
               </div>
             </div>
 
-<<<<<<< HEAD
-=======
             {avatarError && (
               <div className="p-3 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-start space-x-2 border border-rose-200 dark:border-rose-800">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
@@ -448,7 +402,6 @@ export function ProfilePage() {
               </div>
             )}
 
->>>>>>> daf8de7 ( .gitignore update)
             {savedMessage && (
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -625,17 +578,6 @@ export function ProfilePage() {
               })}
             </div>
           </div>
-<<<<<<< HEAD
-        </div>
-
-        {/* RIGHT COLUMN: FORMS (LEAVE KA FORM & ADVANCE KA FORM) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Navigation Tabs for Forms */}
-          <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex space-x-2 border">
-            <button
-              onClick={() => setActiveFormTab('leave')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
-=======
 
           {/* UPCOMING COMPANY HOLIDAY QUICK WIDGET */}
           <div className="bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-transparent border border-rose-200 dark:border-rose-900/60 p-5 rounded-2xl shadow-xs space-y-3">
@@ -691,7 +633,6 @@ export function ProfilePage() {
             <button
               onClick={() => setActiveFormTab('leave')}
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'leave'
->>>>>>> daf8de7 ( .gitignore update)
                   ? 'bg-white dark:bg-slate-900 text-amber-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
@@ -702,19 +643,12 @@ export function ProfilePage() {
 
             <button
               onClick={() => setActiveFormTab('advance')}
-<<<<<<< HEAD
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
-=======
               className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center space-x-2 transition-all cursor-pointer ${activeFormTab === 'advance'
->>>>>>> daf8de7 ( .gitignore update)
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
             >
               <DollarSign className="w-4 h-4" />
-<<<<<<< HEAD
-              <span>Advance Request </span>
-=======
               <span>Advance Request</span>
             </button>
 
@@ -727,7 +661,6 @@ export function ProfilePage() {
             >
               <PartyPopper className="w-4 h-4 text-rose-500" />
               <span>Official Holidays ({holidays.length})</span>
->>>>>>> daf8de7 ( .gitignore update)
             </button>
           </div>
 
@@ -1116,8 +1049,6 @@ export function ProfilePage() {
               </div>
             </div>
           )}
-<<<<<<< HEAD
-=======
 
           {/* TAB 3: COMPANY & GAZETTED HOLIDAYS TAB */}
           {activeFormTab === 'holidays' && (
@@ -1363,7 +1294,6 @@ export function ProfilePage() {
               </div>
             </div>
           )}
->>>>>>> daf8de7 ( .gitignore update)
         </div>
       </div>
     </div>

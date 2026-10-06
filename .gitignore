@@ -10,10 +10,6 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-<<<<<<< HEAD
-*.local
-
-=======
 coverage
 *.local
 
@@ -26,7 +22,6 @@ coverage
 *.env
 !.env.example
 
->>>>>>> daf8de7 ( .gitignore update)
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

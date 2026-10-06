@@ -4,10 +4,7 @@ import {
   Bell,
   ClipboardList,
   Calendar,
-<<<<<<< HEAD
-=======
   CalendarDays,
->>>>>>> daf8de7 ( .gitignore update)
   PartyPopper,
   Sliders,
   Plane,
@@ -78,13 +75,7 @@ export const SYSTEMS_CONFIG = [
       { label: 'Task Assignment', path: '/task-assignment', icon: ClipboardList, requiresSelfAssignOrManager: true },
       { label: 'Checklist Templates', path: '/checklist/list', icon: ListTodo, requiresSelfAssignOrManager: true },
       { label: 'Delegations', path: '/delegation/list', icon: UserCheck, requiresSelfAssignOrManager: true },
-<<<<<<< HEAD
-      { label: 'Notifications', path: '/notifications', icon: Bell },
       { label: 'Calendar', path: '/calendar', icon: Calendar },
-      { label: 'Holidays', path: '/holidays', icon: PartyPopper },
-=======
-      { label: 'Calendar', path: '/calendar', icon: Calendar },
->>>>>>> daf8de7 ( .gitignore update)
       { label: 'Masters', path: '/masters', icon: Sliders, adminOnly: true },
     ]
   },
@@ -136,10 +127,7 @@ export const SYSTEMS_CONFIG = [
       { label: 'Department Master', path: '/master-system/departments', icon: Building },
       { label: 'User / Employee Master', path: '/master-system/users', icon: UserCheck },
       { label: 'TAT Management', path: '/master-system/tat', icon: Clock },
-<<<<<<< HEAD
-=======
       { label: 'Working Day Calendar', path: '/master-system/working-calendar', icon: CalendarDays },
->>>>>>> daf8de7 ( .gitignore update)
       { label: 'Holidays Master', path: '/master-system/holidays', icon: Calendar },
     ]
   },

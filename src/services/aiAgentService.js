@@ -228,9 +228,6 @@ export function searchEntities(keyword) {
   return hasAny ? results : null;
 }
 
-<<<<<<< HEAD
-// Generate intelligent contextual response
-=======
 // N8N Webhook Configuration for Processly Agent
 export const N8N_CONFIG = {
   getWebhookUrl() {
@@ -478,7 +475,6 @@ export async function queryProcesslyAgent(userQuery, context = {}) {
 }
 
 // Generate intelligent contextual response (Processly Agent Local Intelligence)
->>>>>>> daf8de7 ( .gitignore update)
 export function generateAgentResponse(userQuery, context = {}) {
   const { _currentPath = '/', currentUser = null } = context;
   const q = (userQuery || '').trim().toLowerCase();
@@ -525,10 +521,7 @@ export function generateAgentResponse(userQuery, context = {}) {
       if (item.triggers.some((t) => q.includes(t))) {
         return {
           text: `Sure! Main aapko **${item.name}** par lekar chal raha hoon. Aap neeche diye button par click kar sakte hain ya auto-redirect le sakte hain:`,
-<<<<<<< HEAD
-=======
           quick_actions: [],
->>>>>>> daf8de7 ( .gitignore update)
           actions: [{ label: `Go to ${item.name}`, path: item.path, primary: true }],
           navigateTo: item.path
         };
@@ -537,10 +530,7 @@ export function generateAgentResponse(userQuery, context = {}) {
   }
 
   // Check ID search (IND-XXXX, PO-XXXX, ORD-XXXX, LD-XXXX, GRN-XXXX)
-<<<<<<< HEAD
-=======
   // Guideline 2: If user provides an exact ID, return answer in text and quick_actions = []
->>>>>>> daf8de7 ( .gitignore update)
   const idRegex = /(ind-\d+|po-\d+|grn-\d+|ord-\d+|ld-\d+|flw-\d+|qt-\d+)/i;
   const idMatch = q.match(idRegex);
   if (idMatch) {
@@ -571,15 +561,11 @@ export function generateAgentResponse(userQuery, context = {}) {
         actions.push({ label: 'View in Leads', path: '/lead-to-orders/leads' });
       }
 
-<<<<<<< HEAD
-      return { text: detailsText, actions };
-=======
       return {
         text: detailsText.trim(),
         quick_actions: [],
         actions
       };
->>>>>>> daf8de7 ( .gitignore update)
     }
   }
 
@@ -613,9 +599,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Purchase & GRN Status',
@@ -623,7 +606,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open GRN Page', path: '/purchase/grn' },
         { label: 'Purchase QC', path: '/purchase/qc' },
@@ -659,9 +641,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Purchase & GRN Status',
@@ -669,7 +648,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Inventory Dashboard', path: '/inventory/dashboard' },
         { label: 'Stock Items / SKU', path: '/inventory/items' },
@@ -702,9 +680,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Sales Orders Pipeline',
@@ -712,7 +687,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'View Sales Orders', path: '/sales/orders' },
         { label: 'Ready for Dispatch', path: '/sales/ready-dispatch' },
@@ -745,9 +719,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Sales Orders Pipeline',
@@ -755,7 +726,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open Leads Management', path: '/lead-to-orders/leads' },
         { label: 'View Quotations', path: '/lead-to-orders/quotation' },
@@ -787,9 +757,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     }
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'My Pending Tasks',
@@ -797,7 +764,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'Purchase & GRN Status',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open My Tasks', path: '/my-tasks' },
         { label: 'Task Assignment', path: '/task-assignment' },
@@ -821,9 +787,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     text += `Aap WhatsApp Inbox me jaakar customer chat manage aur direct templates send kar sakte hain.`;
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'My Pending Tasks',
@@ -831,7 +794,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'Purchase & GRN Status',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Open WhatsApp Inbox', path: '/whatsapp/inbox' },
         { label: 'Message Templates', path: '/whatsapp/templates' }
@@ -859,9 +821,6 @@ export function generateAgentResponse(userQuery, context = {}) {
     text += `Aap kisi bhi module ke baare me detail me pooch sakte hain ya direct navigate kar sakte hain!`;
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Purchase & GRN Status',
@@ -869,7 +828,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'MIS Summary', path: '/mis-summary' },
         { label: 'Sales Dashboard', path: '/sales/dashboard' },
@@ -889,28 +847,17 @@ export function generateAgentResponse(userQuery, context = {}) {
     q.includes('kya kar sakte ho')
   ) {
     const userName = currentUser?.name ? `, ${currentUser.name.split(' ')[0]}` : '';
-<<<<<<< HEAD
-    const text = `👋 **Namaste${userName}! Main aapka ERP AI Chat Agent hoon.**\n\nMain aapke pure Enterprise Multi System App ka live data monitor karta hoon aur in cheezon me madad kar sakta hoon:\n\n` +
-      `• **📦 Purchase System:** Indent count, Pending PO, QC status, aur GRN updates.\n` +
-      `• **🚀 Sales (OTD):** Order lifecycle stages, Dispatch status, delayed orders.\n` +
-      `• **🎯 Lead to Orders:** Active leads, pending quotations, conversions.\n` +
-      `• **📋 Tasks & Delegations:** My tasks, overdue alerts, team assignments.\n` +
-=======
     const text = `👋 **Namaste${userName}! Main aapka Processly Agent hoon.**\n\nMain aapke pure Enterprise Multi System App ka live data monitor karta hoon aur in cheezon me madad kar sakta hoon:\n\n` +
       `• **📦 Purchase & Supply Chain:** Indent count, Pending PO, QC status, aur GRN updates.\n` +
       `• **🚀 Sales Pipeline (OTD):** Order lifecycle stages, Dispatch status, delayed orders.\n` +
       `• **🎯 Lead to Orders:** Active leads, pending quotations, conversions.\n` +
       `• **📋 Tasks & Approvals:** My tasks, overdue alerts, team assignments.\n` +
->>>>>>> daf8de7 ( .gitignore update)
       `• **💬 WhatsApp Inbox:** Customer unread chats aur communications.\n` +
       `• **🔍 Instant Search:** Kisi bhi ID jaise \`IND-0101\`, \`ORD-1002\`, \`LD-1001\` ka live status.\n` +
       `• **🧭 Fast Navigation:** Kisi bhi page par 1 click me redirect karna.\n\n` +
       `*Aap mujhse Hindi, Hinglish ya English me kuch bhi pooch sakte hain!*`;
 
     return {
-<<<<<<< HEAD
-      text,
-=======
       text: text.trim(),
       quick_actions: [
         'Purchase & GRN Status',
@@ -918,7 +865,6 @@ export function generateAgentResponse(userQuery, context = {}) {
         'My Pending Tasks',
         'Full System Summary'
       ],
->>>>>>> daf8de7 ( .gitignore update)
       actions: [
         { label: 'Check GRN Status', path: '/purchase/grn' },
         { label: 'View My Tasks', path: '/my-tasks' },
@@ -926,20 +872,5 @@ export function generateAgentResponse(userQuery, context = {}) {
       ]
     };
   }
-<<<<<<< HEAD
-
-  // Fallback with smart recommendation
-  return {
-    text: `Samajh gaya! Aapne poocha: *"${userQuery}"*.\n\nMain is query ko verify kar raha hoon. Aap neeche diye quick options me se select kar sakte hain ya exact Order/Indent ID (\`IND-XXXX\`, \`ORD-XXXX\`) likh kar live status check kar sakte hain:`,
-    actions: [
-      { label: 'Purchase & GRN Status', path: '/purchase/grn' },
-      { label: 'Sales Orders Pipeline', path: '/sales/orders' },
-      { label: 'My Pending Tasks', path: '/my-tasks' },
-      { label: 'Full System Summary', path: '/mis-summary' }
-    ]
-  };
-}
-=======
 }
 
->>>>>>> daf8de7 ( .gitignore update)

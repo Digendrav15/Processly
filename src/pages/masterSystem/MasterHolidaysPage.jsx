@@ -1,12 +1,4 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
-import { Calendar, Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react';
-import { useOTDStorage } from '../../hooks/useOTDStorage';
-import { STORAGE_KEYS, setData, generateId, logAuditAction } from '../../services/otdStorageService';
-
-export function MasterHolidaysPage() {
-  const holidays = useOTDStorage(STORAGE_KEYS.HOLIDAYS, []);
-=======
 import { Calendar, Plus, Edit2, Trash2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useOTDStorage } from '../../hooks/useOTDStorage';
 import { STORAGE_KEYS, setData, generateId, logAuditAction } from '../../services/otdStorageService';
@@ -14,7 +6,6 @@ import { holidayService } from '../../services/holidayService';
 
 export function MasterHolidaysPage() {
   const holidays = useOTDStorage(STORAGE_KEYS.HOLIDAYS, holidayService.getHolidaysSync());
->>>>>>> daf8de7 ( .gitignore update)
 
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -56,14 +47,11 @@ export function MasterHolidaysPage() {
     }
 
     setData(STORAGE_KEYS.HOLIDAYS, updated);
-<<<<<<< HEAD
-=======
     try {
       localStorage.setItem('corporate_system_holidays', JSON.stringify(updated));
     } catch (e) {
       console.error(e);
     }
->>>>>>> daf8de7 ( .gitignore update)
     setShowModal(false);
   };
 
@@ -72,14 +60,11 @@ export function MasterHolidaysPage() {
     const item = holidays.find((h) => h.id === id);
     const updated = holidays.filter((h) => h.id !== id);
     setData(STORAGE_KEYS.HOLIDAYS, updated);
-<<<<<<< HEAD
-=======
     try {
       localStorage.setItem('corporate_system_holidays', JSON.stringify(updated));
     } catch (e) {
       console.error(e);
     }
->>>>>>> daf8de7 ( .gitignore update)
     logAuditAction('Holiday Deleted', 'Holidays Master', id, item);
   };
 
@@ -157,26 +142,6 @@ export function MasterHolidaysPage() {
             </h3>
             <form onSubmit={handleSave} className="space-y-4 text-xs">
               <div>
-<<<<<<< HEAD
-                <label className="block font-bold mb-1">Holiday Name *</label>
-                <input type="text" required placeholder="e.g. Independence Day" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 bg-slate-50 border rounded-xl" />
-              </div>
-              <div>
-                <label className="block font-bold mb-1">Holiday Date *</label>
-                <input type="date" required value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="w-full px-3 py-2 bg-slate-50 border rounded-xl" />
-              </div>
-              <div>
-                <label className="block font-bold mb-1">Holiday Type</label>
-                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 bg-slate-50 border rounded-xl">
-                  <option value="Public Holiday">Public Holiday</option>
-                  <option value="Company Holiday">Company Holiday</option>
-                  <option value="Restricted Holiday">Restricted Holiday</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl">Save</button>
-=======
                 <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Holiday Name *</label>
                 <input
                   type="text"
@@ -223,7 +188,6 @@ export function MasterHolidaysPage() {
                 >
                   Save
                 </button>
->>>>>>> daf8de7 ( .gitignore update)
               </div>
             </form>
           </div>
